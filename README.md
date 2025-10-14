@@ -28,14 +28,14 @@ bun dev
 Open [http://localhost:3000](http://localhost:3000).
 
 ## TO DO
-[x] Create web interface
-[x] First hard-coded message to chatbot (tinyllama)
-[x] Custom messages to chatbot using inputs
-[ ] Allowing stream (message displaying while chatbot sends back the answer)
-[ ] Update interface to look more like a modern conversation interface
-[ ] Adding 2 other chatbots in separate containers
-[ ] Making the new chatbots communicate with the app
-[ ] Create a feature to choose the model on the interface
-[ ] Add Dockerfile to project that gives the image of the 3 containers and run them
-[ ] Run a DB on Docker to store conversations 
-[ ] Create feature to choose the conversation on the interface
+- [x] Create web interface
+- [x] First hard-coded message to chatbot (tinyllama)
+- [x] Custom messages to chatbot using inputs
+- [ ] Allowing stream (message displaying while chatbot sends back the answer)
+- [ ] Update interface to look more like a modern conversation interface
+- [ ] Adding 2 other chatbots in separate containers
+- [ ] Making the new chatbots communicate with the app
+- [ ] Create a feature to choose the model on the interface
+- [ ] Add Dockerfile to project that gives the image of the 3 containers and run them
+- [ ] Run a DB on Docker to store conversations 
+- [ ] Create feature to choose the conversation on the interface

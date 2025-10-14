@@ -19,10 +19,7 @@ export default function Home() {
       body: JSON.stringify({ messages: newMessages }),
     });
 
-    console.log(res)
-
     const data = await res.json();
-    console.log(data)
     const answer = data.response;
 
     setMessages([...newMessages, { role: "assistant", content: answer }]);
