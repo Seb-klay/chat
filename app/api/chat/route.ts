@@ -2,14 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { IAnswer } from '../../utils/chatUtils';
 
 export async function POST(request: NextRequest):Promise<NextResponse<IAnswer>> {
-  const messages = await request.json();
+  const message = await request.json();
   const response = await fetch("http://localhost:11434/api/generate", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      model: messages.messages[messages.messages.length-1].model, // or "phi"
-      prompt: messages.messages.map((m: any) => m.content).join("\n"),
-      stream: true,
+      model: message.model, // or "phi"
+      prompt: message.prompt.map((m: any) => m.prompt).join("\n"),
+      stream: message.stream,
     }),
   });
 

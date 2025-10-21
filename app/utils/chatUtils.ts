@@ -1,10 +1,19 @@
+import { Dispatch, SetStateAction } from "react";
+
+type SetMessagesType = Dispatch<SetStateAction<IMessage[]>>;
 
 type role = "user" | "assistant" | "system";
 
 export interface IMessage {
     role: role,
-    content: string,
-    model?: string,
+    model?:string,
+    prompt: string,
+}
+
+export interface IPayload {
+    model: string,
+    prompt: IMessage[],
+    stream:boolean
 }
 
 export interface IAnswer {
@@ -16,3 +25,46 @@ export interface IAnswer {
     context?: number[]
 }
 // {"model":"tinyllama","created_at":"2025-10-16T17:56:49.249317848Z","response":"","done":true,"done_reason":"stop","context":[529,29989]
+
+export const handleStreamResponse = async (response : Response|null, setMessages: SetMessagesType) => {
+    const decoder = new TextDecoder();
+
+    switch (response?.body) {
+        default: {
+        const reader = response?.body.getReader();
+        // Stream processing
+        while (true) {
+            if (!reader) { return }
+            const { value, done } = await reader.read();
+            if (done) break;
+            // Decode the streamed chunks here
+            const decodedMessage: string = decoder.decode(value);
+            // Put it in the messages list
+            setMessages((prev:any) => {
+            const lastMessage = prev.at(-1);
+            
+            // If the last message is from assistant, append to it
+            if (lastMessage?.role === "assistant") {
+                const updatedMessage: IMessage = {
+                ...lastMessage,
+                prompt: lastMessage.prompt + decodedMessage,
+                };
+                return [...prev.slice(0, -1), updatedMessage];
+            } 
+            // Otherwise, create a new assistant message
+            else {
+                const newMessage: IMessage = {
+                role: "assistant",
+                model: "tinyllama",
+                prompt: decodedMessage,
+                };
+                return [...prev, newMessage];
+            }
+            });
+        }
+        }
+        case null: {
+            break;
+        }
+    }
+}

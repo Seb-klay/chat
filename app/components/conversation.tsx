@@ -1,67 +1,30 @@
 import { useState } from "react";
-import { IAnswer, IMessage } from '../utils/chatUtils';
+import { IMessage, IPayload, handleStreamResponse } from '../utils/chatUtils';
+import { postMessage } from '../service/index'
 
 export default function Input() {
-  const decoder = new TextDecoder();
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState<IMessage[]>([]);
 
   const sendMessage = async () => {
     const newMessages: IMessage[] = [
       ...messages,
-      { role: "user", content: input, model:"tinyllama" },
+      { role: "user", model:"tinyllama", prompt: input },
     ];
     setMessages(newMessages);
     setInput("");
 
-    // Create file with all api adresses
-    const response: Response | null = await fetch("/api/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ messages: newMessages }),
-    });
-
-    switch (response.body) {
-      default: {
-        // when the reponse is done
-        if (!response.body){
-          return;
-        }
-        const reader = response.body.getReader();
-        // Stream processing
-        while (true) {
-          const { value, done } = await reader.read();
-          if (done) break;
-          // Decode the streamed chunks here
-          const decodedMessage: string = decoder.decode(value);
-          // Put it in the messages list
-          setMessages((prev) => {
-            const lastMessage = prev.at(-1);
-            
-            // If the last message is from assistant, append to it
-            if (lastMessage?.role === "assistant") {
-              const updatedMessage: IMessage = {
-                ...lastMessage,
-                content: lastMessage.content + decodedMessage,
-              };
-              return [...prev.slice(0, -1), updatedMessage];
-            } 
-            // Otherwise, create a new assistant message
-            else {
-              const newMessage: IMessage = {
-                role: "assistant",
-                content: decodedMessage,
-                model: "tinyllama",
-              };
-              return [...prev, newMessage];
-            }
-          });
-        }
-      }
-      case null: {
-        throw console.error("error to correct later");
-      }
+    const payload:IPayload = {
+      model:"tinyllama",
+      prompt: newMessages,
+      stream:true
     }
+
+    // TODO : Create file with all api adresses
+    const response: Response | null = await postMessage(payload);
+
+    // update the setMessages useState to show messages
+    handleStreamResponse (response, setMessages);
   };
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
@@ -71,7 +34,7 @@ export default function Input() {
             .filter((m) => m.role !== "system")
             .map((m, i) => (
               <div key={i} className="mb-2">
-                <b>{m.role === "user" ? "You" : "Assistant"}:</b> {m.content}
+                <b>{m.role === "user" ? "You" : "Assistant"}:</b> {m.prompt}
               </div>
             ))}
         </div>
