@@ -26,6 +26,11 @@ export interface IAnswer {
 }
 // {"model":"tinyllama","created_at":"2025-10-16T17:56:49.249317848Z","response":"","done":true,"done_reason":"stop","context":[529,29989]
 
+export interface IModelList {
+  model_name: string;
+  address: string;
+}
+
 export const handleStreamResponse = async (response : Response|null, setMessages: SetMessagesType) => {
     const decoder = new TextDecoder();
 

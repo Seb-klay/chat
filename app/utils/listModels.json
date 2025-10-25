@@ -1,0 +1,16 @@
+{
+    "listModels": [
+        {
+            "model_name": "llama3-2",
+            "address": "http://localhost:11435"
+        },
+        {
+            "model_name": "tinyllama",
+            "address": "http://localhost:11434"
+        },
+        {
+            "model_name": "gemma3",
+            "address": "http://localhost:11437"
+        }
+    ]
+}
