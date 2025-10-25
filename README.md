@@ -2,18 +2,49 @@
 Talk with open source AI chatbots and freely change in between the conversation.
 
 ## Getting Started
-First things first, open Docker Desktop and:
+First things first, run in the terminal :
 ```bash
 nvm use
 npm install
 ```
 
-First, start the Docker images and run the containers (coming soon):
-```yaml
+Then, open Docker Desktop and run the containers (coming soon):
 
+Navigate to the folder ai-setup :
+```bash
+cd app/ai-setup
 ```
+<details open>
+<summary>Run and deploy tinyLlama model</summary>
 
-Second, run the development server:
+```bash
+    chmod +x tinyllama.sh && ./tinyllama.sh
+```
+</details>
+<details>
+<summary>Run and deploy llama3-2 model (3 billion params)</summary>
+
+```bash
+    chmod +x llama3-2.sh && ./llama3-2.sh
+```
+</details>
+<details>
+<summary>Run and deploy deepseek-r1 model (7 billion params)</summary>
+
+```bash
+    chmod +x deepseek-r1.sh && ./deepseek-r1.sh
+```
+</details>
+<details>
+<summary>Run and deploy gemma-3 model (1 billion params)</summary>
+
+```bash
+    chmod +x gemma-3.sh && ./gemma-3.sh
+```
+</details>
+
+
+Finally, run the development server in terminal:
 
 ```bash
 npm run dev
@@ -33,7 +64,7 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Custom messages to chatbot using inputs
 - [x] Allowing stream (message displaying while chatbot sends back the answer)
 - [x] Update interface to look more like a modern conversation interface
-- [ ] Adding 2 other chatbots in separate containers
+- [x] Adding 2 other chatbots in separate containers
 - [ ] Making the new chatbots communicate with the app
 - [ ] Create a feature to choose the model on the interface
 - [ ] Add Dockerfile to project that gives the image of the 3 containers and run them
