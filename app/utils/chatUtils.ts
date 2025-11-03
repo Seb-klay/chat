@@ -12,8 +12,9 @@ export interface IMessage {
 
 export interface IPayload {
     model: string,
+    address: string,
     prompt: IMessage[],
-    stream:boolean
+    isStream:boolean
 }
 
 export interface IAnswer {

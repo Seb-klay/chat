@@ -14,15 +14,16 @@ export default function Input() {
   const sendMessage = async () => {
     const newMessages: IMessage[] = [
       ...messages,
-      { role: "user", model:"tinyllama", prompt: input },
+      { role: "user", model: selectedModel.model_name, prompt: input },
     ];
     setMessages(newMessages);
     setInput("");
 
     const payload:IPayload = {
-      model:"tinyllama",
+      model: selectedModel.model_name,
+      address: selectedModel.address,
       prompt: newMessages,
-      stream:true
+      isStream:true
     }
 
     // TODO : Create file with all api adresses

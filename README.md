@@ -25,7 +25,7 @@ cd app/ai-setup
 <summary>Run and deploy llama3-2 model (3 billion params)</summary>
 
 ```bash
-    chmod +x llama3-2.sh && ./llama3-2.sh
+    docker compose -f compose.llama-3.yaml up
 ```
 </details>
 <details>
@@ -39,7 +39,7 @@ cd app/ai-setup
 <summary>Run and deploy gemma-3 model (1 billion params)</summary>
 
 ```bash
-    chmod +x gemma-3.sh && ./gemma-3.sh
+    docker compose -f compose.llama-3.yaml up
 ```
 </details>
 
@@ -65,8 +65,10 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Allowing stream (message displaying while chatbot sends back the answer)
 - [x] Update interface to look more like a modern conversation interface
 - [x] Adding 2 other chatbots in separate containers
-- [ ] Making the new chatbots communicate with the app
-- [ ] Create a feature to choose the model on the interface
-- [ ] Add Dockerfile to project that gives the image of the 3 containers and run them
+- [x] Making the new chatbots communicate with the app
+- [x] Create a feature to choose the model on the interface
+- [x] Add docker-compose file to project that gives the image of the 3 containers and run them
 - [ ] Run a DB on Docker to store conversations 
-- [ ] Create feature to choose the conversation on the interface
+- [ ] Add an identifying layer to identify user and store conversation on his account
+- [ ] Create feature (sidebar) to choose the conversation on the interface
+- [ ] Update interface (general UI : headers, conversation section, selection button, etc.)

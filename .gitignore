@@ -51,3 +51,6 @@ yarn.lock
 .serena
 # pmpm
 pnpm-lock.yaml
+
+#ollama files
+/ollama_data

@@ -1,0 +1,17 @@
+version: '3.9'
+
+services:
+  gemma:
+    image: ollama/ollama
+    container_name: gemma-3
+    ports:
+      - 11437:11434  # Map host 11437 to container 11434
+    volumes:
+      - ./ollama_data:/root/.ollama
+    entrypoint: ["/bin/bash", "-c", "\
+      ollama serve & \
+      sleep 5 && \
+      ollama pull gemma3:1b && \
+      wait"]
+
+# docker compose -f compose.gemma-3.yaml up
