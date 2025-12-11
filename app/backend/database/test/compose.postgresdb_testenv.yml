@@ -1,0 +1,33 @@
+# check https://stackoverflow.com/questions/74116725/docker-container-production-vs-testing-environment
+# when going from test env to production env !
+
+services:
+  db:
+    container_name: ${POSTGRES_DB}
+    image: postgres:18.1
+    environment:
+      APP_ENV: test
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./utils/db-data:/var/lib/postgres/data
+      - ./utils/log-data:/var/lib/postgres/logs
+      - ./utils/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports:
+      - "5432:5432"
+    networks:
+      - db
+    restart: always
+    healthcheck:
+      test: [ "CMD-SHELL", "postgres_isready -d postgres-db" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+networks:
+  db:
+    driver: bridge
+
+volumes:
+  db-data:
+  log-data:

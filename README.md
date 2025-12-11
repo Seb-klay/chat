@@ -8,42 +8,43 @@ nvm use
 npm install
 ```
 
-Then, open Docker Desktop and run the containers (coming soon):
+### AI set up
+Then, open Docker Desktop and run the containers :
 
 Navigate to the folder ai-setup :
 ```bash
-cd app/ai-setup
+cd app/backend/ai-setup
 ```
 <details open>
-<summary>Run and deploy tinyLlama model</summary>
-
-```bash
-    chmod +x tinyllama.sh && ./tinyllama.sh
-```
-</details>
-<details>
 <summary>Run and deploy llama3-2 model (3 billion params)</summary>
 
 ```bash
-    docker compose -f compose.llama-3.yaml up
-```
-</details>
-<details>
-<summary>Run and deploy deepseek-r1 model (7 billion params)</summary>
-
-```bash
-    chmod +x deepseek-r1.sh && ./deepseek-r1.sh
+docker compose -f compose.llama-3.yaml up
 ```
 </details>
 <details>
 <summary>Run and deploy gemma-3 model (1 billion params)</summary>
 
 ```bash
-    docker compose -f compose.llama-3.yaml up
+docker compose -f compose.gemma-3.yaml up
 ```
+
+> [!NOTE]
+> Other models coming soon !
+
 </details>
 
+### Start up the database (postgres)
+Run the Postgres database on docker container :
+```bash
+cd app/backend/database/test
+docker-compose -f compose.postgresdb_testenv.yml up
+```
 
+> [!IMPORTANT]
+> For production environment, it is important to use the "production" folder.
+
+### Start up the interface
 Finally, run the development server in terminal:
 
 ```bash
@@ -69,6 +70,9 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Create a feature to choose the model on the interface
 - [x] Add docker-compose file to project that gives the image of the 3 containers and run them
 - [ ] Run a DB on Docker to store conversations 
-- [ ] Add an identifying layer to identify user and store conversation on his account
+- [ ] Add storing layer
+- [ ] Add identifying layer to identify user and store conversation on his account
 - [ ] Create feature (sidebar) to choose the conversation on the interface
 - [ ] Update interface (general UI : headers, conversation section, selection button, etc.)
+- [ ] Handle logs using promtail and loki (grafana)
+- [ ] Implement backup solution for data

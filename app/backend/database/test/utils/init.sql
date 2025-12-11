@@ -1,0 +1,17 @@
+CREATE DATABASE chat_db;
+
+CREATE TABLE Users (
+  userID SERIAL PRIMARY KEY,
+  nameUser VARCHAR(100) NOT NULL,
+  email VARCHAR(100) UNIQUE NOT NULL,
+  userPassword VARCHAR(100) NOT NULL,
+  userPermission VARCHAR(50) NOT NULL DEFAULT 'USER'
+);
+
+CREATE TABLE Chats (
+  chatID SERIAL PRIMARY KEY,
+  title VARCHAR(100),
+  userID int,
+  CONSTRAINT FK_UserChat FOREIGN KEY (userID)
+    REFERENCES Users(userID)
+);
