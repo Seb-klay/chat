@@ -19,44 +19,7 @@ export async function POST(request: NextRequest):Promise<NextResponse<IAnswer>> 
     }),
   });
 
-  const decoder = new TextDecoder();
-  const encoder = new TextEncoder();
-
-  const stream = new ReadableStream({
-    async start(controller) {
-      const reader = response.body?.getReader();
-      if (!reader) {
-        controller.close() 
-        return;
-      }
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        decoder.decode(value)
-        const chunk = decoder.decode(value);
-        try {
-            const json:IAnswer = JSON.parse(chunk);
-            if (json.response) {
-              controller.enqueue(
-                encoder.encode(json.response)
-              );
-            }
-            else {
-                controller.close();
-                console.log('has been closed')
-            }
-          } catch {
-            // skip partial JSON chunks
-            console.error("error to handle");
-          }
-        }
-
-      controller.close();
-    },
-  });
-
-  return new NextResponse(stream, {
+  return new NextResponse(response?.body, {
     headers: {
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",

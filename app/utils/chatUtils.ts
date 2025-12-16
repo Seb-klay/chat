@@ -44,7 +44,10 @@ export const handleStreamResponse = async (response : Response|null, setMessages
             const { value, done } = await reader.read();
             if (done) break;
             // Decode the streamed chunks here
-            const decodedMessage: string = decoder.decode(value);
+            const chunk : string = decoder.decode(value);
+            const json : IAnswer = JSON.parse(chunk);
+            const decodedMessage : string = json.response
+
             // Put it in the messages list
             setMessages((prev:any) => {
             const lastMessage = prev.at(-1);
