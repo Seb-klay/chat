@@ -5,6 +5,7 @@ services:
   db:
     container_name: ${POSTGRES_DB}
     image: postgres:18.1
+    env_file: ../../../../.env
     environment:
       APP_ENV: test
       POSTGRES_USER: ${POSTGRES_USER}

@@ -38,7 +38,7 @@ docker compose -f compose.gemma-3.yaml up
 Run the Postgres database on docker container :
 ```bash
 cd app/backend/database/test
-docker-compose -f compose.postgresdb_testenv.yml up
+docker-compose --env-file ../../../../.env -f compose.postgresdb_testenv.yml up
 ```
 
 > [!IMPORTANT]
@@ -69,10 +69,13 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Making the new chatbots communicate with the app
 - [x] Create a feature to choose the model on the interface
 - [x] Add docker-compose file to project that gives the image of the 3 containers and run them
-- [ ] Run a DB on Docker to store conversations 
-- [ ] Add storing layer
+- [x] Run a DB on Docker to store conversations 
+- [x] Add storing layer
 - [ ] Add identifying layer to identify user and store conversation on his account
+- [ ] Finish function "create conversation"
 - [ ] Create feature (sidebar) to choose the conversation on the interface
+- [ ] Add function abort message
 - [ ] Update interface (general UI : headers, conversation section, selection button, etc.)
+- [ ] Error handling
 - [ ] Handle logs using promtail and loki (grafana)
 - [ ] Implement backup solution for data

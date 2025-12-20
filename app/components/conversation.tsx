@@ -12,26 +12,27 @@ export default function Input() {
 });
 
   const sendMessage = async () => {
-    const newMessages: IMessage[] = [
+    // store message history
+    const newMessages : IMessage[] = [
       ...messages,
       { role: "user", model: selectedModel.model_name, prompt: input },
     ];
     setMessages(newMessages);
     setInput("");
 
-    const payload:IPayload = {
+    // create payload to send prompt to AI
+    const payload : IPayload = {
       model: selectedModel.model_name,
       address: selectedModel.address,
       prompt: newMessages,
-      isStream:true
+      isStream: true
     }
+    const response = await postMessage(payload)
+    // handle incoming stream response 
+    handleStreamResponse(response, setMessages);
 
-    // TODO : Create file with all api adresses
-    const response: Response | null = await postMessage(payload);
-
-    // update the setMessages useState to show messages
-    handleStreamResponse (response, setMessages);
   };
+  
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-8">
       <div className="w-full h-full min-h-1/2 space-y-4">
