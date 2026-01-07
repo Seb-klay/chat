@@ -3,7 +3,6 @@
 import { z } from "zod";
 import { createSession, deleteSession } from "../lib/session";
 import { redirect } from "next/navigation";
-import { IUser } from "../utils/userUtils";
 import { getUser } from "../service";
 
 function validatePassword(password: string, passwordDb: string) {
@@ -18,7 +17,13 @@ function validatePassword(password: string, passwordDb: string) {
   }
 }
 
-// used to validate login form
+export interface IUser {
+  id?: string;
+  email: string;
+  encrPassword: string;
+  role?: string;
+}
+
 const loginSchema = z.object({
   email: z.email({ message: "Invalid email address" }).trim(),
   password: z
@@ -26,33 +31,6 @@ const loginSchema = z.object({
     //.min(8, { message: "Password must be at least 8 characters" })
     .trim(),
 });
-
-// used to validate signup form
-const signupSchema = z.object({
-    name: z.string()
-        .min(2, { message: "Name must be at least 2 characters" })
-        .max(50, { message: "Name must be less than 50 characters" })
-        .trim(),
-    
-    email: z.string()
-        .email({ message: "Invalid email address" })
-        .trim()
-        .toLowerCase(),
-    
-    password: z.string()
-        .min(8, { message: "Password must be at least 8 characters" })
-        .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
-        .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
-        .regex(/[0-9]/, { message: "Password must contain at least one number" })
-        .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character" }),
-    
-    confirmPassword: z.string()
-        .min(1, { message: "Please confirm your password" })
-    })
-    .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords don't match",
-    path: ["confirmPassword"], // This shows error on confirmPassword field
-    });
 
 export async function login(prevState: any, formData: FormData) {
   const result = loginSchema.safeParse(Object.fromEntries(formData));
@@ -78,6 +56,7 @@ export async function login(prevState: any, formData: FormData) {
   ) {
     if (userInDB.id) {
       // creates a JWT session
+      console.log("userid: " + userInDB.id);
       await createSession(userInDB.id);
     }
   }

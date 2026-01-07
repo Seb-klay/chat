@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server';
-import { IAnswer, IMessage, IPayload } from '../utils/chatUtils';
+import { IMessage, IPayload } from '../utils/chatUtils';
+import { IUser } from '../utils/userUtils';
+const URL: string = process.env.FULL_URL || '';
 
 // check this blog for connection pool and a few tips : 
 // https://medium.com/@artemkhrenov/connection-pooling-patterns-optimizing-database-connections-for-scalable-applications-159e78281389
@@ -23,7 +24,7 @@ export const postMessage = async (payload: IPayload) => {
 
 // TODO create abort message
 
-// message services that send the message to /api/conversation API
+// conversation services that creates the conversation to /api/conversation API
 const createConversation = async (userId: number):Promise<Response | null> => {
   return await fetch(
     "/api/conversation", {
@@ -46,4 +47,39 @@ export const storeMessage = async (message: IMessage | undefined):Promise<Respon
       body: JSON.stringify(message)
     }
   );
+}
+
+export const getUser = async (user: IUser):Promise<Response | null> => {
+  return await fetch(
+    `${URL}/api/authuser`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user)
+    }
+  );
+}
+
+// user services that send the message to /api/message API
+export const createUser = async (user : IUser):Promise<Error | null> => {
+  const response = await fetch(
+    "/api/user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(user)
+    }
+  );
+
+  if (!response.ok) {
+    // Handle error
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to create user');
+  }
+
+  // get info of new user
+  const newUser: IUser = await response.json();
+
+  // directly login and redirect to empty conversation
+  //loginUser(newUser);
+
+  return null;
 }
