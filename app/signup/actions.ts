@@ -4,36 +4,37 @@ import { z } from "zod";
 import { redirect } from "next/navigation";
 import { IUser } from "../utils/userUtils";
 import { createUser } from "../service";
+import { createSession } from "../lib/session";
 
-async function createNewUser(newUser: IUser) {
-    await createUser(newUser)
-}
+const signupSchema = z
+  .object({
+    email: z
+      .email({ message: "Invalid email address" })
+      .trim()
+      .toLowerCase(),
 
-const signupSchema = z.object({
-    name: z.string()
-        .min(2, { message: "Name must be at least 2 characters" })
-        .max(50, { message: "Name must be less than 50 characters" })
-        .trim(),
-    
-    email: z.string()
-        .email({ message: "Invalid email address" })
-        .trim()
-        .toLowerCase(),
-    
-    password: z.string()
-        .min(8, { message: "Password must be at least 8 characters" })
-        .regex(/[A-Z]/, { message: "Password must contain at least one uppercase letter" })
-        .regex(/[a-z]/, { message: "Password must contain at least one lowercase letter" })
-        .regex(/[0-9]/, { message: "Password must contain at least one number" })
-        .regex(/[^A-Za-z0-9]/, { message: "Password must contain at least one special character" }),
-    
-    confirmPassword: z.string()
-        .min(1, { message: "Please confirm your password" })
-    })
-    .refine((data) => data.password === data.confirmPassword, {
+    password: z
+      .string()
+      .min(8, { message: "Password must be at least 8 characters" })
+      .regex(/[A-Z]/, {
+        message: "Password must contain at least one uppercase letter",
+      })
+      .regex(/[a-z]/, {
+        message: "Password must contain at least one lowercase letter",
+      })
+      .regex(/[0-9]/, { message: "Password must contain at least one number" })
+      .regex(/[^A-Za-z0-9]/, {
+        message: "Password must contain at least one special character",
+      }),
+
+    confirmPassword: z
+      .string()
+      .min(1, { message: "Please confirm your password" }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"], // This shows error on confirmPassword field
-    });
+  });
 
 export async function signup(prevState: any, formData: FormData) {
   const result = signupSchema.safeParse(Object.fromEntries(formData));
@@ -47,10 +48,19 @@ export async function signup(prevState: any, formData: FormData) {
   const { email, password } = result.data;
 
   const userToCreate: IUser = {
-    email : email,
-    encrPassword : password
-  }
+    email: email,
+    encrPassword: password,
+  };
 
   // create user in DB and return id, password and role
-  createNewUser(userToCreate)
+  const response = await createUser(userToCreate);
+  const newUser: IUser = await response?.json();
+
+  // check if response is ok
+  if (response?.ok && newUser.id) {
+    await createSession(newUser.id);
+  }
+
+  //redirect to conversation page
+  redirect(`${process.env.FULL_URL}/`);
 }

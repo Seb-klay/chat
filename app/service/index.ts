@@ -60,26 +60,14 @@ export const getUser = async (user: IUser):Promise<Response | null> => {
 }
 
 // user services that send the message to /api/message API
-export const createUser = async (user : IUser):Promise<Error | null> => {
-  const response = await fetch(
-    "/api/user", {
+export const createUser = async (user : IUser):Promise<Response | null> => {
+  return await fetch(
+    `${URL}/api/user`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(user)
     }
-  );
-
-  if (!response.ok) {
-    // Handle error
-    const errorData = await response.json();
-    throw new Error(errorData.error || 'Failed to create user');
-  }
-
-  // get info of new user
-  const newUser: IUser = await response.json();
-
-  // directly login and redirect to empty conversation
-  //loginUser(newUser);
-
-  return null;
+  ).catch((err) => {
+    throw new Error(err)
+  });
 }

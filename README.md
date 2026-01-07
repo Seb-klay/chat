@@ -71,7 +71,10 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Add docker-compose file to project that gives the image of the 3 containers and run them
 - [x] Run a DB on Docker to store conversations 
 - [x] Add storing layer
-- [ ] Add identifying layer to identify user and store conversation on his account
+- [x] Add identifying layer to identify user and store conversation on his account
+- [x] Add signup page
+- [ ] Email validation
+- [ ] Create page "forgot password"
 - [ ] Finish function "create conversation"
 - [ ] Create feature (sidebar) to choose the conversation on the interface
 - [ ] Add function abort message

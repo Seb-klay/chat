@@ -8,27 +8,33 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   const pool = getPool();
 
-  const newUser: IUser = {
-    email: email,
-    encrPassword: encrPassword,
-  };
+  try {
+    const response = await pool.query(
+      "INSERT INTO users (email, userpassword) values ($1, $2)",
+      [email, encrPassword]
+    );
 
-  pool.query(
-    "INSERT INTO users (email, userpassword) values ($1, $2)",
-    [email, encrPassword],
-    (err, res) => {
-      if (err) {
-        console.log("Error during user creation" + err, res);
-      }
-      (newUser.id = res.rows[0].id), (newUser.role = res.rows[0].role);
-    }
-  );
+    const newUser: IUser = {
+      id: response.rows[0].id,
+      email: email,
+      encrPassword: encrPassword,
+      role: response.rows[0].role
+    };
 
-  return new NextResponse(JSON.stringify(newUser), {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-    },
-  });
+    return new NextResponse(JSON.stringify(newUser), {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
+  } catch (err) {
+    return new NextResponse(JSON.stringify(err), {
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache",
+        Connection: "keep-alive",
+      },
+    });
+  }
 }
