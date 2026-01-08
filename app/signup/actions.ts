@@ -2,7 +2,7 @@
 
 import { z } from "zod";
 import { redirect } from "next/navigation";
-import { IUser } from "../utils/userUtils";
+import { IUser, encryptPassword } from "../utils/userUtils";
 import { createUser } from "../service";
 import { createSession } from "../lib/session";
 
@@ -47,9 +47,12 @@ export async function signup(prevState: any, formData: FormData) {
 
   const { email, password } = result.data;
 
+  // encrypt password before storing it
+  const encrPassword = encryptPassword(password);
+
   const userToCreate: IUser = {
     email: email,
-    encrPassword: password,
+    encrPassword: encrPassword,
   };
 
   // create user in DB and return id, password and role

@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { createSession, deleteSession } from "../lib/session";
 import { redirect } from "next/navigation";
-import { IUser } from "../utils/userUtils";
+import { IUser, validatePassword } from "../utils/userUtils";
 import { getUser } from "../service";
 
 // used to validate login form
@@ -14,18 +14,6 @@ const loginSchema = z.object({
     .min(8, { message: "Password must be at least 8 characters" })
     .trim(),
 });
-
-function validatePassword(password: string, passwordDb: string) {
-  if (password !== passwordDb) {
-    return {
-      errors: {
-        email: ["Invalid email or password"],
-      },
-    };
-  } else {
-    return true;
-  }
-}
 
 export async function login(prevState: any, formData: FormData) {
   const result = loginSchema.safeParse(Object.fromEntries(formData));
