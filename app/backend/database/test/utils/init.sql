@@ -27,6 +27,16 @@ CREATE TABLE Messages
     REFERENCES Conversations(convID)
 );
 
+CREATE TABLE email_verification_codes (
+  id SERIAL PRIMARY KEY,
+  email VARCHAR(255) NOT NULL,
+  code CHAR(6) NOT NULL,
+  expires_at TIMESTAMP NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  verified BOOLEAN DEFAULT FALSE,
+  UNIQUE(email, code),
+);
+
 -- Create ONE database user for your entire application
 CREATE USER regular_user
 WITH PASSWORD 'regular_user';
@@ -38,12 +48,12 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO regular_user;
 INSERT INTO users
   (email, userPassword)
 VALUES
-  ('jean@test1.com', 'test1');
+  ('test@test.com', '$2b$16$UOw3/3Nt22eICQ4SVCAFpOiNIfU9LWA1wBOc9cqS/bWh3xovCb4y2');
 INSERT INTO users
   (email, userPassword)
 VALUES
-  ('jeanne@test2.com', 'test2');
+  ('test2@test.com', '$2b$16$UOw3/3Nt22eICQ4SVCAFpOiNIfU9LWA1wBOc9cqS/bWh3xovCb4y2');
 INSERT INTO users
   (email, userPassword)
 VALUES
-  ('jeannette@test3.com', 'test3');
+  ('test3@test.com', '$2b$16$UOw3/3Nt22eICQ4SVCAFpOiNIfU9LWA1wBOc9cqS/bWh3xovCb4y2');

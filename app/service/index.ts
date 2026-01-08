@@ -71,3 +71,27 @@ export const createUser = async (user : IUser):Promise<Response | null> => {
     throw new Error(err)
   });
 }
+
+export const validateUser = async (email: string, code: string, expiresAt: string) => {
+  return await fetch(
+    `${URL}/api/validate-user`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({email: email, code: code, expiresAt: expiresAt})
+    }
+  ).catch((err) => {
+    throw new Error(err)
+  });
+}
+
+export const verifySignupCode = async (email: string, code: string) => {
+  return await fetch(
+    `${URL}/api/verify-code`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({email: email, code: code})
+    }
+  ).catch((err) => {
+    throw new Error(err)
+  });
+}

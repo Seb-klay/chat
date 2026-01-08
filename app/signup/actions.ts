@@ -5,13 +5,12 @@ import { redirect } from "next/navigation";
 import { IUser, encryptPassword } from "../utils/userUtils";
 import { createUser } from "../service";
 import { createSession } from "../lib/session";
+import { sendVerificationCode, verifyCode } from "./verificationService";
 
+// step 1 : sign up
 const signupSchema = z
   .object({
-    email: z
-      .email({ message: "Invalid email address" })
-      .trim()
-      .toLowerCase(),
+    email: z.email({ message: "Invalid email address" }).trim().toLowerCase(),
 
     password: z
       .string()
@@ -41,29 +40,101 @@ export async function signup(prevState: any, formData: FormData) {
 
   if (!result.success) {
     return {
+      success: false,
       errors: result.error.flatten().fieldErrors,
     };
   }
 
-  const { email, password } = result.data;
+  try {
+    const { email, password } = result.data;
 
-  // encrypt password before storing it
-  const encrPassword = encryptPassword(password);
+    // encrypt password before storing it
+    const encrPassword = encryptPassword(password);
 
-  const userToCreate: IUser = {
-    email: email,
-    encrPassword: encrPassword,
-  };
+    // send verification code
+    const responseCode = await sendVerificationCode(email);
+    if (responseCode.success) {
+      //await createSession(newUser.id);
+      return {
+        success: true,
+        temporaryData: {
+          email: email,
+          encrPassword: encrPassword,
+        },
+        errors: null,
+      };
+    }
 
-  // create user in DB and return id, password and role
-  const response = await createUser(userToCreate);
-  const newUser: IUser = await response?.json();
+    // Error if didn't returned before
+    return {
+      success: false,
+      errors: { general: ["An error occurred. Try again please."] },
+    };
+  } catch (err) {
+    return {
+      success: false,
+      errors: err,
+    };
+  }
+}
 
-  // check if response is ok
-  if (response?.ok && newUser.id) {
-    await createSession(newUser.id);
+// Step 2: Verify code and complete registration
+const signupStep2Schema = z.object({
+  code: z.string().length(6, "Code must be 6 digits"),
+  email: z.email(), // Hidden field
+  encrPassword: z.string().min(1), // Hidden field
+});
+
+export async function verifyAndRegister(prevState: any, formData: FormData) {
+  const validatedFields = signupStep2Schema.safeParse(
+    Object.fromEntries(formData)
+  );
+
+  if (!validatedFields.success) {
+    return {
+      success: false,
+      errors: validatedFields.error.flatten().fieldErrors,
+    };
   }
 
+  const { code, encrPassword, email } = validatedFields.data;
+
+  try {
+    // Verify the code
+    const verificationResult = await verifyCode(email, code);
+
+    if (!verificationResult.success) {
+      return {
+        errors: { code: [verificationResult.message || "Invalid code"] },
+      };
+    }
+
+    // create new user
+    const userToCreate: IUser = {
+      email: email,
+      encrPassword: encrPassword,
+    };
+
+    if (!userToCreate) {
+      return {
+        errors: { code: ["Session expired. Please start over."] },
+      };
+    }
+
+    // create user in DB and return id, password and role
+    const responseUser = await createUser(userToCreate);
+    const newUser: IUser = await responseUser?.json();
+
+    // check if response is ok
+    if (responseUser?.ok && newUser.id) {
+      // Create session
+      await createSession(newUser.id);
+    }
+  } catch (error) {
+    return {
+      errors: { code: ["An error occurred. Please try again." + error] },
+    };
+  }
   //redirect to conversation page
   redirect(`${process.env.FULL_URL}/`);
 }
