@@ -19,5 +19,9 @@ export function encryptPassword(password: string) {
 }
 
 export function validatePassword(password: string, passwordDb: string) {
-  return compareSync(password, passwordDb); // true or false
+    try{
+        return compareSync(password, passwordDb); // true or false
+    } catch (err) {
+      throw new Error("Email or password invalid.");
+    }
 }

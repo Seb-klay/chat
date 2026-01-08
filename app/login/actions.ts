@@ -24,23 +24,37 @@ export async function login(prevState: any, formData: FormData) {
     };
   }
 
-  const userToLogin: IUser = {
-    email: result.data.email,
-    encrPassword: result.data.password,
-  };
+  try {
+    const userToLogin: IUser = {
+      email: result.data.email,
+      encrPassword: result.data.password,
+    };
 
-  // check if user is in DB and return id, password and role
-  const response = await getUser(userToLogin);
-  const userInDB: IUser = await response?.json();
+    // check if user is in DB and return id, password and role
+    const response = await getUser(userToLogin);
+    const userInDB: IUser = await response?.json();
 
-  if (
-    userInDB &&
-    validatePassword(userToLogin.encrPassword, userInDB.encrPassword)
-  ) {
+    if (
+      !userInDB ||
+      !validatePassword(userToLogin.encrPassword, userInDB.encrPassword)
+    ) {
+      return {
+        errors: {
+          password: ["Invalid password"],
+        },
+      };
+    }
+
     if (userInDB.id) {
       // creates a JWT session
       await createSession(userInDB.id);
     }
+  } catch (err: any) {
+    return {
+      errors: {
+        password: [err.message],
+      },
+    };
   }
   //redirect to conversation page
   redirect(`${process.env.FULL_URL}/`);
