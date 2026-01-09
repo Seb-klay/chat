@@ -191,117 +191,110 @@ export function SignupForm() {
           </form>
         ) : (
           // second part : verification code
-          <form action={verifyAction} className="space-y-6">
-            <div className="text-center">
-              <p className="text-gray-600 mb-6">
-                We sent a 6-digit code to{" "}
-                <span className="font-semibold">{temporaryData?.email}</span>
-              </p>
-            </div>
-
-            <div>
-              <input
-                type="hidden"
-                name="email"
-                value={temporaryData?.email || ""}
-              />
-            </div>
-
-            <div>
-              <input
-                type="hidden"
-                name="encrPassword"
-                value={temporaryData?.encrPassword || ""}
-              />
-            </div>
-
-            {/* 6-Digit Code Input */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Verification Code
-              </label>
-              <div className="flex justify-center space-x-3">
-                {[1, 2, 3, 4, 5, 6].map((i) => (
-                  <input
-                    key={i}
-                    name={`digit-${i}`}
-                    type="text"
-                    maxLength={1}
-                    pattern="[0-9]"
-                    className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all"
-                    onChange={(e) => {
-                      const code = Array.from(
-                        { length: 6 },
-                        (_, idx) =>
-                          (
-                            document.querySelector(
-                              `input[name="digit-${idx + 1}"]`
-                            ) as HTMLInputElement
-                          )?.value || ""
-                      ).join("");
-
-                      // Update hidden input (for form submit)
-                      const hiddenCode =
-                        document.querySelector<HTMLInputElement>(
-                          'input[name="code"]'
-                        );
-                      if (hiddenCode) hiddenCode.value = code;
-
-                      setTemporaryData((prev: any) => ({
-                        ...prev,
-                        code,
-                      }));
-
-                      // Auto-focus next input
-                      if (e.target.value && i < 6) {
-                        document
-                          .querySelector<HTMLInputElement>(
-                            `input[name="digit-${i + 1}"]`
-                          )
-                          ?.focus();
-                      }
-                    }}
-                  />
-                ))}
-              </div>
-              {/* Hidden field that combines all digits */}
-              <input type="hidden" name="code" id="combined-code" />
-              {verifyState?.errors?.code && (
-                <p className="mt-2 text-sm text-red-600 text-center">
-                  {verifyState.errors.code[0]}
+          <div>
+            <form action={verifyAction} className="space-y-6">
+              <div className="text-center">
+                <p className="text-gray-600 mb-6">
+                  We sent a 6-digit code to{" "}
+                  <span className="font-semibold">{temporaryData?.email}</span>
                 </p>
-              )}
-            </div>
+              </div>
 
-            <div className="text-center">
-              <button
-                type="button"
-                onClick={async () => {
-                  // Resend code functionality
-                  // const response = await fetch("/api/auth/resend-code", {
-                  //   method: "POST",
-                  //   headers: { "Content-Type": "application/json" },
-                  //   body: JSON.stringify({ email: tempData?.email }),
-                  // });
-                  // if (response.ok) {
-                  //   alert("Verification code resent!");
-                  // }
-                }}
-                className="text-sm text-green-600 hover:text-green-700 font-medium"
-              >
-                Didn't receive code? Resend
-              </button>
-            </div>
+              <div>
+                <input
+                  type="hidden"
+                  name="email"
+                  value={temporaryData?.email || ""}
+                />
+              </div>
 
-            <div className="flex space-x-4">
+              <div>
+                <input
+                  type="hidden"
+                  name="encrPassword"
+                  value={temporaryData?.encrPassword || ""}
+                />
+              </div>
+
+              {/* 6-Digit Code Input */}
+              <div>
+                <label className="text-center block text-sm font-medium text-gray-700 mb-2">
+                  Verification Code
+                </label>
+                <div className="flex justify-center space-x-3">
+                  {[1, 2, 3, 4, 5, 6].map((i) => (
+                    <input
+                      key={i}
+                      name={`digit-${i}`}
+                      type="text"
+                      maxLength={1}
+                      pattern="[0-9]"
+                      className="w-14 h-14 text-center text-2xl font-bold border-2 border-gray-300 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 outline-none transition-all"
+                      onChange={(e) => {
+                        const code = Array.from(
+                          { length: 6 },
+                          (_, idx) =>
+                            (
+                              document.querySelector(
+                                `input[name="digit-${idx + 1}"]`
+                              ) as HTMLInputElement
+                            )?.value || ""
+                        ).join("");
+
+                        // Update hidden input (for form submit)
+                        const hiddenCode =
+                          document.querySelector<HTMLInputElement>(
+                            'input[name="code"]'
+                          );
+                        if (hiddenCode) hiddenCode.value = code;
+
+                        setTemporaryData((prev: any) => ({
+                          ...prev,
+                          code,
+                        }));
+
+                        // Auto-focus next input
+                        if (e.target.value && i < 6) {
+                          document
+                            .querySelector<HTMLInputElement>(
+                              `input[name="digit-${i + 1}"]`
+                            )
+                            ?.focus();
+                        }
+                      }}
+                    />
+                  ))}
+                </div>
+                {/* Hidden field that combines all digits */}
+                <input type="hidden" name="code" id="combined-code" />
+                {verifyState?.errors?.code && (
+                  <p className="mt-2 text-sm text-red-600 text-center">
+                    {verifyState.errors.code[0]}
+                  </p>
+                )}
+              </div>
+
+              <div className="flex space-x-4">
+                <button
+                  type="submit"
+                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all"
+                >
+                  Verify & Create Account
+                </button>
+              </div>
+            </form>
+            <form action={signupAction} className="text-center mt-3.5">
+              <input type="hidden" name="email" value={temporaryData?.email} />
+              <input type="hidden" name="password" value={temporaryData?.encrPassword} />
+              <input type="hidden" name="confirmPassword" value={temporaryData?.encrPassword} />
               <button
                 type="submit"
-                className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all"
+                className="text-sm text-green-600 hover:text-green-700 font-medium"
               >
-                Verify & Create Account
+                Click here to resend code
               </button>
-            </div>
-          </form>
+            </form>
+          </div>
         )}
 
         <div className="mt-8 text-center">

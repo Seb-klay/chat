@@ -29,7 +29,7 @@ CREATE TABLE Messages
 
 CREATE TABLE email_verification_codes (
   id SERIAL PRIMARY KEY,
-  email VARCHAR(255) NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL,
   code CHAR(6) NOT NULL,
   expires_at TIMESTAMP NOT NULL,
   created_at TIMESTAMP DEFAULT NOW(),

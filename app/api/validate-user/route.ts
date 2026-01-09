@@ -10,9 +10,16 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
   const pool = getPool();
 
   try {
-    const response = await pool.query(
+    // insert or update table with verification code (if verified = false)
+    await pool.query(
       `INSERT INTO email_verification_codes (email, verified, code, expires_at, created_at) 
-        VALUES ($1, $2, $3, $4, $5)`,
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (email) 
+        DO UPDATE SET 
+          code = $3,
+          expires_at = $4,
+          created_at = $5
+        WHERE email_verification_codes.verified = false`,
       [email, false, code, expiresAt, now.toISOString()]
     );
 
