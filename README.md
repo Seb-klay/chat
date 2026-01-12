@@ -73,12 +73,14 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Add storing layer
 - [x] Add identifying layer to identify user and store conversation on his account
 - [x] Add signup page
-- [ ] Email validation
-- [ ] Create page "forgot password"
-- [ ] Finish function "create conversation"
+- [x] Email validation
+- [x] Finish function "create conversation"
 - [ ] Create feature (sidebar) to choose the conversation on the interface
 - [ ] Add function abort message
 - [ ] Update interface (general UI : headers, conversation section, selection button, etc.)
+- [ ] Create page "forgot password"
+- [ ] Add modify email
+- [ ] Add user settings to the UI and DB
 - [ ] Error handling
 - [ ] Handle logs using promtail and loki (grafana)
 - [ ] Implement backup solution for data

@@ -2,7 +2,6 @@
 
 // lib/verification-service.ts
 import { emailService } from '@/app/service/emailService';
-import { IUser } from '../utils/userUtils';
 import { validateUser, verifySignupCode } from '../service';
 
   // Generate 6-digit code
@@ -53,7 +52,7 @@ import { validateUser, verifySignupCode } from '../service';
     try {
       const verifiedCode = await verifySignupCode(email, code);
 
-      if (!verifiedCode.ok) {
+      if (!verifiedCode?.ok) {
         return { 
           success: false, 
           message: 'Please, retry again.'

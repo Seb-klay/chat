@@ -1,11 +1,12 @@
 "use client";
 
-import Input from "./components/conversation"
+//import Input from "./conversation/[id]/page"
+import HomePage from "./homePage/page"
 
 export default function Home() {
   return (
     <main>
-      <Input></Input>
+      <HomePage></HomePage>
     </main>
   );
 }

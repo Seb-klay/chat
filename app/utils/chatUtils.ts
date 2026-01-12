@@ -17,6 +17,7 @@ export interface IPayload {
   address: string;
   prompt: IMessage[];
   isStream: boolean;
+  conversationID: string | string[] | undefined;
 }
 
 export interface IAnswer {
@@ -38,7 +39,7 @@ export const handleStreamResponse = async (
   response: Response | null,
   setMessages: SetMessagesType
 ) => {
-  const responseFromChatbot: IMessage = 
+  let responseFromChatbot: IMessage = 
     {
       role: "assistant",
       model: "tinyllama",
@@ -50,10 +51,7 @@ export const handleStreamResponse = async (
   const decoder = new TextDecoder();
 
   if (!response?.ok || response == null) {
-    return NextResponse.json(
-      { error: `Upstream error: ${response?.statusText}` },
-      { status: response?.status }
-    );
+    throw new Error(`Upstream error: ${response?.statusText}`)
   }
 
   const reader = response.body?.getReader();
@@ -73,14 +71,12 @@ export const handleStreamResponse = async (
     answerMessage += decodedMessage;
 
     if (json.done) {
-      const responseFromChatbot: IMessage = 
-      {
-        role: "assistant",
-        model: json.model,
-        prompt: answerMessage,
-      };
+      responseFromChatbot.prompt = answerMessage;
+      //setMessages(prev => [...prev, responseFromChatbot])
+      //return responseFromChatbot;
       // Storing final message from chatbot
-      await storeMessage(responseFromChatbot);
+      //await storeMessage(responseFromChatbot);
+      return responseFromChatbot;
     }
 
     //Put it in the messages list
@@ -98,15 +94,6 @@ export const handleStreamResponse = async (
         return [...prev.slice(0, -1), updatedMessage];
       }
       return prev;
-      // Otherwise, create a new assistant message
-      // else {
-      //   const newMessage: IMessage = {
-      //     role: "assistant",
-      //     model: "tinyllama",
-      //     prompt: decodedMessage,
-      //   };
-      //   return [...prev, newMessage];
-      // }
     });
   }
 };

@@ -6,21 +6,17 @@ import { NextRequest, NextResponse } from "next/server";
 export async function POST(
   request: NextRequest
 ): Promise<NextResponse> {
-  const { role, model, prompt }: IMessage = await request.json();
+  try {
+    const { message, conversationId } = await request.json();
+    const { role, model, prompt }: IMessage = message;
 
-  const pool = getPool()
+    const pool = getPool();
 
-  pool.query("INSERT INTO messages (rolesender, model, textmessage, convid) values ($1, $2, $3, $4)",
-    [role, model, prompt, 1],
-    (err, res) => {
-    console.log('callback query finished' + err, res)
-  })
+    pool.query("INSERT INTO messages (rolesender, model, textmessage, convid) values ($1, $2, $3, $4)",
+      [role, model, prompt, conversationId]);
 
-  return new NextResponse(role, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      Connection: "keep-alive",
-    },
-  });
+    return NextResponse.json({ status: 200 });
+  } catch (err) {
+    return NextResponse.json(err, { status: 500 });
+  }
 }

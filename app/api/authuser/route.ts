@@ -21,6 +21,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       role: response.rows[0].role,
     };
 
+    // TODO make this post a GET, 
+
+    // //make it server side
+
+    // update the answer !
     return new NextResponse(JSON.stringify(user), {
       headers: {
         "Content-Type": "text/event-stream",
