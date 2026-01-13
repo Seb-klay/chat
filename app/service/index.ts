@@ -27,6 +27,15 @@ export const createConversation = async (): Promise<Response | null> => {
   });
 };
 
+export const getUserConversations = async () => {
+  return await fetch(`${URL}/api/get-user-conversation`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" }
+  }).catch((err) => {
+  throw new Error(err);
+});
+};
+
 // message services that send the message to /api/message API
 export const storeMessage = async (payload: IPayload | null) => {
   return await fetch(`${URL}/api/message`, {

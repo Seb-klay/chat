@@ -95,7 +95,13 @@ export default function ConversationPage() {
       }
 
       // then sendMessage to AI
-      const streaming = await sendMessageToAI(payloadFromUser);
+      var streaming = await sendMessageToAI(payloadFromUser);
+
+      if (!streaming.ok) {
+        throw new Error(
+          "The AI message could not be generated. Try again please."
+        );
+      }
 
       // handle incoming stream response
       const aiResponse = await handleStreamResponse(streaming, setMessages);

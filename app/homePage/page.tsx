@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createConversation, sendMessageToAI, storeMessage } from "../service";
+import { createConversation, storeMessage } from "../service";
 import { IMessage, IModelList, IPayload } from "../utils/chatUtils";
 
 export default function HomePage() {

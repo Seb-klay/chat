@@ -75,9 +75,9 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Add signup page
 - [x] Email validation
 - [x] Finish function "create conversation"
-- [ ] Create feature (sidebar) to choose the conversation on the interface
-- [ ] Add function abort message
+- [x] Create feature (sidebar) to choose the conversation on the interface
 - [ ] Update interface (general UI : headers, conversation section, selection button, etc.)
+- [ ] Add function abort message
 - [ ] Create page "forgot password"
 - [ ] Add modify email
 - [ ] Add user settings to the UI and DB
