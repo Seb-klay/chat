@@ -3,6 +3,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { listModels } from '../../utils/listModels.json';
 import { Dispatch, SetStateAction } from 'react';
+import { CpuChipIcon } from '@heroicons/react/24/outline';
 
 interface ChooseAiModelProps {
   model: IModelList;
@@ -10,12 +11,12 @@ interface ChooseAiModelProps {
 }
 
 export default function ChooseAiModel({ model, setModel }: ChooseAiModelProps) {
-    const list_models:IModelList[] = listModels;
+  const list_models: IModelList[] = listModels;
 
   return (
     <Menu as="div" className="relative inline-block">
       <MenuButton className="inline-flex w-full justify-center gap-x-1.5 rounded-md bg-white/10 px-3 py-2 text-sm font-semibold text-white inset-ring-1 inset-ring-white/5 hover:bg-white/20">
-        Options
+        <CpuChipIcon className="w-5 h-5" />
         <ChevronDownIcon aria-hidden="true" className="-mr-1 size-5 text-gray-400" />
       </MenuButton>
 
@@ -24,18 +25,45 @@ export default function ChooseAiModel({ model, setModel }: ChooseAiModelProps) {
         className="absolute right-0 z-10 mb-2 w-56 origin-bottom-right bottom-full rounded-md bg-gray-800 outline-1 -outline-offset-1 outline-white/10 transition data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
       >
         <div className="py-1">
-            {list_models.map((m) => (
-            <MenuItem key={m.model_name}>
+          {list_models.map((m) => {
+            // Split model_name by colon to separate name and params
+            const [modelName, params] = m.model_name.split(':');
+            
+            return (
+              <MenuItem key={m.model_name}>
                 <button
-                onClick={() => setModel(m)}
-                className="group flex w-full items-center rounded-md px-2 py-2 text-sm text-gray-300 data-[focus]:bg-gray-700 data-[focus]:text-white"
+                  onClick={() => setModel(m)}
+                  className="group flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-gray-300 data-[focus]:bg-gray-700 data-[focus]:text-white"
                 >
-                    { m.model_name }
+                  <div className="text-left">
+                    <div className="font-medium">{modelName}</div>
+                    {params && (
+                      <div className="text-xs text-gray-400 mt-0.5">{params}</div>
+                    )}
+                  </div>
+                  
+                  {/* Show checkmark for selected model */}
+                  {model?.model_name === m.model_name && (
+                    <svg 
+                      className="w-4 h-4 text-blue-500" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      viewBox="0 0 24 24"
+                    >
+                      <path 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round" 
+                        strokeWidth={2} 
+                        d="M5 13l4 4L19 7" 
+                      />
+                    </svg>
+                  )}
                 </button>
-            </MenuItem>
-            ))}
+              </MenuItem>
+            );
+          })}
         </div>
       </MenuItems>
     </Menu>
-  )
+  );
 }
