@@ -42,7 +42,7 @@ export const storeMessage = async (payload: IPayload | null) => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: payload?.prompt.at(-1),
+        message: payload?.messages.at(-1),
         conversationId: payload?.conversationID,
       }),
     }).catch((err) => {

@@ -17,7 +17,7 @@ export async function GET(
     // get user id in cookie
     // const session = (await cookies()).get("session")?.value;
     // const sessionUser: JWTPayload | undefined = await decrypt(session);
-    const sessionUser = 14 // to delete after testing !
+    const sessionUser = 1 // to delete after testing !
 
     const { id } = await params;
 

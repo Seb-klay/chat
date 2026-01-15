@@ -12,6 +12,9 @@ CREATE TABLE Conversations
   convID SERIAL PRIMARY KEY,
   title VARCHAR(100),
   userID int,
+  createdAt TIMESTAMP NOT NULL,
+  updatedAt TIMESTAMP,
+  isDeleted BOOLEAN NOT NULL,
   CONSTRAINT FK_UserConversation FOREIGN KEY (userID)
     REFERENCES Users(userID)
 );
@@ -23,6 +26,7 @@ CREATE TABLE Messages
   model VARCHAR(50),
   textMessage TEXT,
   convID int,
+  createdAt TIMESTAMP NOT NULL,
   CONSTRAINT FK_convMess FOREIGN KEY (convID)
     REFERENCES Conversations(convID)
 );
@@ -34,7 +38,7 @@ CREATE TABLE email_verification_codes (
   expires_at TIMESTAMP NOT NULL,
   created_at TIMESTAMP DEFAULT NOW(),
   verified BOOLEAN DEFAULT FALSE,
-  UNIQUE(email, code),
+  UNIQUE(email, code)
 );
 
 -- Create ONE database user for your entire application

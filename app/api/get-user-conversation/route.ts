@@ -15,7 +15,7 @@ export async function GET(
     // get user id in cookie
     // const session = (await cookies()).get("session")?.value;
     // const sessionUser: JWTPayload | undefined = await decrypt(session);
-    const sessionUser = 14 // to delete after testing !
+    const sessionUser = 1 // to delete after testing !
 
     if (!sessionUser){
         return NextResponse.json("No user has been found with these credentials. Try to login again or you are not allowed to see this conversation.", { status: 404 });
@@ -24,11 +24,11 @@ export async function GET(
     const pool = getPool();
 
     const response = await pool.query(
-      `SELECT convid, title
+      `SELECT convid, title, updatedat
        FROM conversations 
-       WHERE userid = $1`,
-       // AND isDeleted = false,
-       //ORDER BY created_at DES,
+       WHERE userid = $1
+       AND isdeleted = false
+       ORDER BY createdat DESC`,
       [sessionUser]
     );
 

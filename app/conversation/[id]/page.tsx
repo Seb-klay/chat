@@ -1,29 +1,25 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import ChatInput from "../../components/textInput/chatInput";
 import {
   IMessage,
   IPayload,
   handleStreamResponse,
-  IModelList,
 } from "../../utils/chatUtils";
 import {
   sendMessageToAI,
   storeMessage,
   getConversationHistory,
 } from "../../service/index";
-import ChooseAiModel from "../../components/buttons/buttonAiModel";
+import { IModelList } from "../../utils/listModels";
 import { useParams } from "next/navigation";
+import { MODELS } from "../../utils/listModels"
 
 export default function ConversationPage() {
   const params = useParams();
   const conversationId = params.id as string;
-  const [input, setInput] = useState("");
   const [messages, setMessages] = useState<IMessage[]>([]);
-  const [selectedModel, setSelectedModel] = useState<IModelList>({
-    model_name: "llama3.2:3b",
-    address: "http://localhost:11435",
-  });
 
   useEffect(() => {
     if (!conversationId) return;
@@ -50,8 +46,11 @@ export default function ConversationPage() {
     }
     setMessages(messageHistory);
 
+    // if first message send message manually to function
     if (messageHistory.length === 1) {
-      await sendMessage(messageHistory[0].prompt);
+      const modelId = messageHistory[0].model.id;
+      const model = MODELS[modelId];
+      await sendMessage(messageHistory[0].prompt, model);
     }
   };
 
@@ -64,15 +63,13 @@ export default function ConversationPage() {
     return response;
   };
 
-  const sendMessage = async (userInput?: string) => {
-    const messageText = userInput || input;
+  const sendMessage = async (userInput: string, selectedModel: IModelList) => {
+    const messageText = userInput;
     const messageFromUser: IMessage = {
       role: "user",
-      model: selectedModel.model_name,
+      model: selectedModel,
       prompt: messageText,
     };
-
-    setInput("");
 
     try {
       // store USER message in history
@@ -80,9 +77,7 @@ export default function ConversationPage() {
       setMessages(newMessages);
       // create payload
       var payloadFromUser: IPayload = {
-        model: selectedModel.model_name,
-        address: selectedModel.address,
-        prompt: newMessages,
+        messages: newMessages,
         isStream: true,
         conversationID: conversationId,
       };
@@ -104,7 +99,7 @@ export default function ConversationPage() {
       }
 
       // handle incoming stream response
-      const aiResponse = await handleStreamResponse(streaming, setMessages);
+      const aiResponse = await handleStreamResponse(streaming, selectedModel, setMessages);
 
       if (!aiResponse) {
         throw new Error(
@@ -116,9 +111,7 @@ export default function ConversationPage() {
 
       // create payload
       var payloadFromAI: IPayload = {
-        model: selectedModel.model_name,
-        address: selectedModel.address,
-        prompt: [...messages, messageFromAI],
+        messages: [...messages, messageFromAI],
         isStream: true,
         conversationID: conversationId,
       };
@@ -136,43 +129,21 @@ export default function ConversationPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-8">
-      <div className="w-full h-full min-h-1/2 space-y-4">
-        <div className="border rounded-lg p-4 overflow-y-auto bg-black">
-          {messages
-            .filter((m) => m.role !== "system")
-            .map((m, i) => (
-              <div key={i} className="mb-2">
-                <b>{m.role === "user" ? "You" : "Assistant"}:</b> {m.prompt}
-              </div>
-            ))}
-        </div>
-        <div className="flex space-x-2">
-          {/* input keyboard user */}
-          <input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            className="flex-1 border rounded-lg p-2"
-            placeholder="Type your message..."
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey) {
-                e.preventDefault();
-                sendMessage();
-              }
-            }}
-          />
-          {/* send button */}
-          <ChooseAiModel
-            model={selectedModel}
-            setModel={setSelectedModel}
-          ></ChooseAiModel>
-          <button
-            onClick={() => sendMessage()}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg"
-          >
-            Send
-          </button>
-        </div>
+    <div className="flex flex-col h-screen bg-black items-center w-1/2">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 w-full">
+        {messages
+          .filter((m) => m.role !== "system")
+          .map((m, i) => (
+            <div key={i} className="text-white">
+              <b>{m.role === "user" ? "You" : "Assistant"}:</b> {m.prompt}
+            </div>
+          ))}
+      </div>
+
+      {/* Chat Input */}
+      <div className="sticky bottom-0 w-full border-t border-gray-700 bg-black p-4">
+        <ChatInput onSend={sendMessage} />
       </div>
     </div>
   );

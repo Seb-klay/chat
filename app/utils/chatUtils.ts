@@ -1,6 +1,5 @@
-import { NextResponse } from "next/server";
 import { Dispatch, SetStateAction } from "react";
-import { storeMessage } from '../service/index';
+import { IModelList } from "./listModels";
 
 type SetMessagesType = Dispatch<SetStateAction<IMessage[]>>;
 
@@ -8,14 +7,14 @@ type role = "user" | "assistant" | "system";
 
 export interface IMessage {
   role: role;
-  model?: string;
+  model: {
+    id: number;
+  };
   prompt: string;
 }
 
 export interface IPayload {
-  model: string;
-  address: string;
-  prompt: IMessage[];
+  messages: IMessage[];
   isStream: boolean;
   conversationID: string | string[] | undefined;
 }
@@ -30,19 +29,17 @@ export interface IAnswer {
 }
 // {"model":"tinyllama","created_at":"2025-10-16T17:56:49.249317848Z","response":"","done":true,"done_reason":"stop","context":[529,29989]
 
-export interface IModelList {
-  model_name: string;
-  address: string;
-}
-
 export const handleStreamResponse = async (
   response: Response | null,
+  model: IModelList,
   setMessages: SetMessagesType
 ) => {
   let responseFromChatbot: IMessage = 
     {
       role: "assistant",
-      model: "tinyllama",
+      model: {
+        id: model.id
+      },
       prompt: "",
   };
   setMessages(prev => [...prev, responseFromChatbot])

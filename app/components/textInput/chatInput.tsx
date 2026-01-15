@@ -1,19 +1,20 @@
-import { SetStateAction, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { IModelList } from "../../utils/chatUtils";
-import { IMessage, IPayload } from "@/app/utils/chatUtils";
-import { createConversation, storeMessage } from "@/app/service";
+import { useEffect, useRef, useState } from "react";
+import { IModelList } from "../../utils/listModels";
 import ChooseAiModel from "../buttons/buttonAiModel";
 
-export default function ChatInput() {
-  const router = useRouter();
+type ChatInputProps = {
+  onSend: (message: string, model: IModelList) => void;
+};
+
+export default function ChatInput({ onSend }: ChatInputProps) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const [selectedModel, setSelectedModel] = useState<IModelList>({
+  const [model, setModel] = useState<IModelList>({
+    id: 1,
     model_name: "llama3.2:3b",
-    address: "http://localhost:11435",
+    address: ""
   });
 
   useEffect(() => {
@@ -36,64 +37,25 @@ export default function ChatInput() {
   const handleAbort = () => {
     setLoading(false);
     setIsSending(false);
-    console.log("Request aborted");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      createAndRedirect();
+      onSend(input, model);
+      setInput("");
     }
   };
 
-  const createAndRedirect = async () => {
-    if (!input.trim()) return;
-
-    setIsSending(true);
-    setLoading(true);
-
-    // Set empty list of message
-    const newMessages: IMessage[] = [
-      { role: "user", model: selectedModel.model_name, prompt: input },
-    ];
-
-    try {
-      // Create new conversation
-      const response = await createConversation();
-
-      if (!response?.ok) {
-        throw new Error(
-          `Error with status ${response?.status} while creating a conversation. Try again please.`
-        );
-      }
-
-      const data = await response?.json();
-      const conversationId = data.rows[0].convid;
-
-      // create payload to send prompt to AI
-      const payload: IPayload = {
-        model: selectedModel.model_name,
-        address: selectedModel.address,
-        prompt: newMessages,
-        isStream: true,
-        conversationID: conversationId,
-      };
-
-      // Store message in new conversation
-      storeMessage(payload);
-
-      // Redirect to the new conversation
-      router.push(`/conversation/${conversationId}`);
-    } catch (err) {
-      console.error("Error:", err);
-    } finally {
-      setIsSending(false);
-      setLoading(false);
-    }
+    const handleSend = () => {
+    //setLoading(false);
+    //setIsSending(false);
+    onSend(input, model);
+    setInput("");
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
+    <div className="w-full mx-auto">
       {/* Main Input Container */}
       <div className="relative">
         <textarea
@@ -111,14 +73,15 @@ export default function ChatInput() {
         {/* Button Container */}
         <div className="absolute right-2 bottom-2 flex items-center gap-2 mb-2 mr-2">
           <ChooseAiModel
-            model={selectedModel}
-            setModel={setSelectedModel}
+            onModelSelect={(model) => {
+                setModel(model);
+            }}
           ></ChooseAiModel>
 
           {/* Send/Abort Button */}
           <div className="flex items-center gap-2">
             <button
-              onClick={isSending ? handleAbort : createAndRedirect}
+              onClick={isSending ? handleAbort : handleSend}
               disabled={!input.trim() && !isSending}
               className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
                 isSending

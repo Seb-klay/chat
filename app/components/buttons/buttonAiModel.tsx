@@ -1,17 +1,29 @@
-import { IModelList } from '../../utils/chatUtils';
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
-import { listModels } from '../../utils/listModels.json';
-import { Dispatch, SetStateAction } from 'react';
+import { IModelList, MODELS } from "../../utils/listModels"
+import { useState } from 'react';
 import { CpuChipIcon } from '@heroicons/react/24/outline';
 
 interface ChooseAiModelProps {
-  model: IModelList;
-  setModel: Dispatch<SetStateAction<IModelList>>;
+  onModelSelect?: (model: IModelList) => void;
 }
 
-export default function ChooseAiModel({ model, setModel }: ChooseAiModelProps) {
-  const list_models: IModelList[] = listModels;
+export default function ChooseAiModel({ onModelSelect }: ChooseAiModelProps) {
+  const list_models: IModelList[] = Object.values(MODELS);
+    const [selectedModel, setSelectedModel] = useState<IModelList>({
+    id: 1,
+    model_name: "llama3.2:3b",
+  });
+  
+  // When user selects a model in the dropdown
+  const handleModelSelect = (model: IModelList) => {
+    setSelectedModel(model);
+    
+    // Send it back to parent via callback
+    if (onModelSelect) {
+      onModelSelect(model);
+    }
+  };
 
   return (
     <Menu as="div" className="relative inline-block">
@@ -32,7 +44,7 @@ export default function ChooseAiModel({ model, setModel }: ChooseAiModelProps) {
             return (
               <MenuItem key={m.model_name}>
                 <button
-                  onClick={() => setModel(m)}
+                  onClick={() => handleModelSelect(m)}
                   className="group flex w-full items-center justify-between rounded-md px-3 py-2 text-sm text-gray-300 data-[focus]:bg-gray-700 data-[focus]:text-white"
                 >
                   <div className="text-left">
@@ -43,7 +55,7 @@ export default function ChooseAiModel({ model, setModel }: ChooseAiModelProps) {
                   </div>
                   
                   {/* Show checkmark for selected model */}
-                  {model?.model_name === m.model_name && (
+                  {selectedModel?.model_name === m.model_name && (
                     <svg 
                       className="w-4 h-4 text-blue-500" 
                       fill="none" 

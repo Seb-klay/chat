@@ -2,7 +2,6 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getPool } from "../../backend/database/utils/databaseUtils";
-import { IMessage } from "@/app/utils/chatUtils";
 // import { cookies } from "next/headers";
 // import { JWTPayload } from "jose";
 // import { decrypt } from "@/app/lib/session";
@@ -16,7 +15,7 @@ export async function POST(
     // get user id in cookie
     // const session = (await cookies()).get("session")?.value;
     // const sessionUser: JWTPayload | undefined = await decrypt(session);
-    const sessionUser = 14 // to delete after testing !
+    const sessionUser = 1 // to delete after testing !
 
     const pool = getPool();
 
@@ -24,10 +23,10 @@ export async function POST(
     // const title = 'summary AI'
 
     const response = await pool.query(
-      `INSERT INTO conversations (title, userid) 
-        values ($1, $2) 
+      `INSERT INTO conversations (title, userid, createdat, isDeleted) 
+        values ($1, $2, $3, $4) 
         RETURNING *`,
-      ['titre test', sessionUser])
+      ['titre test', sessionUser, new Date(Date.now()), false]);
 
     return NextResponse.json(response, { status: 200 });
 

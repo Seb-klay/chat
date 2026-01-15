@@ -12,8 +12,8 @@ export async function POST(
 
     const pool = getPool();
 
-    pool.query("INSERT INTO messages (rolesender, model, textmessage, convid) values ($1, $2, $3, $4)",
-      [role, model, prompt, conversationId]);
+    pool.query("INSERT INTO messages (rolesender, model, textmessage, convid, createdat) values ($1, $2, $3, $4, $5)",
+      [role, model, prompt, conversationId, new Date(Date.now())]);
 
     return NextResponse.json({ status: 200 });
   } catch (err) {

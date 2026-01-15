@@ -87,7 +87,7 @@ export default function ConversationSidebar() {
       {/* Sidebar */}
       <div
         className={`
-          fixed top-0 left-0 h-screen bg-gray-900 border-r border-gray-800
+          h-screen bg-gray-900 border-r border-gray-800
           transition-all duration-300 z-40 flex flex-col
           ${isCollapsed ? "w-20" : "w-64"}
         `}
