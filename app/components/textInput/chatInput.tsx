@@ -55,7 +55,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
   };
 
   return (
-    <div className="w-full mx-auto">
+    <div className="w-full mx-auto bg-transparent">
       {/* Main Input Container */}
       <div className="relative">
         <textarea

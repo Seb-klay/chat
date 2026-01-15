@@ -65,7 +65,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 w-full md:w-1/2 lg:w-1/2 mr-auto ml-auto">
       {/* Header with icon and text */}
       <div className="mb-8 text-center">
         {/* Icon */}

@@ -68,7 +68,7 @@ export default function ConversationSidebar() {
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="fixed top-4 left-4 z-50 p-2.5 rounded-lg bg-gray-800 text-white shadow-lg hover:bg-gray-700 transition-all sm:hidden"
+        className="fixed top-4 left-4 z-50 p-2.5 rounded-lg bg-gray-800 text-white shadow-lg hover:bg-gray-700 transition-all md:hidden"
         aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
       >
         <div className="w-5 h-5 relative">
@@ -88,13 +88,13 @@ export default function ConversationSidebar() {
       <div
         className={`
           h-screen bg-gray-900 border-r border-gray-800
-          transition-all duration-300 z-40 flex flex-col
-          ${isCollapsed ? "w-20" : "w-64"}
+          transition-all duration-300 z-40 flex flex-col 
+          ${isCollapsed ? "w-0 md:w-20" : "w-full md:w-64"}
         `}
       >
         {/* Header Section - Always visible */}
         <div className="p-4 border-b border-gray-800">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4  ml-15 mt-2 md:ml-2">
             {!isCollapsed && (
               <h2 className="text-lg font-semibold text-white">
                 Conversations
@@ -104,7 +104,7 @@ export default function ConversationSidebar() {
             {/* Collapse button - top right */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1.5 rounded hover:bg-gray-800 text-gray-400 hover:text-white"
+              className="p-1.5 rounded hover:bg-gray-800 text-gray-400 hover:text-white hidden md:block"
               title={isCollapsed ? "Expand" : "Collapse"}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,7 +175,7 @@ export default function ConversationSidebar() {
               href="/"
               className={`
                 flex items-center p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white
-                ${isCollapsed ? "justify-center" : "justify-start"}
+                ${isCollapsed ? "justify-center hidden" : "justify-start"}
               `}
               title={isCollapsed ? "New Chat" : ""}
             >
@@ -201,7 +201,7 @@ export default function ConversationSidebar() {
         {!isCollapsed && 
         <div className="flex-1 overflow-y-scroll">
           {loading ? (
-            <div className="p-4 flex justify-center">
+            <div className={`${isCollapsed ? "hidden" : "p-4 flex justify-center"}`}>
               <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
             </div>
           ) : conversations.length === 0 ? (
@@ -227,7 +227,7 @@ export default function ConversationSidebar() {
                         </h3>
                       </div>
                       <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
-                        {new Date(conv.updatedAt).toLocaleDateString()}
+                        {new Date(conv.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                   </Link>

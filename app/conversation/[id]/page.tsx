@@ -129,7 +129,7 @@ export default function ConversationPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-black items-center w-1/2">
+    <div className="flex flex-col h-screen items-center w-full md:w-1/2 lg:w-1/2 ml-auto mr-auto bg-transparent">
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 w-full">
         {messages
@@ -142,7 +142,7 @@ export default function ConversationPage() {
       </div>
 
       {/* Chat Input */}
-      <div className="sticky bottom-0 w-full border-t border-gray-700 bg-black p-4">
+      <div className="sticky bottom-0 w-full p-4">
         <ChatInput onSend={sendMessage} />
       </div>
     </div>

@@ -23,10 +23,10 @@ export async function POST(
     // const title = 'summary AI'
 
     const response = await pool.query(
-      `INSERT INTO conversations (title, userid, createdat, isDeleted) 
-        values ($1, $2, $3, $4) 
+      `INSERT INTO conversations (title, userid, createdat, updatedat, isDeleted) 
+        values ($1, $2, $3, $4, $5) 
         RETURNING *`,
-      ['titre test', sessionUser, new Date(Date.now()), false]);
+      ['titre test', sessionUser, new Date(Date.now()), new Date(Date.now()), false]);
 
     return NextResponse.json(response, { status: 200 });
 
