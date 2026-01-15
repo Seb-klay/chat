@@ -14,7 +14,8 @@ import {
 } from "../../service/index";
 import { IModelList } from "../../utils/listModels";
 import { useParams } from "next/navigation";
-import { MODELS } from "../../utils/listModels"
+import { MODELS } from "../../utils/listModels";
+import Dialog from "../../components/dialogs/dialogs";
 
 export default function ConversationPage() {
   const params = useParams();
@@ -99,7 +100,11 @@ export default function ConversationPage() {
       }
 
       // handle incoming stream response
-      const aiResponse = await handleStreamResponse(streaming, selectedModel, setMessages);
+      const aiResponse = await handleStreamResponse(
+        streaming,
+        selectedModel,
+        setMessages
+      );
 
       if (!aiResponse) {
         throw new Error(
@@ -129,17 +134,9 @@ export default function ConversationPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen items-center w-full md:w-1/2 lg:w-1/2 ml-auto mr-auto bg-transparent">
+    <div className="flex flex-col h-screen items-center w-full md:w-1/2 ml-auto mr-auto bg-transparent scroll-smooth">
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 w-full">
-        {messages
-          .filter((m) => m.role !== "system")
-          .map((m, i) => (
-            <div key={i} className="text-white">
-              <b>{m.role === "user" ? "You" : "Assistant"}:</b> {m.prompt}
-            </div>
-          ))}
-      </div>
+      <Dialog messages={messages} />
 
       {/* Chat Input */}
       <div className="sticky bottom-0 w-full p-4">

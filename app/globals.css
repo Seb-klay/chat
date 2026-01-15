@@ -24,3 +24,16 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+.dialog-scroll-container {
+  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+  overscroll-behavior: contain; /* Prevent scroll chaining */
+  touch-action: pan-y; /* Better touch control */
+}
+
+.sticky-input-container {
+  position: fixed;
+  bottom: 0;
+  z-index: 10;
+  background: inherit;
+}

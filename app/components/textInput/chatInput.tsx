@@ -14,24 +14,29 @@ export default function ChatInput({ onSend }: ChatInputProps) {
   const [model, setModel] = useState<IModelList>({
     id: 1,
     model_name: "llama3.2:3b",
-    address: ""
+    address: "",
   });
 
   useEffect(() => {
-    if (textareaRef.current) {
-      const textarea = textareaRef.current;
-      textarea.style.height = "auto";
+    const textarea = textareaRef.current;
+    if (!textarea) return;
 
-      if (textarea.scrollHeight <= 200) {
-        // Still within max height, auto-grow
-        textarea.style.height = `${textarea.scrollHeight}px`;
-        textarea.style.overflowY = "hidden";
-      } else {
-        // Exceeded max height, enable scrolling
-        textarea.style.height = "300px";
-        textarea.style.overflowY = "auto";
-      }
-    }
+    // Reset height first (required for shrink on mobile)
+    textarea.style.height = "auto";
+
+    // Choose max height based on screen size
+    const isMobile = window.innerWidth < 768;
+    const maxHeight = isMobile ? 150 : 300;
+
+    // Force layout read AFTER reset
+    const scrollHeight = textarea.scrollHeight;
+
+    // Apply bounded height
+    const newHeight = Math.min(scrollHeight, maxHeight);
+    textarea.style.height = `${newHeight}px`;
+
+    // Toggle scrolling
+    textarea.style.overflowY = scrollHeight > maxHeight ? "auto" : "hidden";
   }, [input]);
 
   const handleAbort = () => {
@@ -47,7 +52,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
     }
   };
 
-    const handleSend = () => {
+  const handleSend = () => {
     //setLoading(false);
     //setIsSending(false);
     onSend(input, model);
@@ -64,7 +69,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type your message here..."
-          className="w-full p-4 pr-36 bg-gray-900 text-white border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden resize-none min-h-[60px] max-h-[300px]"
+          className="w-full p-4 pr-36 bg-gray-900 text-white border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden overflow-y-scroll resize-none min-h-[30px] md:min-h-[60px]"
           rows={1}
           disabled={isSending}
           style={{ height: "auto" }}
@@ -74,7 +79,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
         <div className="absolute right-2 bottom-2 flex items-center gap-2 mb-2 mr-2">
           <ChooseAiModel
             onModelSelect={(model) => {
-                setModel(model);
+              setModel(model);
             }}
           ></ChooseAiModel>
 

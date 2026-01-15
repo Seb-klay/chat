@@ -94,3 +94,40 @@ export const handleStreamResponse = async (
     });
   }
 };
+
+// simpler handleStream to test :
+// const reader = res.body?.getReader();
+// if (!reader) throw new Error("No reader available");
+
+// let aiResponse = "";
+// setMessages(prevMessages => [...prevMessages, { role: "assistant", content: "" }]);
+
+// while (true) {
+//   const { done, value } = await reader.read();
+//   if (done) break;
+
+//   const chunk = new TextDecoder().decode(value);
+//   const lines = chunk.split("\n\n");
+//   for (const line of lines) {
+//     if (line.startsWith("data: ")) {
+//       const data = line.slice(6);
+//       if (data === "[DONE]") {
+//         setIsLoading(false);
+//         break;
+//       }
+//       try {
+//         const parsedData = JSON.parse(data);
+//         if (typeof parsedData === "string") {
+//           aiResponse += parsedData;
+//           setMessages(prevMessages => {
+//             const updatedMessages = [...prevMessages];
+//             updatedMessages[updatedMessages.length - 1].content += parsedData;
+//             return updatedMessages;
+//           });
+//         }
+//       } catch (error) {
+//         console.error("Error parsing data:", error);
+//       }
+//     }
+//   }
+// }

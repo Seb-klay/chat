@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { getUserConversations } from "@/app/service";
 import { usePathname, useParams } from "next/navigation";
@@ -52,12 +52,14 @@ export default function ConversationSidebar() {
 
   const handleDelete = async () => {};
 
-  const openMenu = (conversationId: string, e: React.MouseEvent<HTMLButtonElement>) => {
+  const openMenu = (
+    conversationId: string,
+    e: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    e.stopPropagation();
 
-      e.stopPropagation();
-
-  const rect = e.currentTarget.getBoundingClientRect();
-  setMenuRect(rect);
+    const rect = e.currentTarget.getBoundingClientRect();
+    setMenuRect(rect);
     setActiveMenu((prevActiveMenu) =>
       prevActiveMenu === conversationId ? null : conversationId
     );
@@ -72,15 +74,21 @@ export default function ConversationSidebar() {
         aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
       >
         <div className="w-5 h-5 relative">
-          <span className={`absolute left-0 top-1 h-0.5 w-full bg-current transform transition-all duration-300 ${
-            isCollapsed ? '' : 'rotate-45 top-2'
-          }`}></span>
-          <span className={`absolute left-0 top-2 h-0.5 w-full bg-current transition-all duration-300 ${
-            isCollapsed ? '' : 'opacity-0'
-          }`}></span>
-          <span className={`absolute left-0 top-3 h-0.5 w-full bg-current transform transition-all duration-300 ${
-            isCollapsed ? '' : '-rotate-45 top-2'
-          }`}></span>
+          <span
+            className={`absolute left-0 top-1 h-0.5 w-full bg-current transform transition-all duration-300 ${
+              isCollapsed ? "" : "rotate-45 top-2"
+            }`}
+          ></span>
+          <span
+            className={`absolute left-0 top-2 h-0.5 w-full bg-current transition-all duration-300 ${
+              isCollapsed ? "" : "opacity-0"
+            }`}
+          ></span>
+          <span
+            className={`absolute left-0 top-3 h-0.5 w-full bg-current transform transition-all duration-300 ${
+              isCollapsed ? "" : "-rotate-45 top-2"
+            }`}
+          ></span>
         </div>
       </button>
 
@@ -107,9 +115,18 @@ export default function ConversationSidebar() {
               className="p-1.5 rounded hover:bg-gray-800 text-gray-400 hover:text-white hidden md:block"
               title={isCollapsed ? "Expand" : "Collapse"}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                  d="M4 6h16M4 12h16M4 18h16" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
               </svg>
             </button>
           </div>
@@ -198,78 +215,85 @@ export default function ConversationSidebar() {
         </div>
 
         {/* Conversations List */}
-        {!isCollapsed && 
-        <div className="flex-1 overflow-y-scroll">
-          {loading ? (
-            <div className={`${isCollapsed ? "hidden" : "p-4 flex justify-center"}`}>
-              <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
-          ) : conversations.length === 0 ? (
-            <div className="p-4 text-center text-gray-500">
-              No conversations yet
-            </div>
-          ) : (
-            <div className="py-2">
-              {conversations.map((conv) => (
-                <div
-                  key={conv.convid}
-                  className={`group relative px-4 py-3 transition-colors border-l-2 ${
-                    currentConversationId === conv.convid
-                      ? "border-red-500 bg-gradient-to-r from-blue-900/40 to-blue-800/20 text-white font-medium shadow-inner hover:from-blue-900/50 hover:to-blue-800/30"
-                      : "border-transparent text-gray-300 hover:bg-gray-800"
-                  }`}
-                >
-                  <Link href={`/conversation/${conv.convid}`} className="block">
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1 min-w-0 pr-8">
-                        <h3 className="text-white font-medium truncate">
-                          {conv.title || "Untitled"}
-                        </h3>
-                      </div>
-                      <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
-                        {new Date(conv.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </Link>
-
-                  {/* 3-dots button - shows on hover */}
-                  <div className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        openMenu(conv.convid, e);
-                      }}
-                      className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded"
-                      aria-label="Conversation options"
+        {!isCollapsed && (
+          <div className="flex-1 overflow-y-scroll">
+            {loading ? (
+              <div
+                className={`${
+                  isCollapsed ? "hidden" : "p-4 flex justify-center"
+                }`}
+              >
+                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+              </div>
+            ) : conversations.length === 0 ? (
+              <div className="p-4 text-center text-gray-500">
+                No conversations yet
+              </div>
+            ) : (
+              <div className="py-2">
+                {conversations.map((conv) => (
+                  <div
+                    key={conv.convid}
+                    className={`group relative px-4 py-3 transition-colors border-l-2 ${
+                      currentConversationId === conv.convid
+                        ? "border-red-500 bg-gradient-to-r from-blue-900/40 to-blue-800/20 text-white font-medium shadow-inner hover:from-blue-900/50 hover:to-blue-800/30"
+                        : "border-transparent text-gray-300 hover:bg-gray-800"
+                    }`}
+                  >
+                    <Link
+                      href={`/conversation/${conv.convid}`}
+                      className="block"
                     >
-                      <svg
-                        className="w-4 h-4"
-                        fill="currentColor"
-                        viewBox="0 0 16 16"
-                      >
-                        <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
-                      </svg>
-                    </button>
-                  </div>
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1 min-w-0 pr-8">
+                          <h3 className="text-white font-medium truncate">
+                            {conv.title || "Untitled"}
+                          </h3>
+                        </div>
+                        <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
+                          {new Date(conv.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                    </Link>
 
-                  {/* Dropdown Menu */}
-                  {activeMenu === conv.convid && (
+                    {/* 3-dots button - shows on hover */}
+                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <button
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          openMenu(conv.convid, e);
+                        }}
+                        className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded"
+                        aria-label="Conversation options"
+                      >
+                        <svg
+                          className="w-4 h-4"
+                          fill="currentColor"
+                          viewBox="0 0 16 16"
+                        >
+                          <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    {/* Dropdown Menu */}
+                    {activeMenu === conv.convid && (
                       <ConversationDropdown
-                      anchorRect={menuRect}
-                      conv={conv}
-                      setDeletingConversationId={setDeletingConversationId}
-                      setRenamingConversationId={setRenamingConversationId}
-                      setNewTitle={setNewTitle}
-                      setActiveMenu={setActiveMenu}
-                    />
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-}
+                        anchorRect={menuRect}
+                        conv={conv}
+                        setDeletingConversationId={setDeletingConversationId}
+                        setRenamingConversationId={setRenamingConversationId}
+                        setNewTitle={setNewTitle}
+                        setActiveMenu={setActiveMenu}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Footer */}
         <div className="p-4 border-t border-gray-800">
