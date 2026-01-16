@@ -14,7 +14,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
+    --background: #020617;
     --foreground: #ededed;
   }
 }
@@ -25,15 +25,19 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-.dialog-scroll-container {
-  -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-  overscroll-behavior: contain; /* Prevent scroll chaining */
-  touch-action: pan-y; /* Better touch control */
+*::-webkit-scrollbar {
+  width: 6px;
 }
 
-.sticky-input-container {
-  position: fixed;
-  bottom: 0;
-  z-index: 10;
-  background: inherit;
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #ededed; /* slate-300 */
+  border-radius: 3px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #101828; /* slate-400 */
 }

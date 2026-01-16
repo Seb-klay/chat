@@ -20,7 +20,7 @@ export default function ClientLayout({ children }: { children: React.ReactNode }
 
     // Render with the sidebar for all other pages
     return (
-        <div className="flex min-h-screen bg-gray-950">
+        <div className="flex min-h-screen bg-transparent">
         <AppSidebar />
         {/* Main Content */}
         <main className="flex-1 overflow-auto">

@@ -71,7 +71,7 @@ export default function HomePage() {
         {/* Icon */}
         <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
           <svg
-            className="w-6 h-6 text-white"
+            className="w-6 h-6 text-gray-100"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -86,7 +86,7 @@ export default function HomePage() {
         </div>
 
         {/* Text */}
-        <h2 className="text-2xl font-bold text-white mb-2">
+        <h2 className="text-2xl font-bold text-gray-100 mb-2">
           How can I help you today?
         </h2>
         <p className="text-gray-400">

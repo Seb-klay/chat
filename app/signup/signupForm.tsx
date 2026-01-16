@@ -22,7 +22,7 @@ export function SignupForm() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-black p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">Create Account</h1>
+          <h1 className="text-2xl font-bold text-gray-100 mb-2">Create Account</h1>
           <p className="text-gray-400">Join our community today</p>
         </div>
 
@@ -46,7 +46,7 @@ export function SignupForm() {
                   type="email"
                   placeholder="you@example.com"
                   required
-                  className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition-colors placeholder:text-gray-500"
+                  className="w-full px-4 py-3 bg-gray-900 text-gray-100 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition-colors placeholder:text-gray-500"
                 />
                 {signupState?.errors?.email && (
                   <p className="mt-2 text-sm text-red-400">
@@ -69,7 +69,7 @@ export function SignupForm() {
                   type="password"
                   placeholder="••••••••"
                   required
-                  className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition-colors placeholder:text-gray-500"
+                  className="w-full px-4 py-3 bg-gray-900 text-gray-100 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition-colors placeholder:text-gray-500"
                 />
                 {signupState?.errors?.password && (
                   <p className="mt-2 text-sm text-red-400">
@@ -95,7 +95,7 @@ export function SignupForm() {
                   type="password"
                   placeholder="••••••••"
                   required
-                  className="w-full px-4 py-3 bg-gray-900 text-white border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition-colors placeholder:text-gray-500"
+                  className="w-full px-4 py-3 bg-gray-900 text-gray-100 border border-gray-700 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-blue-600 outline-none transition-colors placeholder:text-gray-500"
                 />
                 {signupState?.errors?.confirmPassword && (
                   <p className="mt-2 text-sm text-red-400">
@@ -143,7 +143,7 @@ export function SignupForm() {
               {/* Sign Up Button */}
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3.5 px-4 rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/30 transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed group"
+                className="w-full bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-gray-100 font-semibold py-3.5 px-4 rounded-xl transition-all duration-300 hover:shadow-xl hover:shadow-emerald-500/30 transform hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed group"
               >
                 <span className="flex items-center justify-center gap-2.5">
                   <svg
@@ -277,7 +277,7 @@ export function SignupForm() {
               <div className="flex space-x-4">
                 <button
                   type="submit"
-                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all"
+                  className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 text-gray-100 font-semibold py-3 rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all"
                 >
                   Verify & Create Account
                 </button>

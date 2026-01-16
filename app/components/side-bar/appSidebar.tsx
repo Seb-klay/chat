@@ -15,7 +15,7 @@ interface Conversation {
 }
 
 export default function ConversationSidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
   const pathname = usePathname();
@@ -70,7 +70,7 @@ export default function ConversationSidebar() {
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="fixed top-4 left-4 z-50 p-2.5 rounded-lg bg-gray-800 text-white shadow-lg hover:bg-gray-700 transition-all md:hidden"
+        className="fixed top-4 left-4 z-50 p-2.5 rounded-lg bg-gray-800 text-gray-100 shadow-lg hover:bg-gray-700 transition-all md:hidden"
         aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
       >
         <div className="w-5 h-5 relative">
@@ -104,7 +104,7 @@ export default function ConversationSidebar() {
         <div className="p-4 border-b border-gray-800">
           <div className="flex items-center justify-between mb-4  ml-15 mt-2 md:ml-2">
             {!isCollapsed && (
-              <h2 className="text-lg font-semibold text-white">
+              <h2 className="text-lg font-semibold text-gray-100">
                 Conversations
               </h2>
             )}
@@ -112,7 +112,7 @@ export default function ConversationSidebar() {
             {/* Collapse button - top right */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1.5 rounded hover:bg-gray-800 text-gray-400 hover:text-white hidden md:block"
+              className="p-1.5 rounded hover:bg-gray-800 text-gray-400 hover:text-gray-100 hidden md:block"
               title={isCollapsed ? "Expand" : "Collapse"}
             >
               <svg
@@ -191,7 +191,7 @@ export default function ConversationSidebar() {
             <Link
               href="/"
               className={`
-                flex items-center p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white
+                flex items-center p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-gray-100
                 ${isCollapsed ? "justify-center hidden" : "justify-start"}
               `}
               title={isCollapsed ? "New Chat" : ""}
@@ -236,7 +236,7 @@ export default function ConversationSidebar() {
                     key={conv.convid}
                     className={`group relative px-4 py-3 transition-colors border-l-2 ${
                       currentConversationId === conv.convid
-                        ? "border-red-500 bg-gradient-to-r from-blue-900/40 to-blue-800/20 text-white font-medium shadow-inner hover:from-blue-900/50 hover:to-blue-800/30"
+                        ? "border-red-500 bg-gradient-to-r from-blue-900/40 to-blue-800/20 text-gray-100 font-medium shadow-inner hover:from-blue-900/50 hover:to-blue-800/30"
                         : "border-transparent text-gray-300 hover:bg-gray-800"
                     }`}
                   >
@@ -246,7 +246,7 @@ export default function ConversationSidebar() {
                     >
                       <div className="flex justify-between items-start">
                         <div className="flex-1 min-w-0 pr-8">
-                          <h3 className="text-white font-medium truncate">
+                          <h3 className="text-gray-100 font-medium truncate">
                             {conv.title || "Untitled"}
                           </h3>
                         </div>
@@ -264,7 +264,7 @@ export default function ConversationSidebar() {
                           e.stopPropagation();
                           openMenu(conv.convid, e);
                         }}
-                        className="p-1.5 text-gray-400 hover:text-white hover:bg-gray-700 rounded"
+                        className="p-1.5 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded"
                         aria-label="Conversation options"
                       >
                         <svg

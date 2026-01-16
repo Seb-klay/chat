@@ -60,7 +60,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
   };
 
   return (
-    <div className="w-full mx-auto bg-transparent">
+    <div className="w-full mx-auto bg-slate-950 bottom-0">
       {/* Main Input Container */}
       <div className="relative">
         <textarea
@@ -69,7 +69,7 @@ export default function ChatInput({ onSend }: ChatInputProps) {
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type your message here..."
-          className="w-full p-4 pr-36 bg-gray-900 text-white border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden overflow-y-scroll resize-none min-h-[30px] md:min-h-[60px]"
+          className="w-full p-4 pr-36 bg-gray-900 text-gray-100 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden overflow-y-scroll resize-none min-h-[30px] md:min-h-[60px]"
           rows={1}
           disabled={isSending}
           style={{ height: "auto" }}
@@ -90,8 +90,8 @@ export default function ChatInput({ onSend }: ChatInputProps) {
               disabled={!input.trim() && !isSending}
               className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
                 isSending
-                  ? "bg-red-600 hover:bg-red-700 text-white"
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
+                  ? "bg-red-600 hover:bg-red-700 text-gray-100"
+                  : "bg-blue-600 hover:bg-blue-700 text-gray-100"
               }`}
             >
               {isSending ? (

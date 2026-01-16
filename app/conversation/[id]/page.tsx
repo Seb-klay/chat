@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ChatInput from "../../components/textInput/chatInput";
 import {
   IMessage,
@@ -16,11 +16,31 @@ import { IModelList } from "../../utils/listModels";
 import { useParams } from "next/navigation";
 import { MODELS } from "../../utils/listModels";
 import Dialog from "../../components/dialogs/dialogs";
+import DialogsSkeleton from "../../components/dialogs/dialogsSkeleton";
 
 export default function ConversationPage() {
   const params = useParams();
   const conversationId = params.id as string;
   const [messages, setMessages] = useState<IMessage[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const container = scrollRef.current?.parentElement;
+    if (container) {
+      const isNearBottom =
+        container.scrollHeight - container.scrollTop <=
+        container.clientHeight + 100;
+
+      if (isNearBottom) {
+        scrollToBottom();
+      }
+    }
+  }, [messages]);
+
+  const scrollToBottom = () => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
 
   useEffect(() => {
     if (!conversationId) return;
@@ -28,6 +48,7 @@ export default function ConversationPage() {
   }, [conversationId]);
 
   const loadConversationHistory = async (id: string) => {
+    setLoading(true);
     const loadHistory = await getConversationHistory(id);
     if (!loadHistory.ok) {
       throw new Error(
@@ -46,6 +67,7 @@ export default function ConversationPage() {
       messageHistory.push(newMessage);
     }
     setMessages(messageHistory);
+    setLoading(false);
 
     // if first message send message manually to function
     if (messageHistory.length === 1) {
@@ -134,13 +156,29 @@ export default function ConversationPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen items-center w-full md:w-1/2 ml-auto mr-auto bg-transparent scroll-smooth">
+    <div className="flex flex-col h-[100dvh] px-2">
       {/* Messages */}
-      <Dialog messages={messages} />
+      <div className="flex-1 overflow-y-auto">
+        <div className="space-y-2 bg-transparent rounded-lg w-full md:w-1/2 mx-auto">
+          {loading ? (
+          // Render multiple skeletons while loading
+          <>
+            <DialogsSkeleton />
+          </>
+        ) : (
+          <Dialog messages={messages} />
+        )}
+
+          {/* Anchor */}
+          <div ref={scrollRef} className="h-1" />
+        </div>
+      </div>
 
       {/* Chat Input */}
-      <div className="sticky bottom-0 w-full p-4">
-        <ChatInput onSend={sendMessage} />
+      <div className="w-full md:w-1/2 mx-auto bg-slate-950 sticky bottom-0">
+        <div className="bg-transparent rounded-lg">
+          <ChatInput onSend={sendMessage} />
+        </div>
       </div>
     </div>
   );

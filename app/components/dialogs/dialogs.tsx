@@ -10,7 +10,7 @@ interface DialogProps {
 
 const Dialogs: React.FC<DialogProps> = ({ messages }) => {
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-2 w-full bg-transparent rounded-lg">
+    <div className=" space-y-2 bg-transparent rounded-lg">
       {messages
         .filter((m) => m.role !== "system")
         .map((m, i) => (
@@ -21,9 +21,9 @@ const Dialogs: React.FC<DialogProps> = ({ messages }) => {
             }`}
           >
             <div
-              className={`max-w-xs md:max-w-xl px-4 py-2 rounded-lg  mt-3 md:mt-6 mb-3 md:mb-6 ${
+              className={`max-w-xs md:max-w-xl px-4 py-2 rounded-lg mt-3 md:mt-6 mb-3 md:mb-6 ${
                 m.role === "user"
-                  ? "bg-gray-900 text-white"
+                  ? "bg-gray-900 text-gray-100"
                   : "bg-transparent text-gray-100"
               }`}
             >
