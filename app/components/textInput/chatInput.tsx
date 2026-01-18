@@ -1,14 +1,20 @@
 import { useEffect, useRef, useState } from "react";
 import { IModelList } from "../../utils/listModels";
 import ChooseAiModel from "../buttons/buttonAiModel";
+import { LoadingButton } from "../buttons/loadingButton";
+import { SendButton } from "../buttons/sendButton";
+import { AbortButton } from "../buttons/abortButton";
 
 type ChatInputProps = {
+  isChatbotWriting?: boolean;
+  isSending?: boolean;
+  onAbort?: () => void;
   onSend: (message: string, model: IModelList) => void;
 };
 
-export default function ChatInput({ onSend }: ChatInputProps) {
+export default function ChatInput({ isChatbotWriting, onAbort, onSend }: ChatInputProps) {
   const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
+  //const [loading, setLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [model, setModel] = useState<IModelList>({
@@ -38,11 +44,6 @@ export default function ChatInput({ onSend }: ChatInputProps) {
     // Toggle scrolling
     textarea.style.overflowY = scrollHeight > maxHeight ? "auto" : "hidden";
   }, [input]);
-
-  const handleAbort = () => {
-    setLoading(false);
-    setIsSending(false);
-  };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -85,33 +86,17 @@ export default function ChatInput({ onSend }: ChatInputProps) {
 
           {/* Send/Abort Button */}
           <div className="flex items-center gap-2">
-            <button
-              onClick={isSending ? handleAbort : handleSend}
-              disabled={!input.trim() && !isSending}
-              className={`w-10 h-10 flex items-center justify-center rounded-full transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-                isSending
-                  ? "bg-red-600 hover:bg-red-700 text-gray-100"
-                  : "bg-blue-600 hover:bg-blue-700 text-gray-100"
-              }`}
-            >
-              {isSending ? (
-                <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            {isChatbotWriting ? (
+              onAbort ? (
+                <AbortButton onClick={onAbort} />
               ) : (
-                <svg
-                  className="w-5 h-5"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth="2"
-                    d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-                  />
-                </svg>
-              )}
-            </button>
+                <LoadingButton />
+              )
+            ) : isSending ? (
+              <LoadingButton />
+            ) : (
+              <SendButton onClick={handleSend} disabled={!input.trim()} />
+            )}
           </div>
         </div>
       </div>

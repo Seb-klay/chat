@@ -23,7 +23,8 @@ export default function ConversationPage() {
   const conversationId = params.id as string;
   const [messages, setMessages] = useState<IMessage[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingConversation, setLoadingConversation] = useState(false);
+  const [isChatbotWriting, setisChatbotWriting] = useState(false);
 
   useEffect(() => {
     const container = scrollRef.current?.parentElement;
@@ -48,7 +49,7 @@ export default function ConversationPage() {
   }, [conversationId]);
 
   const loadConversationHistory = async (id: string) => {
-    setLoading(true);
+    setLoadingConversation(true);
     const loadHistory = await getConversationHistory(id);
     if (!loadHistory.ok) {
       throw new Error(
@@ -67,7 +68,7 @@ export default function ConversationPage() {
       messageHistory.push(newMessage);
     }
     setMessages(messageHistory);
-    setLoading(false);
+    setLoadingConversation(false);
 
     // if first message send message manually to function
     if (messageHistory.length === 1) {
@@ -84,6 +85,11 @@ export default function ConversationPage() {
       throw new Error("Could not save the message. Try again please.");
     }
     return response;
+  };
+
+  const handleAbort = () => {
+    //setLoading(false);
+    //setIsSending(false);
   };
 
   const sendMessage = async (userInput: string, selectedModel: IModelList) => {
@@ -121,6 +127,8 @@ export default function ConversationPage() {
         );
       }
 
+      setisChatbotWriting(true);
+
       // handle incoming stream response
       const aiResponse = await handleStreamResponse(
         streaming,
@@ -133,6 +141,8 @@ export default function ConversationPage() {
           "The AI message could not be generated. Try again please."
         );
       }
+      setisChatbotWriting(false);
+      
       // Store response from AI
       const messageFromAI: IMessage = aiResponse;
 
@@ -151,6 +161,7 @@ export default function ConversationPage() {
         );
       }
     } catch (err) {
+      setisChatbotWriting(false);
       console.error(err);
     }
   };
@@ -160,14 +171,22 @@ export default function ConversationPage() {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
         <div className="space-y-2 bg-transparent rounded-lg w-full md:w-1/2 mx-auto">
-          {loading ? (
-          // Render multiple skeletons while loading
-          <>
-            <DialogsSkeleton />
-          </>
-        ) : (
-          <Dialog messages={messages} />
-        )}
+          {loadingConversation ? (
+            <>
+              <DialogsSkeleton />
+            </>
+          ) : (
+            <>
+              <Dialog messages={messages} />
+              {isChatbotWriting && (
+              <div className="flex space-x-2">
+                  <div className="dot text-gray-100 w-2 h-2 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+                  <div className="dot text-gray-100 w-2 h-2 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+                  <div className="dot text-gray-100 w-2 h-2 rounded-full animate-bounce"></div>
+              </div>
+              )}
+            </>
+          )}
 
           {/* Anchor */}
           <div ref={scrollRef} className="h-1" />
@@ -177,7 +196,10 @@ export default function ConversationPage() {
       {/* Chat Input */}
       <div className="w-full md:w-1/2 mx-auto bg-slate-950 sticky bottom-0">
         <div className="bg-transparent rounded-lg">
-          <ChatInput onSend={sendMessage} />
+          <ChatInput 
+            isChatbotWriting={isChatbotWriting}
+            onAbort={handleAbort}
+            onSend={sendMessage} />
         </div>
       </div>
     </div>

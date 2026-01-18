@@ -3,9 +3,11 @@ import ChatInput from "../components/textInput/chatInput";
 import { createConversation, storeMessage } from "../service";
 import { IPayload, IMessage } from "../utils/chatUtils";
 import { IModelList } from "../utils/listModels";
+import { useState } from 'react';
 
 export default function HomePage() {
   const router = useRouter();
+  const [isSending, setIsSending] = useState(false);
 
   const postMessageToDB = async (payload: IPayload) => {
     const response = await storeMessage(payload);
@@ -19,8 +21,7 @@ export default function HomePage() {
   const createAndRedirect = async (userInput: string, selectedModel: IModelList) => {
     if (!userInput.trim()) return;
 
-    //setIsSending(true);
-    //setLoading(true);
+    setIsSending(true);
 
     // Set empty list of message
     const newMessages: IMessage[] = [
@@ -59,8 +60,7 @@ export default function HomePage() {
     } catch (err) {
       console.error("Error:", err);
     } finally {
-      //setIsSending(false);
-      //setLoading(false);
+      setIsSending(false);
     }
   };
 
@@ -94,7 +94,9 @@ export default function HomePage() {
         </p>
       </div>
 
-      <ChatInput onSend={createAndRedirect} />
+      <ChatInput 
+        isSending={isSending}
+        onSend={createAndRedirect} />
     </div>
   );
 }
