@@ -10,6 +10,7 @@ export async function POST(
   const { messages, isStream } = await request.json();
 
   // get AI URL from list
+  console.log(messages[messages.length - 1])
   const lastMessage = messages[messages.length - 1];
   const AI_MODEL_URL: string = MODELS[lastMessage.model.id].address
 

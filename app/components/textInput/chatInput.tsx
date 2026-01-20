@@ -20,7 +20,6 @@ export default function ChatInput({ isChatbotWriting, onAbort, onSend }: ChatInp
   const [model, setModel] = useState<IModelList>({
     id: 1,
     model_name: "llama3.2:3b",
-    address: "",
   });
 
   useEffect(() => {

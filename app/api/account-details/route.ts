@@ -24,15 +24,23 @@ export async function GET(
     const pool = getPool();
 
     const response = await pool.query(
-      `SELECT convid, title, createdat, updatedat
-       FROM conversations 
-       WHERE userid = $1
-       AND isdeleted = false
-       ORDER BY createdat DESC`,
+        `
+        SELECT
+            u.email,
+            DATE_TRUNC('day', conv.updatedat) AS day,
+            SUM(conv.nummessages) AS total_messages
+        FROM u users
+        JOIN conversations conv ON u.userid = conv.userid
+        WHERE u.userid = $1
+            AND conv.updatedat >= NOW() - INTERVAL '7 days'
+        GROUP BY day
+        ORDER BY day
+        `,
       [sessionUser]
     );
+    console.log(response)
 
-    return NextResponse.json({ conversations: response.rows }, { status: 200 });
+    return NextResponse.json( response.rows, { status: 200 });
 
   } catch (err) {
     return NextResponse.json(err, { status: 500 });

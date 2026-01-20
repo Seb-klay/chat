@@ -6,12 +6,11 @@ import { getPool } from "../../backend/database/utils/databaseUtils";
 // import { JWTPayload } from "jose";
 // import { decrypt } from "@/app/lib/session";
 
-// Create conversation
-export async function POST(
+// Delete conversation
+export async function DELETE(
   request: NextRequest
 ): Promise<NextResponse> {
   try {
-    //const { userId } = await request.json();
     // get user id in cookie
     // const session = (await cookies()).get("session")?.value;
     // const sessionUser: JWTPayload | undefined = await decrypt(session);
@@ -19,16 +18,27 @@ export async function POST(
 
     const pool = getPool();
 
-    // call to AI to make summary (title) of conversation
-    // const title = 'summary AI'
+    // Get the conversation ID from the URL query
+    const { id } = await request.json();
 
+    if (!id) {
+      return NextResponse.json({ error: "Conversation ID is required" }, { status: 400 });
+    }
+
+    // Mark the conversation as deleted
     const response = await pool.query(
-      `INSERT INTO conversations (title, userid, createdat, updatedat, isDeleted) 
-        values ($1, $2, $3, $4, $5) 
-        RETURNING *`,
-      ['titre test which is really really long for test purpose', sessionUser, new Date(Date.now()), new Date(Date.now()), false]);
+      `UPDATE users
+       SET isDeleted = true
+       WHERE userid = $1
+       RETURNING *`,
+      [id]
+    );
 
-    return NextResponse.json(response, { status: 200 });
+    if (response.rowCount === 0) {
+      return NextResponse.json({ error: "Conversation not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(response.rows[0], { status: 200 });
 
   } catch (err) {
     return NextResponse.json(err, { status: 500 });

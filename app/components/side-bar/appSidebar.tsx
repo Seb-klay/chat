@@ -2,15 +2,16 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { getUserConversations } from "@/app/service";
+import { deleteConversation, getUserConversations } from "@/app/service";
 import { usePathname, useParams } from "next/navigation";
-import { ConversationDropdown } from "./conversationDropdown";
+import ConversationsUser from "./conversationsUser";
+import { ConfirmationCardDelete } from "../cards/confirmationDeleteConvCard";
 
-interface Conversation {
+export interface Conversation {
   convid: string;
   title: string;
-  createdAt: string;
-  updatedAt: string;
+  createdat: string;
+  updatedat: string;
   messageCount: number;
 }
 
@@ -27,6 +28,8 @@ export default function ConversationSidebar() {
   const [deletingConversationId, setDeletingConversationId] = useState<
     string | null
   >(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+
   const [newTitle, setNewTitle] = useState("");
   const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
   const params = useParams();
@@ -50,20 +53,63 @@ export default function ConversationSidebar() {
 
   const handleRename = async () => {};
 
-  const handleDelete = async () => {};
+  const handleDeleteConversation = async () => {
+    if (deletingConversationId) {
+      // call API to delete the conversation
+      const response = await deleteConversation(deletingConversationId);
 
-  const openMenu = (
-    conversationId: string,
-    e: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    e.stopPropagation();
-
-    const rect = e.currentTarget.getBoundingClientRect();
-    setMenuRect(rect);
-    setActiveMenu((prevActiveMenu) =>
-      prevActiveMenu === conversationId ? null : conversationId
-    );
+      if (!response.ok) {
+        setDeleteError(
+          "The conversation could not be deleted."
+        );
+      } else {
+        fetchConversations();
+        setDeletingConversationId(null);
+      }
+    }
   };
+
+  function getDateGroup(dateString: string): string {
+    const date = new Date(dateString);
+    const now = new Date();
+
+    const diffMs = now.getTime() - date.getTime();
+    const diffHours = diffMs / (1000 * 60 * 60);
+    const diffDays = diffHours / 24;
+
+    if (diffHours < 1) {
+      return "Last hour";
+    }
+
+    if (diffDays < 1) {
+      return "Today";
+    }
+
+    if (diffDays < 7) {
+      return "Last week";
+    }
+
+    if (date.getFullYear() === now.getFullYear()) {
+      // Month name (December, November, ...)
+      return date.toLocaleString("default", { month: "long" });
+    }
+
+    return String(date.getFullYear());
+  }
+
+  const groupedConversations = conversations.reduce<
+    Record<string, typeof conversations>
+  >((groups, conv) => {
+    const dateToUse = conv.updatedat ?? conv.createdat;
+    const group = getDateGroup(dateToUse);
+
+    if (!groups[group]) {
+      groups[group] = [];
+    }
+
+    groups[group].push(conv);
+    return groups;
+  }, {});
 
   return (
     <>
@@ -134,7 +180,8 @@ export default function ConversationSidebar() {
           {/* Essential Buttons - Always visible, icon-only when collapsed */}
           <div className="flex flex-col space-y-2">
             {/* User Account */}
-            <button
+            <Link
+              href="/account"
               className={`
                 flex items-center p-2 rounded-lg hover:bg-gray-800 text-gray-300
                 ${isCollapsed ? "justify-center" : "justify-start"}
@@ -155,10 +202,11 @@ export default function ConversationSidebar() {
                 />
               </svg>
               {!isCollapsed && <span className="ml-3">Account</span>}
-            </button>
+            </Link>
 
             {/* Parameters/Settings */}
-            <button
+            <Link
+              href="/settings"
               className={`
                 flex items-center p-2 rounded-lg hover:bg-gray-800 text-gray-300
                 ${isCollapsed ? "justify-center" : "justify-start"}
@@ -185,14 +233,18 @@ export default function ConversationSidebar() {
                 />
               </svg>
               {!isCollapsed && <span className="ml-3">Settings</span>}
-            </button>
+            </Link>
 
             {/* Create New Conversation */}
             <Link
               href="/"
               className={`
                 flex items-center p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-gray-100
-                ${isCollapsed ? "justify-center hidden" : "justify-start"}
+                ${
+                  isCollapsed
+                    ? "justify-center items-center hidden md:block md:mx-auto"
+                    : "justify-start"
+                }
               `}
               title={isCollapsed ? "New Chat" : ""}
             >
@@ -231,65 +283,55 @@ export default function ConversationSidebar() {
               </div>
             ) : (
               <div className="py-2">
-                {conversations.map((conv) => (
-                  <div
-                    key={conv.convid}
-                    className={`group relative px-4 py-3 transition-colors border-l-2 ${
-                      currentConversationId === conv.convid
-                        ? "border-red-500 bg-gradient-to-r from-blue-900/40 to-blue-800/20 text-gray-100 font-medium shadow-inner hover:from-blue-900/50 hover:to-blue-800/30"
-                        : "border-transparent text-gray-300 hover:bg-gray-800"
-                    }`}
-                  >
-                    <Link
-                      href={`/conversation/${conv.convid}`}
-                      className="block"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1 min-w-0 pr-8">
-                          <h3 className="text-gray-100 font-medium truncate">
-                            {conv.title || "Untitled"}
-                          </h3>
+                {Object.entries(groupedConversations).map(
+                  ([groupName, convs]) => {
+                    return (
+                      <div key={groupName}>
+                        {/* Section Header */}
+                        <div className="px-4 pt-8 pb-2 text-xs font-semibold text-gray-500">
+                          {groupName}
                         </div>
-                        <span className="text-xs text-gray-500 ml-2 whitespace-nowrap">
-                          {new Date(conv.createdAt).toLocaleDateString()}
-                        </span>
+
+                        {convs.map((conv) => {
+                          return (
+                            <div
+                              key={conv.convid}
+                              className={`group relative px-4 transition-colors border-l-2 rounded-lg overflow-x-hidden ${
+                                currentConversationId === conv.convid
+                                  ? "border-red-500 bg-gradient-to-r from-blue-900/40 to-blue-800/20 text-gray-100 font-medium shadow-inner hover:from-blue-900/50 hover:to-blue-800/30"
+                                  : "border-transparent text-gray-300 hover:bg-gray-800"
+                              }`}
+                            >
+                              <ConversationsUser
+                                conversation={conv}
+                                isActive={activeMenu === conv.convid}
+                                anchorRect={menuRect}
+                                setMenuRect={setMenuRect}
+                                setDeletingConversationId={
+                                  setDeletingConversationId
+                                }
+                                setRenamingConversationId={
+                                  setRenamingConversationId
+                                }
+                                setNewTitle={setNewTitle}
+                                setActiveMenu={setActiveMenu}
+                              />
+                            </div>
+                          );
+                        })}
+                        {/* Delete confirmation card */}
+                        {deletingConversationId && (
+                          <ConfirmationCardDelete
+                            error={ deleteError }
+                            setDeletingConversationId={setDeletingConversationId}
+                            setDeleteError={setDeleteError}
+                            handleDelete={handleDeleteConversation}
+                          />
+                        )}
                       </div>
-                    </Link>
-
-                    {/* 3-dots button - shows on hover */}
-                    <div className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                          openMenu(conv.convid, e);
-                        }}
-                        className="p-1.5 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded"
-                        aria-label="Conversation options"
-                      >
-                        <svg
-                          className="w-4 h-4"
-                          fill="currentColor"
-                          viewBox="0 0 16 16"
-                        >
-                          <path d="M3 9.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3zm5 0a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3z" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Dropdown Menu */}
-                    {activeMenu === conv.convid && (
-                      <ConversationDropdown
-                        anchorRect={menuRect}
-                        conv={conv}
-                        setDeletingConversationId={setDeletingConversationId}
-                        setRenamingConversationId={setRenamingConversationId}
-                        setNewTitle={setNewTitle}
-                        setActiveMenu={setActiveMenu}
-                      />
-                    )}
-                  </div>
-                ))}
+                    );
+                  }
+                )}
               </div>
             )}
           </div>

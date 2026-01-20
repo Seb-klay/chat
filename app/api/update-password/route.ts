@@ -7,28 +7,33 @@ import { getPool } from "../../backend/database/utils/databaseUtils";
 // import { decrypt } from "@/app/lib/session";
 
 // Create conversation
-export async function POST(
+export async function UPDATE(
   request: NextRequest
 ): Promise<NextResponse> {
   try {
-    //const { userId } = await request.json();
+    const { newPassword } = await request.json();
     // get user id in cookie
     // const session = (await cookies()).get("session")?.value;
     // const sessionUser: JWTPayload | undefined = await decrypt(session);
     const sessionUser = 1 // to delete after testing !
 
-    const pool = getPool();
+    if (!sessionUser){
+        return NextResponse.json("No user has been found with these credentials. Try to login again or you are not allowed to see this conversation.", { status: 404 });
+    }
 
-    // call to AI to make summary (title) of conversation
-    // const title = 'summary AI'
+    const pool = getPool();
+    console.log(4)
 
     const response = await pool.query(
-      `INSERT INTO conversations (title, userid, createdat, updatedat, isDeleted) 
-        values ($1, $2, $3, $4, $5) 
-        RETURNING *`,
-      ['titre test which is really really long for test purpose', sessionUser, new Date(Date.now()), new Date(Date.now()), false]);
+      `UPDATE users
+       SET userpassword = $1
+       WHERE userid = $2
+       RETURNING *`,
+      [newPassword, sessionUser]
+    );
+    console.log(response)
 
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json( response.rows, { status: 200 });
 
   } catch (err) {
     return NextResponse.json(err, { status: 500 });

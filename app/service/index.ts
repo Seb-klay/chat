@@ -4,6 +4,7 @@ const URL: string = process.env.FULL_URL || "";
 
 // message services that send the message to /api/chat API
 export const sendMessageToAI = async (payload: IPayload | null) => {
+  console.log(payload)
   // send prompt to AI assistant
   return await fetch(`${URL}/api/chat-messages`, {
     method: "POST",
@@ -27,6 +28,18 @@ export const createConversation = async (): Promise<Response | null> => {
   });
 };
 
+export const deleteConversation = async (conversationID: string) => {
+  return await fetch(`${URL}/api/delete-conversation`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id : conversationID,
+      }),
+    }).catch((err) => {
+    throw new Error(err);
+  });
+};
+
 export const getUserConversations = async () => {
   return await fetch(`${URL}/api/get-user-conversation`, {
     method: "GET",
@@ -38,11 +51,12 @@ export const getUserConversations = async () => {
 
 // message services that send the message to /api/message API
 export const storeMessage = async (payload: IPayload | null) => {
+  console.log(payload)
   return await fetch(`${URL}/api/message`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        message: payload?.messages.at(-1),
+        message: payload?.messages,
         conversationId: payload?.conversationID,
       }),
     }).catch((err) => {
@@ -78,6 +92,22 @@ export const createUser = async (user: IUser): Promise<Response | null> => {
   });
 };
 
+export const deleteUserAccount = async (): Promise<Response | null> => {
+  return await fetch(`${URL}/api/delete-user`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" }
+  }).catch((err) => {
+    throw new Error(err);
+  });
+};
+
+export const getAccountDetails = async (): Promise<Response | null> => {
+  return await fetch(`${URL}/api/account-details`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" }
+  });
+};
+
 export const validateUser = async (
   email: string,
   code: string,
@@ -102,5 +132,13 @@ export const verifySignupCode = async (
     body: JSON.stringify({ email: email, code: code }),
   }).catch((err) => {
     throw new Error(err);
+  });
+};
+
+export const updatePasswordUser = async (newPassword: string): Promise<Response | null> => {
+  return await fetch(`${URL}/api/update-password`, {
+    method: "UPDATE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(newPassword),
   });
 };

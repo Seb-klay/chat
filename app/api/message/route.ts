@@ -8,7 +8,7 @@ export async function POST(
 ): Promise<NextResponse> {
   try {
     const { message, conversationId } = await request.json();
-    const { role, model, prompt }: IMessage = message;
+    const { role, model, prompt }: IMessage = message.at(-1);
 
     const pool = getPool();
 

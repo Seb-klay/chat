@@ -4,12 +4,14 @@ import { createConversation, storeMessage } from "../service";
 import { IPayload, IMessage } from "../utils/chatUtils";
 import { IModelList } from "../utils/listModels";
 import { useState } from 'react';
+//import sendMessage from "../conversation/[id]/page"
 
 export default function HomePage() {
   const router = useRouter();
   const [isSending, setIsSending] = useState(false);
 
   const postMessageToDB = async (payload: IPayload) => {
+    console.log(payload)
     const response = await storeMessage(payload);
 
     if (!response?.ok) {
@@ -54,6 +56,9 @@ export default function HomePage() {
       if (!responseDB.ok) {
         throw new Error("Could not store user message. Try again please.");
       }
+
+      // TODO : correct it and send directly to the main sendMessage function in converstation/page
+      //const res = sendMessage(userInput, selectedModel);
 
       // Redirect to the new conversation
       router.push(`/conversation/${conversationId}`);

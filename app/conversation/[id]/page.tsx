@@ -72,6 +72,8 @@ export default function ConversationPage() {
 
     // if first message send message manually to function
     if (messageHistory.length === 1) {
+      console.log("--------------------------")
+      console.log(messageHistory[0])
       const modelId = messageHistory[0].model.id;
       const model = MODELS[modelId];
       await sendMessage(messageHistory[0].prompt, model);
