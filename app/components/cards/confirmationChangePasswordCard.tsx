@@ -53,8 +53,8 @@ export function ConfirmationUpdatePassword({
                      outline-none transition"
             />
             {state?.errors?.email && (
-              <p className="mt-1 text-sm text-red-400">
-                {state?.errors?.email}
+              <p className="mt-1 text-sm text-red-400 whitespace-pre-line">
+                {state?.errors?.email?.join("\n")}
               </p>
             )}
           </div>
@@ -77,8 +77,8 @@ export function ConfirmationUpdatePassword({
                      outline-none transition"
             />
             {state?.errors?.currentPassword && (
-              <p className="mt-1 text-sm text-red-400">
-                {state?.errors?.currentPassword}
+              <p className="mt-1 text-sm text-red-400 whitespace-pre-line">
+                {state?.errors?.currentPassword?.join("\n")}
               </p>
             )}
           </div>
@@ -105,8 +105,8 @@ export function ConfirmationUpdatePassword({
               Minimum 8 characters, with uppercase, lowercase, number and symbol
             </p>
             {state?.errors?.password && (
-              <p className="mt-1 text-sm text-red-400">
-                {state?.errors?.password}
+              <p className="mt-1 text-sm text-red-400 whitespace-pre-line">
+                {state?.errors?.password?.join("\n")}
               </p>
             )}
           </div>
@@ -130,8 +130,8 @@ export function ConfirmationUpdatePassword({
                      outline-none transition"
             />
             {state?.errors?.confirmPassword && (
-              <p className="mt-1 text-sm text-red-400">
-                {state?.errors?.confirmPassword}
+              <p className="mt-1 text-sm text-red-400 whitespace-pre-line">
+                {state?.errors?.confirmPassword?.join("\n")}
               </p>
             )}
           </div>

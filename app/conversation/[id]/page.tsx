@@ -2,21 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 import ChatInput from "../../components/textInput/chatInput";
-import {
-  IMessage,
-  IPayload,
-  handleStreamResponse,
-} from "../../utils/chatUtils";
-import {
-  sendMessageToAI,
-  storeMessage,
-  getConversationHistory,
-} from "../../service/index";
+import { IMessage, IPayload } from "../../utils/chatUtils";
+import { getConversationHistory } from "../../service/index";
 import { IModelList } from "../../utils/listModels";
 import { useParams } from "next/navigation";
 import { MODELS } from "../../utils/listModels";
 import Dialog from "../../components/dialogs/dialogs";
 import DialogsSkeleton from "../../components/dialogs/dialogsSkeleton";
+import { sendChatMessage } from "@/app/service/aiService";
 
 export default function ConversationPage() {
   const params = useParams();
@@ -51,7 +44,7 @@ export default function ConversationPage() {
   const loadConversationHistory = async (id: string) => {
     setLoadingConversation(true);
     const loadHistory = await getConversationHistory(id);
-    if (!loadHistory.ok) {
+    if (!loadHistory?.ok) {
       throw new Error(
         "The conversation could not load. Refresh the page or create a new conversation."
       );
@@ -72,21 +65,12 @@ export default function ConversationPage() {
 
     // if first message send message manually to function
     if (messageHistory.length === 1) {
-      console.log("--------------------------")
-      console.log(messageHistory[0])
+      console.log("--------------------------");
+      console.log(messageHistory[0]);
       const modelId = messageHistory[0].model.id;
       const model = MODELS[modelId];
       await sendMessage(messageHistory[0].prompt, model);
     }
-  };
-
-  const postMessageToDB = async (payload: IPayload) => {
-    const response = await storeMessage(payload);
-
-    if (!response?.ok) {
-      throw new Error("Could not save the message. Try again please.");
-    }
-    return response;
   };
 
   const handleAbort = () => {
@@ -101,67 +85,42 @@ export default function ConversationPage() {
       model: selectedModel,
       prompt: messageText,
     };
+    const assistantPlaceholder: IMessage = {
+      role: "assistant", // This ensures it uses the "Bot" styling/side
+      model: selectedModel,
+      prompt: "",
+    };
+    // store USER message in history
+    setMessages((prev) => [...prev, messageFromUser, assistantPlaceholder]);
 
     try {
-      // store USER message in history
-      const newMessages: IMessage[] = [...messages, messageFromUser];
-      setMessages(newMessages);
       // create payload
       var payloadFromUser: IPayload = {
-        messages: newMessages,
+        messages: messages,
         isStream: true,
         conversationID: conversationId,
       };
-
-      // Store message user in DB
-      const userResponse = await postMessageToDB(payloadFromUser);
-
-      if (!userResponse?.ok) {
-        throw new Error("Your message could not be stored. Try again please.");
-      }
-
-      // then sendMessage to AI
-      var streaming = await sendMessageToAI(payloadFromUser);
-
-      if (!streaming.ok) {
-        throw new Error(
-          "The AI message could not be generated. Try again please."
-        );
-      }
-
       setisChatbotWriting(true);
 
-      // handle incoming stream response
-      const aiResponse = await handleStreamResponse(
-        streaming,
-        selectedModel,
-        setMessages
-      );
+      const response = await sendChatMessage(payloadFromUser, {
+        onData: (chunk: string) => {
+          setMessages((prev) => {
+            const last = prev[prev.length - 1];
+            const updated = { ...last, prompt: last.prompt + chunk };
+            return [...prev.slice(0, -1), updated];
+          });
+        },
 
-      if (!aiResponse) {
-        throw new Error(
-          "The AI message could not be generated. Try again please."
-        );
-      }
-      setisChatbotWriting(false);
-      
-      // Store response from AI
-      const messageFromAI: IMessage = aiResponse;
+        // Handle errors (e.g., show a toast notification)
+        onError: (err) => {
+          console.error("Stream failed:", err);
+        },
 
-      // create payload
-      var payloadFromAI: IPayload = {
-        messages: [...messages, messageFromAI],
-        isStream: true,
-        conversationID: conversationId,
-      };
-
-      // Store AI message in DB
-      const res = await postMessageToDB(payloadFromAI);
-      if (!res.ok) {
-        throw new Error(
-          "The AI message could not be stored. Try again please."
-        );
-      }
+        // Finalize the message (e.g., replace temp ID with DB ID)
+        onCompleted: () => {
+          setisChatbotWriting(false);
+        },
+      });
     } catch (err) {
       setisChatbotWriting(false);
       console.error(err);
@@ -181,11 +140,11 @@ export default function ConversationPage() {
             <>
               <Dialog messages={messages} />
               {isChatbotWriting && (
-              <div className="flex space-x-2">
+                <div className="flex space-x-2">
                   <div className="dot text-gray-100 w-2 h-2 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
                   <div className="dot text-gray-100 w-2 h-2 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
                   <div className="dot text-gray-100 w-2 h-2 rounded-full animate-bounce"></div>
-              </div>
+                </div>
               )}
             </>
           )}
@@ -198,10 +157,11 @@ export default function ConversationPage() {
       {/* Chat Input */}
       <div className="w-full md:w-1/2 mx-auto bg-slate-950 sticky bottom-0">
         <div className="bg-transparent rounded-lg">
-          <ChatInput 
+          <ChatInput
             isChatbotWriting={isChatbotWriting}
             onAbort={handleAbort}
-            onSend={sendMessage} />
+            onSend={sendMessage}
+          />
         </div>
       </div>
     </div>
