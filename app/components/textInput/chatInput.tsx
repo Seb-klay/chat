@@ -12,7 +12,12 @@ type ChatInputProps = {
   onSend: (message: string, model: IModelList) => void;
 };
 
-export default function ChatInput({ onThought, onChatbotWriting, onAbort, onSend }: ChatInputProps) {
+export default function ChatInput({
+  onThought,
+  onChatbotWriting,
+  onAbort,
+  onSend,
+}: ChatInputProps) {
   const [input, setInput] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [model, setModel] = useState<IModelList>({
@@ -81,14 +86,14 @@ export default function ChatInput({ onThought, onChatbotWriting, onAbort, onSend
 
           {/* Send/Abort Button */}
           <div className="flex items-center gap-2">
-          {onChatbotWriting ? (
-            <AbortButton onClick={onAbort || (() => {})} />
-          ) : (
-            <SendButton 
-              onClick={handleSend} 
-              disabled={!input.trim() || onThought} 
-            />
-          )}
+            {onChatbotWriting ? (
+              <AbortButton onClick={onAbort || (() => {})} />
+            ) : (
+              <SendButton
+                onClick={handleSend}
+                disabled={!input.trim() || onThought}
+              />
+            )}
           </div>
         </div>
       </div>

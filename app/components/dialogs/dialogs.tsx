@@ -5,7 +5,7 @@ import raw from "rehype-raw";
 import { CodeBlock } from "./codeBlock";
 
 interface DialogProps {
-    messages : IMessage[];
+  messages: IMessage[];
 }
 
 const Dialogs: React.FC<DialogProps> = ({ messages }) => {
@@ -27,42 +27,45 @@ const Dialogs: React.FC<DialogProps> = ({ messages }) => {
                   : "bg-transparent text-gray-100"
               }`}
             >
-      <ReactMarkdown
-        remarkPlugins={[gfm as any]}
-        rehypePlugins={[raw as any]}
-        components={{
-          code: ({ node, className, children, ...props }) => {
-            const match = /language-(\w+)/.exec(className || "");
-            return match ? (
-              <CodeBlock
-                language={match[1]}
-                value={String(children).replace(/\n$/, "")}
-              />
-            ) : (
-              <code
-                className="bg-secondary-foreground text-secondary px-1 rounded-sm"
-                {...props}
+              <ReactMarkdown
+                remarkPlugins={[gfm as any]}
+                rehypePlugins={[raw as any]}
+                components={{
+                  code: ({ node, className, children, ...props }) => {
+                    const match = /language-(\w+)/.exec(className || "");
+                    return match ? (
+                      <CodeBlock
+                        language={match[1]}
+                        value={String(children).replace(/\n$/, "")}
+                      />
+                    ) : (
+                      <code
+                        className="bg-secondary-foreground text-secondary px-1 rounded-sm"
+                        {...props}
+                      >
+                        {children}
+                      </code>
+                    );
+                  },
+                  p: ({ node, ...props }) => (
+                    <p className="whitespace-pre-wrap" {...props} />
+                  ),
+                  ul: ({ node, ...props }) => (
+                    <ul className="-mt-1 list-disc space-y-2 pl-8" {...props} />
+                  ),
+                  ol: ({ node, ...props }) => (
+                    <ol
+                      className="-mt-1 list-decimal space-y-2 pl-8"
+                      {...props}
+                    />
+                  ),
+                  li: ({ node, ...props }) => (
+                    <li className="whitespace-normal break-words" {...props} />
+                  ),
+                }}
               >
-                {children}
-              </code>
-            );
-          },
-            p: ({ node, ...props }) => (
-            <p className="whitespace-pre-wrap" {...props} />
-            ),
-            ul: ({ node, ...props }) => (
-            <ul className="-mt-1 list-disc space-y-2 pl-8" {...props} />
-            ),
-            ol: ({ node, ...props }) => (
-            <ol className="-mt-1 list-decimal space-y-2 pl-8" {...props} />
-            ),
-            li: ({ node, ...props }) => (
-            <li className="whitespace-normal break-words" {...props} />
-            ),
-        }}
-      >
-        {m.prompt}
-      </ReactMarkdown>
+                {m.prompt}
+              </ReactMarkdown>
             </div>
           </div>
         ))}
@@ -70,4 +73,4 @@ const Dialogs: React.FC<DialogProps> = ({ messages }) => {
   );
 };
 
-export default Dialogs
+export default Dialogs;

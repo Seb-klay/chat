@@ -9,7 +9,6 @@ import {
 } from "../../service/index";
 import { IModelList } from "../../utils/listModels";
 import { useParams } from "next/navigation";
-import { MODELS } from "../../utils/listModels";
 import Dialog from "../../components/dialogs/dialogs";
 import DialogsSkeleton from "../../components/dialogs/dialogsSkeleton";
 import { sendChatMessage } from "@/app/service/aiService";
@@ -30,7 +29,7 @@ export default function ConversationPage() {
     userid: string;
     createdat: string;
     updatedat: string;
-    defaultModel: IModelList;
+    defaultmodel: IModelList;
   };
 
   useEffect(() => {
@@ -69,7 +68,7 @@ export default function ConversationPage() {
           throw new Error(err);
         });
         const newConversation: IConversation[] = await response?.json();
-        sendMessage(newConversation[0].title, newConversation[0].defaultModel);
+        sendMessage(newConversation[0].title, newConversation[0].defaultmodel);
       // otherwise just load the history
       } else {
         var messageHistory: IMessage[] = [];

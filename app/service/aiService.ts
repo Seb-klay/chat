@@ -13,22 +13,32 @@ type StreamCallbacks = {
 export const sendChatMessage = async (
   payload: IPayload,
   abortController: AbortController,
-  callbacks: StreamCallbacks,
+  callbacks: StreamCallbacks
 ) => {
   try {
+    // store user message
+    await storeMessage(payload).catch((err) => {
+      throw new Error(
+        `Error with status ${response?.status} while storing the message of the user. ` +
+          err
+      );
+    });
+
+    // send user input to AI model
     const response = await fetch(`/api/chat-messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       signal: abortController.signal,
+    }).catch((err) => {
+      throw new Error(
+        `Error with status ${response?.status} while sending message to the AI. ` +
+          err
+      );
     });
 
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-
     // Pass the stream to the handler
-    await handleStream(response, callbacks);
+    await handleStream(response, payload, callbacks);
   } catch (error: any) {
     if (error.name === "AbortError") {
       console.log("Fetch aborted by user");
@@ -40,9 +50,9 @@ export const sendChatMessage = async (
 
 const handleStream = async (
   response: Response,
+  payload: IPayload,
   { onData, onWrite, onCompleted, onError }: StreamCallbacks
 ) => {
-
   // AI stops thinking and starts writing message
   onWrite();
 
@@ -52,6 +62,7 @@ const handleStream = async (
   if (!reader) throw new Error("No reader available");
 
   let buffer = "";
+  let aiResponse = "";
 
   while (true) {
     const { done, value } = await reader.read();
@@ -75,10 +86,29 @@ const handleStream = async (
         const data: IAnswer = JSON.parse(trimmed);
 
         if (data.response) {
+          aiResponse += data.response;
           onData(data.response);
         }
 
         if (data.done === true) {
+          const assistantPlaceholder: IMessage = {
+            role: "assistant", // This ensures it uses the "Bot" styling/side
+            model: payload.messages.at(-1)!.model,
+            prompt: aiResponse,
+          };
+          // create payload
+          var payloadFromAI: IPayload = {
+            messages: [...payload.messages, assistantPlaceholder],
+            isStream: true,
+            conversationID: payload.conversationID,
+          };
+          // store user message
+          await storeMessage(payloadFromAI).catch((err) => {
+            throw new Error(
+              `Error with status ${response?.status} while storing the message of the user. ` +
+                err
+            );
+          });
           onCompleted();
           return;
         }
