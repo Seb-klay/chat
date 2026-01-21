@@ -1,17 +1,17 @@
-import { useRouter } from 'next/navigation'
+import { useRouter } from "next/navigation";
 import ChatInput from "../components/textInput/chatInput";
 import { createConversation, storeMessage } from "../service";
 import { IPayload, IMessage } from "../utils/chatUtils";
 import { IModelList } from "../utils/listModels";
-import { useState } from 'react';
+import { useState } from "react";
 //import sendMessage from "../conversation/[id]/page"
 
 export default function HomePage() {
   const router = useRouter();
-  const [isSending, setIsSending] = useState(false);
+  const [onAiThought, setOnAiThought] = useState(false);
 
   const postMessageToDB = async (payload: IPayload) => {
-    console.log(payload)
+    console.log(payload);
     const response = await storeMessage(payload);
 
     if (!response?.ok) {
@@ -20,52 +20,39 @@ export default function HomePage() {
     return response;
   };
 
-  const createAndRedirect = async (userInput: string, selectedModel: IModelList) => {
+  const createAndRedirect = async (
+    userInput: string,
+    selectedModel: IModelList
+  ) => {
     if (!userInput.trim()) return;
 
-    setIsSending(true);
+    setOnAiThought(true);
 
     // Set empty list of message
-    const newMessages: IMessage[] = [
-      { role: "user", model: selectedModel, prompt: userInput },
-    ];
+    // const newMessages: IMessage[] = [
+    //   { role: "user", model: selectedModel, prompt: userInput },
+    // ];
 
     try {
-      // Create new conversation
-      const response = await createConversation();
-
-      if (!response?.ok) {
-        throw new Error(
-          `Error with status ${response?.status} while creating a conversation. Try again please.`
-        );
-      }
+      // Create new conversation with input as title and default model
+      const response = await createConversation(userInput, selectedModel).catch(
+        (err) => {
+          throw new Error(
+            `Error with status ${response?.status} while creating a conversation.` + err
+          );
+        }
+      );
 
       const data = await response?.json();
-      const conversationId = data.rows[0].convid;
-
-      // create payload to send prompt to AI
-      const payload: IPayload = {
-        messages: newMessages,
-        isStream: true,
-        conversationID: conversationId,
-      };
-
-      // Store message in new conversation
-      const responseDB = await postMessageToDB(payload);
-
-      if (!responseDB.ok) {
-        throw new Error("Could not store user message. Try again please.");
-      }
-
-      // TODO : correct it and send directly to the main sendMessage function in converstation/page
-      //const res = sendMessage(userInput, selectedModel);
+      console.log(data);
+      const conversationId = data[0].convid;
 
       // Redirect to the new conversation
       router.push(`/conversation/${conversationId}`);
     } catch (err) {
       console.error("Error:", err);
     } finally {
-      setIsSending(false);
+      setOnAiThought(false);
     }
   };
 
@@ -99,9 +86,11 @@ export default function HomePage() {
         </p>
       </div>
 
-      <ChatInput 
-        isSending={isSending}
-        onSend={createAndRedirect} />
+      <ChatInput
+        onThought={onAiThought}
+        onChatbotWriting={false}
+        onSend={createAndRedirect}
+      />
     </div>
   );
 }

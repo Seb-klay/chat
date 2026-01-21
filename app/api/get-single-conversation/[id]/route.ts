@@ -8,8 +8,8 @@ import { getPool } from "../../../backend/database/utils/databaseUtils";
 
 // Create conversation
 export async function GET(
-  request: Request,
-  { params }: { params: Promise<{ id: string }> }
+    request: Request,
+  { params }: { params: { id: string } }
 ): Promise<NextResponse> {
   try {
     //const { userId } = await request.json();
@@ -27,11 +27,12 @@ export async function GET(
     const pool = getPool();
 
     const response = await pool.query(
-      `SELECT rolesender as role, model, textmessage as prompt
-       FROM messages 
-       WHERE convid = $1
-       ORDER BY createdat ASC`,
-      [id]
+      `SELECT title, defaultModel
+       FROM conversations 
+       WHERE userid = $1
+       AND convid = $2
+       AND isdeleted = false`,
+      [sessionUser, id]
     );
 
     return NextResponse.json(response.rows, { status: 200 });

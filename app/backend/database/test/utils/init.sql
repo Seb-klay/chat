@@ -15,6 +15,7 @@ CREATE TABLE Conversations
   createdAt TIMESTAMP NOT NULL,
   updatedAt TIMESTAMP,
   isDeleted BOOLEAN NOT NULL,
+  defaultModel TEXT,
   CONSTRAINT FK_UserConversation FOREIGN KEY (userID)
     REFERENCES Users(userID)
 );

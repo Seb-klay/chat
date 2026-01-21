@@ -6,16 +6,14 @@ import { SendButton } from "../buttons/sendButton";
 import { AbortButton } from "../buttons/abortButton";
 
 type ChatInputProps = {
-  isChatbotWriting?: boolean;
-  isSending?: boolean;
+  onThought: boolean;
+  onChatbotWriting: boolean;
   onAbort?: () => void;
   onSend: (message: string, model: IModelList) => void;
 };
 
-export default function ChatInput({ isChatbotWriting, onAbort, onSend }: ChatInputProps) {
+export default function ChatInput({ onThought, onChatbotWriting, onAbort, onSend }: ChatInputProps) {
   const [input, setInput] = useState("");
-  //const [loading, setLoading] = useState(false);
-  const [isSending, setIsSending] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [model, setModel] = useState<IModelList>({
     id: 1,
@@ -53,8 +51,6 @@ export default function ChatInput({ isChatbotWriting, onAbort, onSend }: ChatInp
   };
 
   const handleSend = () => {
-    //setLoading(false);
-    //setIsSending(false);
     onSend(input, model);
     setInput("");
   };
@@ -71,7 +67,7 @@ export default function ChatInput({ isChatbotWriting, onAbort, onSend }: ChatInp
           placeholder="Type your message here..."
           className="w-full p-4 pr-36 bg-gray-900 text-gray-100 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden overflow-y-scroll resize-none min-h-[30px] md:min-h-[60px]"
           rows={1}
-          disabled={isSending}
+          disabled={onChatbotWriting}
           style={{ height: "auto" }}
         />
 
@@ -85,17 +81,14 @@ export default function ChatInput({ isChatbotWriting, onAbort, onSend }: ChatInp
 
           {/* Send/Abort Button */}
           <div className="flex items-center gap-2">
-            {isChatbotWriting ? (
-              onAbort ? (
-                <AbortButton onClick={onAbort} />
-              ) : (
-                <LoadingButton />
-              )
-            ) : isSending ? (
-              <LoadingButton />
-            ) : (
-              <SendButton onClick={handleSend} disabled={!input.trim()} />
-            )}
+          {onChatbotWriting ? (
+            <AbortButton onClick={onAbort || (() => {})} />
+          ) : (
+            <SendButton 
+              onClick={handleSend} 
+              disabled={!input.trim() || onThought} 
+            />
+          )}
           </div>
         </div>
       </div>

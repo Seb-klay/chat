@@ -11,7 +11,7 @@ export async function POST(
   request: NextRequest
 ): Promise<NextResponse> {
   try {
-    //const { userId } = await request.json();
+    const { title, defaultModel } = await request.json();
     // get user id in cookie
     // const session = (await cookies()).get("session")?.value;
     // const sessionUser: JWTPayload | undefined = await decrypt(session);
@@ -19,16 +19,13 @@ export async function POST(
 
     const pool = getPool();
 
-    // call to AI to make summary (title) of conversation
-    // const title = 'summary AI'
-
     const response = await pool.query(
-      `INSERT INTO conversations (title, userid, createdat, updatedat, isDeleted) 
-        values ($1, $2, $3, $4, $5) 
-        RETURNING *`,
-      ['titre test which is really really long for test purpose', sessionUser, new Date(Date.now()), new Date(Date.now()), false]);
+      `INSERT INTO conversations (title, userid, createdat, updatedat, defaultModel, isDeleted) 
+        values ($1, $2, $3, $4, $5, $6) 
+        RETURNING convid`,
+      [ title, sessionUser, new Date(Date.now()), new Date(Date.now()), defaultModel, false]);
 
-    return NextResponse.json(response, { status: 200 });
+    return NextResponse.json(response.rows, { status: 200 });
 
   } catch (err) {
     return NextResponse.json(err, { status: 500 });

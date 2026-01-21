@@ -3,7 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import ChatInput from "../../components/textInput/chatInput";
 import { IMessage, IPayload } from "../../utils/chatUtils";
-import { getConversationHistory } from "../../service/index";
+import {
+  getConversationHistory,
+  getSingleConversations,
+} from "../../service/index";
 import { IModelList } from "../../utils/listModels";
 import { useParams } from "next/navigation";
 import { MODELS } from "../../utils/listModels";
@@ -13,11 +16,22 @@ import { sendChatMessage } from "@/app/service/aiService";
 
 export default function ConversationPage() {
   const params = useParams();
-  const conversationId = params.id as string;
-  const [messages, setMessages] = useState<IMessage[]>([]);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const [loadingConversation, setLoadingConversation] = useState(false);
-  const [isChatbotWriting, setisChatbotWriting] = useState(false);
+  const conversationId = params.id as string; // used to get the id in the URL
+  const [messages, setMessages] = useState<IMessage[]>([]); // list of messages history
+  const scrollRef = useRef<HTMLDivElement>(null); // used to go at the bottom of the page
+  const [loadingConversation, setLoadingConversation] = useState(false); // when conv is loading, activate skeleton page
+  const [onAiWriting, setOnAiWriting] = useState(false); // when AI is writing
+  const [onAiThought, setOnAiThought] = useState(false); // when AI "thinks" or waiting for the AI stream, it triggers the 3 waiting dots
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  type IConversation = {
+    convid: string;
+    title: string;
+    userid: string;
+    createdat: string;
+    updatedat: string;
+    defaultModel: IModelList;
+  };
 
   useEffect(() => {
     const container = scrollRef.current?.parentElement;
@@ -41,41 +55,48 @@ export default function ConversationPage() {
     loadConversationHistory(conversationId);
   }, [conversationId]);
 
+  // load history function
   const loadConversationHistory = async (id: string) => {
-    setLoadingConversation(true);
-    const loadHistory = await getConversationHistory(id);
-    if (!loadHistory?.ok) {
-      throw new Error(
-        "The conversation could not load. Refresh the page or create a new conversation."
-      );
-    }
-    const history = await loadHistory.json();
-
-    var messageHistory: IMessage[] = [];
-    for (let chat of history) {
-      const newMessage: IMessage = {
-        role: chat.rolesender,
-        model: chat.model,
-        prompt: chat.textmessage,
-      };
-      messageHistory.push(newMessage);
-    }
-    setMessages(messageHistory);
-    setLoadingConversation(false);
-
-    // if first message send message manually to function
-    if (messageHistory.length === 1) {
-      console.log("--------------------------");
-      console.log(messageHistory[0]);
-      const modelId = messageHistory[0].model.id;
-      const model = MODELS[modelId];
-      await sendMessage(messageHistory[0].prompt, model);
+    try {
+      setLoadingConversation(true);
+      const loadHistory = await getConversationHistory(id).catch((err) => {
+        throw new Error("The user history could not load. " + err);
+      });
+      const history: IMessage[] = await loadHistory?.json();
+      // in case of a new conversation
+      if (history.length === 0) {
+        const response = await getSingleConversations(id).catch((err) => {
+          throw new Error(err);
+        });
+        const newConversation: IConversation[] = await response?.json();
+        sendMessage(newConversation[0].title, newConversation[0].defaultModel);
+      // otherwise just load the history
+      } else {
+        var messageHistory: IMessage[] = [];
+        for (let chat of history) {
+          console.log("watch out the updates !");
+          console.log(chat);
+          const newMessage: IMessage = {
+            role: chat.role,
+            model: chat.model,
+            prompt: chat.prompt,
+          };
+          messageHistory.push(newMessage);
+        }
+        setMessages(messageHistory);
+      }
+      setLoadingConversation(false);
+    } catch (error) {
+      console.error(error);
     }
   };
 
   const handleAbort = () => {
-    //setLoading(false);
-    //setIsSending(false);
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+      abortControllerRef.current = null;
+      setOnAiWriting(false);
+    }
   };
 
   const sendMessage = async (userInput: string, selectedModel: IModelList) => {
@@ -93,36 +114,51 @@ export default function ConversationPage() {
     // store USER message in history
     setMessages((prev) => [...prev, messageFromUser, assistantPlaceholder]);
 
+    // create the controller when the user wants to abort the message generation
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
+
     try {
       // create payload
       var payloadFromUser: IPayload = {
-        messages: messages,
+        messages: [...messages, messageFromUser],
         isStream: true,
         conversationID: conversationId,
       };
-      setisChatbotWriting(true);
+      setOnAiThought(true);
 
-      const response = await sendChatMessage(payloadFromUser, {
-        onData: (chunk: string) => {
-          setMessages((prev) => {
-            const last = prev[prev.length - 1];
-            const updated = { ...last, prompt: last.prompt + chunk };
-            return [...prev.slice(0, -1), updated];
-          });
-        },
+      await sendChatMessage(
+        payloadFromUser,
+        // pass the controller when message is aborting
+        controller,
+        {
+          onData: (chunk: string) => {
+            setMessages((prev) => {
+              const last = prev[prev.length - 1];
+              const updated = { ...last, prompt: last.prompt + chunk };
+              return [...prev.slice(0, -1), updated];
+            });
+          },
 
-        // Handle errors (e.g., show a toast notification)
-        onError: (err) => {
-          console.error("Stream failed:", err);
-        },
+          // Handle errors
+          onError: (err) => {
+            setOnAiThought(false);
+            setOnAiWriting(false);
+            console.error("Stream failed:", err);
+          },
 
-        // Finalize the message (e.g., replace temp ID with DB ID)
-        onCompleted: () => {
-          setisChatbotWriting(false);
-        },
-      });
+          onWrite: () => {
+            setOnAiThought(false);
+            setOnAiWriting(true);
+          },
+
+          // Finalize the message
+          onCompleted: () => {
+            setOnAiWriting(false);
+          },
+        }
+      );
     } catch (err) {
-      setisChatbotWriting(false);
       console.error(err);
     }
   };
@@ -139,14 +175,15 @@ export default function ConversationPage() {
           ) : (
             <>
               <Dialog messages={messages} />
-              {isChatbotWriting && (
-                <div className="flex space-x-2">
-                  <div className="dot text-gray-100 w-2 h-2 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-                  <div className="dot text-gray-100 w-2 h-2 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-                  <div className="dot text-gray-100 w-2 h-2 rounded-full animate-bounce"></div>
-                </div>
-              )}
             </>
+          )}
+
+          {onAiThought && (
+            <div className="flex space-x-2 mb-6">
+              <div className="dot bg-gray-100 w-2 h-2 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+              <div className="dot bg-gray-100 w-2 h-2 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+              <div className="dot bg-gray-100 w-2 h-2 rounded-full animate-bounce"></div>
+            </div>
           )}
 
           {/* Anchor */}
@@ -158,7 +195,8 @@ export default function ConversationPage() {
       <div className="w-full md:w-1/2 mx-auto bg-slate-950 sticky bottom-0">
         <div className="bg-transparent rounded-lg">
           <ChatInput
-            isChatbotWriting={isChatbotWriting}
+            onThought={onAiThought}
+            onChatbotWriting={onAiWriting}
             onAbort={handleAbort}
             onSend={sendMessage}
           />

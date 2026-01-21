@@ -1,4 +1,5 @@
 import { IPayload } from "../utils/chatUtils";
+import { IModelList } from "../utils/listModels";
 import { IUser } from "../utils/userUtils";
 const URL: string = process.env.FULL_URL || "";
 
@@ -21,10 +22,16 @@ const URL: string = process.env.FULL_URL || "";
 // };
 
 // conversation services that creates the conversation to /api/conversation API
-export const createConversation = async (): Promise<Response | null> => {
+export const createConversation = async (title: string, defaultModel: IModelList): Promise<Response | null> => {
   return await fetch(`${URL}/api/conversation`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title : title,
+        defaultModel: defaultModel,
+      }),
+    }).catch((err) => {
+    throw new Error(err);
   });
 };
 
@@ -49,6 +56,15 @@ export const getUserConversations = async () => {
 });
 };
 
+export const getSingleConversations = async (conversationID: string) => {
+  return await fetch(`${URL}/api/get-single-conversation/${conversationID}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" }
+  }).catch((err) => {
+  throw new Error(err);
+});
+};
+
 // message services that send the message to /api/message API
 export const storeMessage = async (payload: IPayload | null): Promise<Response | null> => {
   console.log(payload)
@@ -64,8 +80,8 @@ export const storeMessage = async (payload: IPayload | null): Promise<Response |
   });
 };
 
-export const getConversationHistory = async (conversationId: string): Promise<Response | null> => {
-  return await fetch(`${URL}/api/get-history/${conversationId}`, {
+export const getConversationHistory = async (conversationID: string): Promise<Response | null> => {
+  return await fetch(`${URL}/api/get-history/${conversationID}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" }
   }).catch((err) => {
