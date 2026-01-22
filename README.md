@@ -77,9 +77,9 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Finish function "create conversation"
 - [x] Create feature (sidebar) to choose the conversation on the interface
 - [ ] Update interface (general UI : headers, conversation section, selection button, etc.)
-- [ ] Add function abort message
-- [ ] Create page "forgot password"
-- [ ] Add modify email
+- [x] Add function abort message
+- [x] Create page "forgot password"
+- [x] Add delete account
 - [ ] Add user settings to the UI and DB
 - [ ] Error handling
 - [ ] Handle logs using promtail and loki (grafana)

@@ -27,7 +27,7 @@ export async function GET(
     const pool = getPool();
 
     const response = await pool.query(
-      `SELECT title, defaultModel
+      `SELECT convid, title, defaultModel, createdat, updatedat
        FROM conversations 
        WHERE userid = $1
        AND convid = $2

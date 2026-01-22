@@ -31,29 +31,37 @@ export interface IAnswer {
 export const summaryConversationAndUpdate = async (
   newConversation: IConversation
 ) => {
-  const titleToSummarize = "Summarize this text in 6 words : " + newConversation.title;
+  const titleToSummarize =
+    "Summarize this text in 6 words : " + newConversation.title;
 
-  const response = await summaryConversation(titleToSummarize, newConversation.defaultmodel).catch((err) => {
-    throw new Error("Could not generate new title of conversation. " + err);
-  });
+  // const response = await summaryConversation(titleToSummarize, newConversation.defaultmodel).catch((err) => {
+  //   throw new Error("Could not generate new title of conversation. " + err);
+  // });
 
-  const newTitle = await response.json();
+  // const newTitle = await response.json();
+  const newTitle = "--- Test title written by me ---";
 
-  await updateTitleConversation(newConversation.convid, newTitle).catch((err) => {
+  const response = await updateTitleConversation(
+    newConversation.convid,
+    newTitle
+  ).catch((err) => {
     throw new Error("Could not update new title of conversation. " + err);
   });
 
-    // add event emitter
-    const updatedConversation = { 
-    ...newConversation, 
-    title: newTitle 
+  if (!response) throw new Error("Could not store AI generated title.");
+
+  // add event emitter
+  const updatedConversation = {
+    ...newConversation,
+    title: newTitle,
   };
-  const event = new CustomEvent('chat-created', { detail: updatedConversation });
+  const event = new CustomEvent("chat-created", {
+    detail: updatedConversation,
+  });
   window.dispatchEvent(event);
 
   return updatedConversation;
 };
-
 
 // ----- full example of end answer for analytics purposes later -----
 // {
@@ -81,7 +89,7 @@ export const summaryConversationAndUpdate = async (
 //   eval_count: 9,                       The AI's response ("Discussing love is my current desire.") was 9 tokens long.
 //   eval_duration: 2568946048            The actual time spent generating the words in the response.
 
-// ----- infos for billing. ----- 
+// ----- infos for billing. -----
 // user_id: To track which user is consuming your budget.
 // prompt_tokens (prompt_eval_count): The "input" cost.
 // completion_tokens (eval_count): The "output" cost (usually more expensive in paid APIs).
@@ -91,7 +99,7 @@ export const summaryConversationAndUpdate = async (
 // ----- perfs and analytics data -----
 // total_duration: Total round-trip time (ms).
 // eval_duration: Actual generation time.
-// tokens_per_second: Calculate this before saving: eval_count/(eval_duration/10 
+// tokens_per_second: Calculate this before saving: eval_count/(eval_duration/10
 // 9
 //  ).
 // timestamp: To track usage over time (daily/monthly).

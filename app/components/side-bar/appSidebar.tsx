@@ -7,7 +7,7 @@ import {
   getUserConversations,
   updateTitleConversation,
 } from "@/app/service";
-import { usePathname, useParams } from "next/navigation";
+import { useParams } from "next/navigation";
 import ConversationsUser from "./conversationsUser";
 import { ConfirmationCardDelete } from "../cards/confirmationDeleteConvCard";
 import { ConfirmationCardRename } from "../cards/confirmationRenameConvCard";
@@ -25,8 +25,8 @@ export default function ConversationSidebar() {
   const [isCollapsed, setIsCollapsed] = useState(true);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [loading, setLoading] = useState(true);
-  const pathname = usePathname();
-  const currentConversationId = pathname.split("/").pop();
+  const params = useParams();
+  const currentConversationId = params.id;
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [renamingConversationId, setRenamingConversationId] = useState<
     string | null
@@ -36,7 +36,6 @@ export default function ConversationSidebar() {
   >(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
   const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
-  const params = useParams();
 
   useEffect(() => {
     fetchConversations();
@@ -56,19 +55,20 @@ export default function ConversationSidebar() {
   };
 
   // When conversation is created with a generated title, it triggers this reload of the list
-useEffect(() => {
-  const handleNewConvEvent = (event: any) => {
-    const newChat: IConversation = event.detail;
-    // Update state directly so it appears in the list instantly
-    setConversations((prev: any) => {
-      // Prevent duplicates if already exists
-      if (prev.some((c: { convid: string; }) => c.convid === newChat.convid)) return prev;
-      return [newChat, ...prev];
-    });
-  };
-  window.addEventListener('chat-created', handleNewConvEvent);
-  return () => window.removeEventListener('chat-created', handleNewConvEvent);
-}, []);
+  useEffect(() => {
+    const handleNewConvEvent = (event: any) => {
+      const newChat: IConversation = event.detail;
+      // Update state directly so it appears in the list instantly
+      setConversations((prev: any) => {
+        // Prevent duplicates if already exists
+        if (prev.some((c: { convid: string }) => c.convid === newChat.convid))
+          return prev;
+        return [newChat, ...prev];
+      });
+    };
+    window.addEventListener("chat-created", handleNewConvEvent);
+    return () => window.removeEventListener("chat-created", handleNewConvEvent);
+  }, []);
 
   const handleRename = async (newTitle: string | undefined) => {
     if (!newTitle) throw new Error("No title was found");
@@ -82,6 +82,7 @@ useEffect(() => {
         throw new Error(
           `New title could not be stored with status ${response?.status}.`
         );
+      console.log(renamingConversationId);
       setConversations((prev) =>
         prev.map((conv) =>
           conv.convid === renamingConversationId
@@ -129,6 +130,10 @@ useEffect(() => {
       return "Last week";
     }
 
+    if (diffDays < 30) {
+      return "Last month";
+    }
+
     if (date.getFullYear() === now.getFullYear()) {
       // Month name (December, November, ...)
       return date.toLocaleString("default", { month: "long" });
@@ -137,23 +142,23 @@ useEffect(() => {
     return String(date.getFullYear());
   }
 
-const groupedConversations = useMemo(() => {
-  return conversations.reduce<Record<string, Conversation[]>>(
-    (groups, conv) => {
-      const dateToUse = conv.updatedat ?? conv.createdat;
-      const group = getDateGroup(dateToUse);
+  const groupedConversations = useMemo(() => {
+    return conversations.reduce<Record<string, Conversation[]>>(
+      (groups, conv) => {
+        const dateToUse = conv.updatedat ?? conv.createdat;
+        const group = getDateGroup(dateToUse);
 
-      if (!groups[group]) {
-        groups[group] = [];
-      }
+        if (!groups[group]) {
+          groups[group] = [];
+        }
 
-      groups[group].push(conv);
+        groups[group].push(conv);
 
-      return groups;
-    },
-    {}
-  );
-}, [conversations]);
+        return groups;
+      },
+      {}
+    );
+  }, [conversations]);
 
   return (
     <>
@@ -191,10 +196,14 @@ const groupedConversations = useMemo(() => {
         `}
       >
         {/* Header Section - Always visible */}
-        <div className="p-4 border-b border-gray-800">
-          <div className="flex items-center justify-between mb-4  ml-15 mt-2 md:ml-2">
+        <div className="p-2 border-b border-gray-800">
+          <div
+            className={`flex justify-between my-4 ${
+              isCollapsed ? "flex-col items-center" : ""
+            }`}
+          >
             {!isCollapsed && (
-              <h2 className="text-lg font-semibold text-gray-100">
+              <h2 className="text-lg font-semibold text-gray-100 my-auto">
                 Conversations
               </h2>
             )}
@@ -202,7 +211,9 @@ const groupedConversations = useMemo(() => {
             {/* Collapse button - top right */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className="p-1.5 rounded hover:bg-gray-800 text-gray-400 hover:text-gray-100 hidden md:block"
+              className={`p-2 rounded hover:bg-gray-800 text-gray-400 hover:text-gray-100 hidden md:block ${
+                isCollapsed ? "justify-center" : "justify-end"
+              }`}
               title={isCollapsed ? "Expand" : "Collapse"}
             >
               <svg
@@ -283,7 +294,7 @@ const groupedConversations = useMemo(() => {
             <Link
               href="/"
               className={`
-                flex items-center p-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-gray-100
+                flex items-center p-2 rounded-lg duration-500 ease-in-out bg-gradient-to-br from-indigo-500 to-indigo-800 hover:to-violet-900 text-gray-100
                 ${
                   isCollapsed
                     ? "justify-center items-center hidden md:block md:mx-auto"
@@ -326,9 +337,20 @@ const groupedConversations = useMemo(() => {
                 No conversations yet
               </div>
             ) : (
-              <div className="py-2">
-                {Object.entries(groupedConversations).map(
-                  ([groupName, convs]) => {
+              <div className="py-1 px-1">
+                {Object.entries(groupedConversations)
+                  // sort conversation from most recent to oldest
+                  .sort(([, convsA], [, convsB]) => {
+                    const getTime = (convs: Conversation[]) =>
+                      Math.max(
+                        ...convs.map((c) =>
+                          new Date(c.updatedat ?? c.createdat).getTime()
+                        )
+                      );
+                    // Sort descending (newest groups first)
+                    return getTime(convsB) - getTime(convsA);
+                  })
+                  .map(([groupName, convs]) => {
                     return (
                       <div key={groupName}>
                         {/* Section Header */}
@@ -336,13 +358,14 @@ const groupedConversations = useMemo(() => {
                           {groupName}
                         </div>
 
-                        {convs.map((conv, index) => {
+                        {convs.map((conv) => {
                           return (
                             <div
-                              key={index}
-                              className={`group relative px-4 transition-colors border-l-2 rounded-lg overflow-x-hidden ${
-                                currentConversationId === conv.convid
-                                  ? "border-red-500 bg-gradient-to-r from-blue-900/40 to-blue-800/20 text-gray-100 font-medium shadow-inner hover:from-blue-900/50 hover:to-blue-800/30"
+                              key={conv.convid}
+                              className={`group relative px-2 transition-colors rounded-lg overflow-x-hidden ${
+                                String(currentConversationId) ===
+                                String(conv.convid)
+                                  ? "bg-gradient-to-br from-slate-600 to-slate-800 text-gray-100 font-medium shadow-inner hover:from-blue-900/50 hover:to-blue-800/30"
                                   : "border-transparent text-gray-300 hover:bg-gray-800"
                               }`}
                             >
@@ -387,8 +410,7 @@ const groupedConversations = useMemo(() => {
                         )}
                       </div>
                     );
-                  }
-                )}
+                  })}
               </div>
             )}
           </div>

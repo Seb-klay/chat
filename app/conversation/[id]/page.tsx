@@ -6,7 +6,6 @@ import { IMessage, IPayload, summaryConversationAndUpdate } from "../../utils/ch
 import {
   getConversationHistory,
   getSingleConversations,
-  updateTitleConversation,
 } from "../../service/index";
 import { IModelList } from "../../utils/listModels";
 import { useParams } from "next/navigation";
@@ -50,12 +49,6 @@ export default function ConversationPage() {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   };
 
-  const renameGeneratedConversation = async (conversation: IConversation) => {
-    await summaryConversationAndUpdate(conversation).catch((err) => {
-      throw new Error("The conversation could not be renamed. " + err);
-    })
-  }
-
   useEffect(() => {
     if (!conversationId) return;
     loadConversationHistory(conversationId);
@@ -75,9 +68,9 @@ export default function ConversationPage() {
           throw new Error(err);
         });
         const newConversation: IConversation[] = await response?.json();
-        sendMessage(newConversation[0].title, newConversation[0].defaultmodel);
+        await sendMessage(newConversation[0].title, newConversation[0].defaultmodel);
         // rename conversation
-        renameGeneratedConversation(newConversation[0]);
+        await summaryConversationAndUpdate(newConversation[0]);
       // otherwise just load the history
       } else {
         var messageHistory: IMessage[] = [];
