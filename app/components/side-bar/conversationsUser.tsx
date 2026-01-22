@@ -3,13 +3,16 @@ import { ConversationDropdown } from "./conversationDropdown";
 import { Conversation } from "./appSidebar";
 
 type Props = {
-  conversation: Conversation
+  conversation: Conversation;
   isActive: boolean;
-  anchorRect: DOMRect | null
+  anchorRect: DOMRect | null;
   setMenuRect: React.Dispatch<React.SetStateAction<DOMRect | null>>;
-  setDeletingConversationId: React.Dispatch<React.SetStateAction<string | null>>;
-  setRenamingConversationId: React.Dispatch<React.SetStateAction<string | null>>;
-  setNewTitle: React.Dispatch<React.SetStateAction<string>>;
+  setDeletingConversationId: React.Dispatch<
+    React.SetStateAction<string | null>
+  >;
+  setRenamingConversationId: React.Dispatch<
+    React.SetStateAction<string | null>
+  >;
   setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
@@ -20,17 +23,17 @@ export default function ConversationsUser({
   setMenuRect,
   setDeletingConversationId,
   setRenamingConversationId,
-  setNewTitle,
-  setActiveMenu
+  setActiveMenu,
 }: Props) {
   if (!conversation) return null;
 
   const { convid, title, createdat, updatedat, messageCount } = conversation;
 
-    const openMenu = (
+  const openMenu = (
     conversationId: string,
     e: React.MouseEvent<HTMLButtonElement>
   ) => {
+    e.preventDefault();
     e.stopPropagation();
 
     const rect = e.currentTarget.getBoundingClientRect();
@@ -40,14 +43,13 @@ export default function ConversationsUser({
     );
   };
 
-
   return (
     <>
       <Link href={`/conversation/${convid}`} className="block rounded-lg py-3">
         <div className="flex justify-between items-start">
           <div className="flex-1 min-w-0 pr-8">
             <h3 className="text-gray-100 font-medium truncate">
-              {title || "Untitled"}
+              { title }
             </h3>
           </div>
         </div>
@@ -57,8 +59,6 @@ export default function ConversationsUser({
       <div className="absolute right-2 top-1/2 transform -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
             openMenu(convid, e);
           }}
           className="p-1.5 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded"
@@ -77,7 +77,6 @@ export default function ConversationsUser({
           conv={conversation}
           setDeletingConversationId={setDeletingConversationId}
           setRenamingConversationId={setRenamingConversationId}
-          setNewTitle={setNewTitle}
           setActiveMenu={setActiveMenu}
         />
       )}

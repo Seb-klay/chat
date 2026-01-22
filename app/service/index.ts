@@ -3,25 +3,6 @@ import { IModelList } from "../utils/listModels";
 import { IUser } from "../utils/userUtils";
 const URL: string = process.env.FULL_URL || "";
 
-// message services that send the message to /api/chat API
-// export const sendMessageToAI = async (payload: IPayload | null) => {
-//   console.log(payload)
-//   // send prompt to AI assistant
-//   return await fetch(`${URL}/api/chat-messages`, {
-//     method: "POST",
-//     headers: { "Content-Type": "application/json" },
-//     body: JSON.stringify(payload),
-//   }).catch((err) => {
-//     throw new Error(err);
-//   });
-// };
-
-// TODO create abort message function
-// export const abortMessage = async (): Promise<Response | null> => {
-//   return null;
-// };
-
-// conversation services that creates the conversation to /api/conversation API
 export const createConversation = async (title: string, defaultModel: IModelList): Promise<Response | null> => {
   return await fetch(`${URL}/api/conversation`, {
     method: "POST",
@@ -65,9 +46,37 @@ export const getSingleConversations = async (conversationID: string) => {
 });
 };
 
+export const updateTitleConversation = async (conversationID: string | null, newTitle: string) => {
+  if (!conversationID) return; 
+  return await fetch(`${URL}/api/update-title-conversation`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      id : conversationID,
+      newTitle: newTitle,
+    }),
+  }).catch((err) => {
+  throw new Error(err);
+});
+};
+
+export const summaryConversation = async (userInput: string, model: IModelList) => {
+  const titleToSummarize = "Summarize this text in 6 words : " + userInput;
+
+    return await fetch(`${URL}/api/generate-title`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        titleToSummarize: titleToSummarize,
+        model: model,
+      }),
+    }).catch((err) => {
+    throw new Error(err);
+  });
+}
+
 // message services that send the message to /api/message API
 export const storeMessage = async (payload: IPayload | null): Promise<Response | null> => {
-  console.log(payload)
   return await fetch(`${URL}/api/message`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -153,7 +162,7 @@ export const verifySignupCode = async (
 
 export const updatePasswordUser = async (newPassword: string): Promise<Response | null> => {
   return await fetch(`${URL}/api/update-password`, {
-    method: "UPDATE",
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(newPassword),
   });

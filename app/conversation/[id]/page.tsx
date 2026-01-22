@@ -2,16 +2,26 @@
 
 import { useEffect, useRef, useState } from "react";
 import ChatInput from "../../components/textInput/chatInput";
-import { IMessage, IPayload } from "../../utils/chatUtils";
+import { IMessage, IPayload, summaryConversationAndUpdate } from "../../utils/chatUtils";
 import {
   getConversationHistory,
   getSingleConversations,
+  updateTitleConversation,
 } from "../../service/index";
 import { IModelList } from "../../utils/listModels";
 import { useParams } from "next/navigation";
 import Dialog from "../../components/dialogs/dialogs";
 import DialogsSkeleton from "../../components/dialogs/dialogsSkeleton";
 import { sendChatMessage } from "@/app/service/aiService";
+
+  export type IConversation = {
+    convid: string;
+    title: string;
+    userid: string;
+    createdat: string;
+    updatedat: string;
+    defaultmodel: IModelList;
+  };
 
 export default function ConversationPage() {
   const params = useParams();
@@ -22,15 +32,6 @@ export default function ConversationPage() {
   const [onAiWriting, setOnAiWriting] = useState(false); // when AI is writing
   const [onAiThought, setOnAiThought] = useState(false); // when AI "thinks" or waiting for the AI stream, it triggers the 3 waiting dots
   const abortControllerRef = useRef<AbortController | null>(null);
-
-  type IConversation = {
-    convid: string;
-    title: string;
-    userid: string;
-    createdat: string;
-    updatedat: string;
-    defaultmodel: IModelList;
-  };
 
   useEffect(() => {
     const container = scrollRef.current?.parentElement;
@@ -48,6 +49,12 @@ export default function ConversationPage() {
   const scrollToBottom = () => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  const renameGeneratedConversation = async (conversation: IConversation) => {
+    await summaryConversationAndUpdate(conversation).catch((err) => {
+      throw new Error("The conversation could not be renamed. " + err);
+    })
+  }
 
   useEffect(() => {
     if (!conversationId) return;
@@ -69,12 +76,12 @@ export default function ConversationPage() {
         });
         const newConversation: IConversation[] = await response?.json();
         sendMessage(newConversation[0].title, newConversation[0].defaultmodel);
+        // rename conversation
+        renameGeneratedConversation(newConversation[0]);
       // otherwise just load the history
       } else {
         var messageHistory: IMessage[] = [];
         for (let chat of history) {
-          console.log("watch out the updates !");
-          console.log(chat);
           const newMessage: IMessage = {
             role: chat.role,
             model: chat.model,

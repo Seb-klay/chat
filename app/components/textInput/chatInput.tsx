@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { IModelList } from "../../utils/listModels";
 import ChooseAiModel from "../buttons/buttonAiModel";
-import { LoadingButton } from "../buttons/loadingButton";
 import { SendButton } from "../buttons/sendButton";
 import { AbortButton } from "../buttons/abortButton";
 

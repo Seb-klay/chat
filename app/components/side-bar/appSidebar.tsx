@@ -1,11 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { deleteConversation, getUserConversations } from "@/app/service";
+import {
+  deleteConversation,
+  getUserConversations,
+  updateTitleConversation,
+} from "@/app/service";
 import { usePathname, useParams } from "next/navigation";
 import ConversationsUser from "./conversationsUser";
 import { ConfirmationCardDelete } from "../cards/confirmationDeleteConvCard";
+import { ConfirmationCardRename } from "../cards/confirmationRenameConvCard";
+import { IConversation } from "@/app/conversation/[id]/page";
 
 export interface Conversation {
   convid: string;
@@ -29,8 +35,6 @@ export default function ConversationSidebar() {
     string | null
   >(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
-
-  const [newTitle, setNewTitle] = useState("");
   const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
   const params = useParams();
 
@@ -51,7 +55,45 @@ export default function ConversationSidebar() {
     }
   };
 
-  const handleRename = async () => {};
+  // When conversation is created with a generated title, it triggers this reload of the list
+useEffect(() => {
+  const handleNewConvEvent = (event: any) => {
+    const newChat: IConversation = event.detail;
+    // Update state directly so it appears in the list instantly
+    setConversations((prev: any) => {
+      // Prevent duplicates if already exists
+      if (prev.some((c: { convid: string; }) => c.convid === newChat.convid)) return prev;
+      return [newChat, ...prev];
+    });
+  };
+  window.addEventListener('chat-created', handleNewConvEvent);
+  return () => window.removeEventListener('chat-created', handleNewConvEvent);
+}, []);
+
+  const handleRename = async (newTitle: string | undefined) => {
+    if (!newTitle) throw new Error("No title was found");
+
+    try {
+      const response = await updateTitleConversation(
+        renamingConversationId,
+        newTitle
+      );
+      if (!response?.ok)
+        throw new Error(
+          `New title could not be stored with status ${response?.status}.`
+        );
+      setConversations((prev) =>
+        prev.map((conv) =>
+          conv.convid === renamingConversationId
+            ? { ...conv, title: newTitle }
+            : conv
+        )
+      );
+      setRenamingConversationId(null);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleDeleteConversation = async () => {
     if (deletingConversationId) {
@@ -59,9 +101,7 @@ export default function ConversationSidebar() {
       const response = await deleteConversation(deletingConversationId);
 
       if (!response.ok) {
-        setDeleteError(
-          "The conversation could not be deleted."
-        );
+        setDeleteError("The conversation could not be deleted.");
       } else {
         fetchConversations();
         setDeletingConversationId(null);
@@ -97,19 +137,23 @@ export default function ConversationSidebar() {
     return String(date.getFullYear());
   }
 
-  const groupedConversations = conversations.reduce<
-    Record<string, typeof conversations>
-  >((groups, conv) => {
-    const dateToUse = conv.updatedat ?? conv.createdat;
-    const group = getDateGroup(dateToUse);
+const groupedConversations = useMemo(() => {
+  return conversations.reduce<Record<string, Conversation[]>>(
+    (groups, conv) => {
+      const dateToUse = conv.updatedat ?? conv.createdat;
+      const group = getDateGroup(dateToUse);
 
-    if (!groups[group]) {
-      groups[group] = [];
-    }
+      if (!groups[group]) {
+        groups[group] = [];
+      }
 
-    groups[group].push(conv);
-    return groups;
-  }, {});
+      groups[group].push(conv);
+
+      return groups;
+    },
+    {}
+  );
+}, [conversations]);
 
   return (
     <>
@@ -292,10 +336,10 @@ export default function ConversationSidebar() {
                           {groupName}
                         </div>
 
-                        {convs.map((conv) => {
+                        {convs.map((conv, index) => {
                           return (
                             <div
-                              key={conv.convid}
+                              key={index}
                               className={`group relative px-4 transition-colors border-l-2 rounded-lg overflow-x-hidden ${
                                 currentConversationId === conv.convid
                                   ? "border-red-500 bg-gradient-to-r from-blue-900/40 to-blue-800/20 text-gray-100 font-medium shadow-inner hover:from-blue-900/50 hover:to-blue-800/30"
@@ -313,7 +357,6 @@ export default function ConversationSidebar() {
                                 setRenamingConversationId={
                                   setRenamingConversationId
                                 }
-                                setNewTitle={setNewTitle}
                                 setActiveMenu={setActiveMenu}
                               />
                             </div>
@@ -322,10 +365,24 @@ export default function ConversationSidebar() {
                         {/* Delete confirmation card */}
                         {deletingConversationId && (
                           <ConfirmationCardDelete
-                            error={ deleteError }
-                            setDeletingConversationId={setDeletingConversationId}
+                            error={deleteError}
+                            setDeletingConversationId={
+                              setDeletingConversationId
+                            }
                             setDeleteError={setDeleteError}
                             handleDelete={handleDeleteConversation}
+                          />
+                        )}
+
+                        {/* Rename confirmation card */}
+                        {renamingConversationId && (
+                          <ConfirmationCardRename
+                            error={deleteError}
+                            setRenamingConversationId={
+                              setRenamingConversationId
+                            }
+                            setDeleteError={setDeleteError}
+                            handleRename={handleRename}
                           />
                         )}
                       </div>

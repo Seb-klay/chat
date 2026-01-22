@@ -1,7 +1,6 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-import { IAnswer } from "../../utils/chatUtils";
 import { MODELS } from "../../utils/listModels"
 
 // export async function POST(

@@ -102,7 +102,7 @@ const handleStream = async (
             isStream: true,
             conversationID: payload.conversationID,
           };
-          // store user message
+          // store AI message
           await storeMessage(payloadFromAI).catch((err) => {
             throw new Error(
               `Error with status ${response?.status} while storing the message of the user. ` +
