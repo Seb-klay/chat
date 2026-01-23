@@ -26,9 +26,9 @@ export async function PUT(
 
     const response = await pool.query(
       `UPDATE conversations
-        SET title = $1
-        WHERE convid = $2`,
-      [newTitle, id]
+        SET title = $1, updatedat = $2
+        WHERE convid = $3`,
+      [newTitle, new Date(Date.now()), id]
     );
     console.log(response);
 

@@ -1,31 +1,20 @@
 import Link from "next/link";
 import { ConversationDropdown } from "./conversationDropdown";
-import { Conversation } from "./appSidebar";
-import React from "react";
+import { ConfirmationAction, ConfirmationState, Conversation } from "./appSidebar";
+import React, { useState } from "react";
 
 type Props = {
   conversation: Conversation;
-  isActive: boolean;
-  anchorRect: DOMRect | null;
-  setMenuRect: React.Dispatch<React.SetStateAction<DOMRect | null>>;
-  setDeletingConversationId: React.Dispatch<
-    React.SetStateAction<string | null>
-  >;
-  setRenamingConversationId: React.Dispatch<
-    React.SetStateAction<string | null>
-  >;
-  setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
+  onOption: (state: ConfirmationState | null) => void;
 };
 
 export default function ConversationsUser({
   conversation,
-  isActive,
-  anchorRect,
-  setMenuRect,
-  setDeletingConversationId,
-  setRenamingConversationId,
-  setActiveMenu,
+  onOption
 }: Props) {
+  const [activeMenu, setActiveMenu] = useState<string | null>(null);
+  const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
+
   if (!conversation) return null;
 
   const { convid, title, createdat, updatedat, messageCount } = conversation;
@@ -73,12 +62,11 @@ export default function ConversationsUser({
         </div>
 
         {/* Dropdown Menu */}
-        {isActive && (
+        {activeMenu === convid && (
           <ConversationDropdown
-            anchorRect={anchorRect}
+            anchorRect={menuRect}
             conv={conversation}
-            setDeletingConversationId={setDeletingConversationId}
-            setRenamingConversationId={setRenamingConversationId}
+            onOption={onOption}
             setActiveMenu={setActiveMenu}
           />
         )}

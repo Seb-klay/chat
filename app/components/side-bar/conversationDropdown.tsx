@@ -1,26 +1,35 @@
 "use client";
 
 import { createPortal } from "react-dom";
-import { Conversation } from "./appSidebar"
+import { ConfirmationAction, ConfirmationState, Conversation } from "./appSidebar";
 import { useState } from "react";
 
 type Props = {
   anchorRect: DOMRect | null;
   conv: Conversation;
-  setDeletingConversationId: React.Dispatch<React.SetStateAction<string | null>>;
-  setRenamingConversationId: React.Dispatch<React.SetStateAction<string | null>>;
+  onOption: (state: ConfirmationState | null) => void;
   setActiveMenu: React.Dispatch<React.SetStateAction<string | null>>;
 };
 
 export function ConversationDropdown({
   anchorRect,
   conv,
-  setDeletingConversationId,
-  setRenamingConversationId,
+  onOption,
   setActiveMenu,
 }: Props) {
   if (!anchorRect) return null;
   const { top, right } = anchorRect;
+
+  const sendAction = (
+    e: React.MouseEvent<HTMLButtonElement>,
+    action: ConfirmationAction,
+    conversationId: string,
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onOption({action, conversationId});
+    setActiveMenu(null);
+  };
 
   return createPortal(
     <div
@@ -30,7 +39,6 @@ export function ConversationDropdown({
         left: right - 192,
         zIndex: 9999,
       }}
-      onClick={(e) => e.stopPropagation()}
       className="w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl"
     >
       <div className="absolute right-2 bottom-full mb-1 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-100">
@@ -38,10 +46,7 @@ export function ConversationDropdown({
           {/* Rename Option */}
           <button
             onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setRenamingConversationId(conv.convid);
-              setActiveMenu(null);
+              sendAction(e, "rename", conv.convid);
             }}
             className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
           >
@@ -64,10 +69,7 @@ export function ConversationDropdown({
           {/* Delete Option */}
           <button
             onClick={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              setDeletingConversationId(conv.convid);
-              setActiveMenu(null);
+              sendAction(e, "delete", conv.convid);
             }}
             className="flex items-center w-full px-4 py-2 text-sm text-red-400 hover:bg-gray-700"
           >
@@ -115,6 +117,6 @@ export function ConversationDropdown({
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

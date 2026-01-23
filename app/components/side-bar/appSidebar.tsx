@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import {
   deleteConversation,
@@ -9,8 +9,7 @@ import {
 } from "@/app/service";
 import { useParams } from "next/navigation";
 import ConversationsUser from "./conversationsUser";
-import { ConfirmationCardDelete } from "../cards/confirmationDeleteConvCard";
-import { ConfirmationCardRename } from "../cards/confirmationRenameConvCard";
+import { ConfirmationConvCard } from "../cards/confirmationConvCard";
 import { IConversation } from "@/app/conversation/[id]/page";
 
 export interface Conversation {
@@ -21,21 +20,23 @@ export interface Conversation {
   messageCount: number;
 }
 
+export type ConfirmationAction = "delete" | "rename" | "share";
+
+export type ConfirmationState =
+  | {
+      action: ConfirmationAction;
+      conversationId: string;
+    }
+  | undefined;
+
 export default function ConversationSidebar() {
-  const [isCollapsed, setIsCollapsed] = useState(true);
-  const [conversations, setConversations] = useState<Conversation[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(true); // sidebar collapsed or not
+  const [conversations, setConversations] = useState<Conversation[]>([]); // list of conversation
   const params = useParams();
-  const currentConversationId = params.id;
-  const [activeMenu, setActiveMenu] = useState<string | null>(null);
-  const [renamingConversationId, setRenamingConversationId] = useState<
-    string | null
-  >(null);
-  const [deletingConversationId, setDeletingConversationId] = useState<
-    string | null
-  >(null);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
+  const currentConversationId = params.id; // get id of current conversation
+  const [confirmationState, setConfirmationState] =
+    useState<ConfirmationState | null>(null);
+  const [onError, setOnError] = useState<string | null>(null); // for confirmation cards
 
   useEffect(() => {
     fetchConversations();
@@ -43,14 +44,11 @@ export default function ConversationSidebar() {
 
   const fetchConversations = async () => {
     try {
-      setLoading(true);
       const response = await getUserConversations();
       const data = await response.json();
       setConversations(data.conversations || []);
     } catch (error) {
       console.error("Failed to fetch conversations:", error);
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -75,39 +73,45 @@ export default function ConversationSidebar() {
 
     try {
       const response = await updateTitleConversation(
-        renamingConversationId,
-        newTitle
+        confirmationState?.conversationId,
+        newTitle,
       );
       if (!response?.ok)
-        throw new Error(
-          `New title could not be stored with status ${response?.status}.`
+        setOnError(
+          `New title could not be stored with status ${response?.status}.`,
         );
-      console.log(renamingConversationId);
       setConversations((prev) =>
         prev.map((conv) =>
-          conv.convid === renamingConversationId
+          conv.convid === confirmationState?.conversationId
             ? { ...conv, title: newTitle }
-            : conv
-        )
+            : conv,
+        ),
       );
-      setRenamingConversationId(null);
+      setConfirmationState(null);
     } catch (err) {
       console.error(err);
     }
   };
 
   const handleDeleteConversation = async () => {
-    if (deletingConversationId) {
+    if (confirmationState?.conversationId) {
       // call API to delete the conversation
-      const response = await deleteConversation(deletingConversationId);
+      const response = await deleteConversation(
+        confirmationState.conversationId,
+      );
 
       if (!response.ok) {
-        setDeleteError("The conversation could not be deleted.");
+        setOnError("The conversation could not be deleted.");
       } else {
         fetchConversations();
-        setDeletingConversationId(null);
+        setConfirmationState(null);
       }
     }
+  };
+
+  const handleCancel = () => {
+    setConfirmationState(null);
+    setOnError(null);
   };
 
   function getDateGroup(dateString: string): string {
@@ -156,7 +160,7 @@ export default function ConversationSidebar() {
 
         return groups;
       },
-      {}
+      {},
     );
   }, [conversations]);
 
@@ -324,95 +328,74 @@ export default function ConversationSidebar() {
         {/* Conversations List */}
         {!isCollapsed && (
           <div className="flex-1 overflow-y-scroll">
-            {loading ? (
-              <div
-                className={`${
-                  isCollapsed ? "hidden" : "p-4 flex justify-center"
-                }`}
-              >
-                <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-              </div>
-            ) : conversations.length === 0 ? (
-              <div className="p-4 text-center text-gray-500">
-                No conversations yet
-              </div>
-            ) : (
-              <div className="py-1 px-1">
-                {Object.entries(groupedConversations)
-                  // sort conversation from most recent to oldest
-                  .sort(([, convsA], [, convsB]) => {
-                    const getTime = (convs: Conversation[]) =>
-                      Math.max(
-                        ...convs.map((c) =>
-                          new Date(c.updatedat ?? c.createdat).getTime()
-                        )
-                      );
-                    // Sort descending (newest groups first)
-                    return getTime(convsB) - getTime(convsA);
-                  })
-                  .map(([groupName, convs]) => {
-                    return (
-                      <div key={groupName}>
-                        {/* Section Header */}
-                        <div className="px-4 pt-8 pb-2 text-xs font-semibold text-gray-500">
-                          {groupName}
+            <Suspense
+              fallback={
+                <div className="p-4 flex justify-center">
+                  <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              }
+            >
+              {conversations.length === 0 ? (
+                <div className="p-4 text-center text-gray-500">
+                  No conversations yet
+                </div>
+              ) : (
+                <div className="py-1 px-1">
+                  {Object.entries(groupedConversations)
+                    // sort conversation from most recent to oldest
+                    .sort(([, convsA], [, convsB]) => {
+                      const getTime = (convs: Conversation[]) =>
+                        Math.max(
+                          ...convs.map((c) =>
+                            new Date(c.updatedat ?? c.createdat).getTime(),
+                          ),
+                        );
+                      // Sort descending (newest groups first)
+                      return getTime(convsB) - getTime(convsA);
+                    })
+                    .map(([groupName, convs]) => {
+                      return (
+                        <div key={groupName}>
+                          {/* Section Header */}
+                          <div className="px-4 pt-8 pb-2 text-xs font-semibold text-gray-500">
+                            {groupName}
+                          </div>
+
+                          {convs.map((conv) => {
+                            return (
+                              <div
+                                key={conv.convid}
+                                className={`group relative px-2 transition-colors rounded-lg overflow-x-hidden ${
+                                  String(currentConversationId) ===
+                                  String(conv.convid)
+                                    ? "bg-gradient-to-br from-slate-600 to-slate-800 text-gray-100 font-medium shadow-inner hover:from-blue-900/50 hover:to-blue-800/30"
+                                    : "border-transparent text-gray-300 hover:bg-gray-800"
+                                }`}
+                              >
+                                <ConversationsUser
+                                  conversation={conv}
+                                  onOption={setConfirmationState}
+                                />
+                              </div>
+                            );
+                          })}
+                          {/* Delete, Rename, Share, ..., confirmation card */}
+                          {confirmationState && (
+                            <ConfirmationConvCard
+                              action={confirmationState.action}
+                              onCancel={handleCancel}
+                              onDelete={handleDeleteConversation}
+                              onRename={handleRename}
+                              onShare={() => {}}
+                              onError={onError}
+                            />
+                          )}
                         </div>
-
-                        {convs.map((conv) => {
-                          return (
-                            <div
-                              key={conv.convid}
-                              className={`group relative px-2 transition-colors rounded-lg overflow-x-hidden ${
-                                String(currentConversationId) ===
-                                String(conv.convid)
-                                  ? "bg-gradient-to-br from-slate-600 to-slate-800 text-gray-100 font-medium shadow-inner hover:from-blue-900/50 hover:to-blue-800/30"
-                                  : "border-transparent text-gray-300 hover:bg-gray-800"
-                              }`}
-                            >
-                              <ConversationsUser
-                                conversation={conv}
-                                isActive={activeMenu === conv.convid}
-                                anchorRect={menuRect}
-                                setMenuRect={setMenuRect}
-                                setDeletingConversationId={
-                                  setDeletingConversationId
-                                }
-                                setRenamingConversationId={
-                                  setRenamingConversationId
-                                }
-                                setActiveMenu={setActiveMenu}
-                              />
-                            </div>
-                          );
-                        })}
-                        {/* Delete confirmation card */}
-                        {deletingConversationId && (
-                          <ConfirmationCardDelete
-                            error={deleteError}
-                            setDeletingConversationId={
-                              setDeletingConversationId
-                            }
-                            setDeleteError={setDeleteError}
-                            handleDelete={handleDeleteConversation}
-                          />
-                        )}
-
-                        {/* Rename confirmation card */}
-                        {renamingConversationId && (
-                          <ConfirmationCardRename
-                            error={deleteError}
-                            setRenamingConversationId={
-                              setRenamingConversationId
-                            }
-                            setDeleteError={setDeleteError}
-                            handleRename={handleRename}
-                          />
-                        )}
-                      </div>
-                    );
-                  })}
-              </div>
-            )}
+                      );
+                    })}
+                </div>
+              )}
+            </Suspense>
           </div>
         )}
 

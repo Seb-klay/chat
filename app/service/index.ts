@@ -46,7 +46,7 @@ export const getSingleConversations = async (conversationID: string) => {
 });
 };
 
-export const updateTitleConversation = async (conversationID: string | null, newTitle: string) => {
+export const updateTitleConversation = async (conversationID: string | undefined, newTitle: string) => {
   if (!conversationID) return; 
   return await fetch(`${URL}/api/update-title-conversation`, {
     method: "PUT",

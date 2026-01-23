@@ -1,10 +1,6 @@
-// components/dialogs/dialogsSkeleton.tsx
-
 import React from 'react';
 
-export const DialogsSkeleton = () => {
-  // Array to render multiple skeleton rows
-
+export default function DialogsSkeleton () {
   return (
     <div className="w-full space-y-6 py-2 animate-pulse">
         <div className="space-y-4">
@@ -44,5 +40,3 @@ export const DialogsSkeleton = () => {
     </div>
   );
 };
-
-export default DialogsSkeleton;
