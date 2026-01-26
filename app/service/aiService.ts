@@ -1,6 +1,6 @@
 "use client";
 
-import { storeMessage } from ".";
+import { addUserAnalytics, storeMessage } from ".";
 import { IAnswer, IMessage, IPayload } from "../utils/chatUtils";
 
 type StreamCallbacks = {
@@ -92,7 +92,7 @@ const handleStream = async (
 
         if (data.done === true) {
           const assistantPlaceholder: IMessage = {
-            role: "assistant", // This ensures it uses the "Bot" styling/side
+            role: "assistant",
             model: payload.messages.at(-1)!.model,
             prompt: aiResponse,
           };
@@ -103,12 +103,26 @@ const handleStream = async (
             conversationID: payload.conversationID,
           };
           // store AI message
-          await storeMessage(payloadFromAI).catch((err) => {
-            throw new Error(
-              `Error with status ${response?.status} while storing the message of the user. ` +
-                err
-            );
-          });
+          const storingResponse = await storeMessage(payloadFromAI);
+
+          if (!storingResponse?.ok) throw new Error(`Response with status ${storingResponse?.status} while storing the message of the user.`);
+          // store analytics detail
+          const analytics: IAnswer = {
+            model: data.model,
+            created_at: data.created_at,
+            total_duration: data.total_duration,
+            load_duration: data.load_duration,
+            prompt_eval_count: data.prompt_eval_count,
+            prompt_eval_duration: data.prompt_eval_duration,
+            eval_count: data.eval_count,
+            eval_duration: data.eval_duration,
+          };
+          console.log(data);
+
+          const analyticsResponse = await addUserAnalytics(analytics);
+
+          if (!analyticsResponse?.ok) throw new Error(`Response with status ${analyticsResponse?.status} while storing user's analytics.`);
+          // stop loading icons
           onCompleted();
           return;
         }

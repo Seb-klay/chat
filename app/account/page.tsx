@@ -1,111 +1,36 @@
-"use client";
+"use server";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import {
-  deleteUserAccount,
-  getAccountDetails,
-  updatePasswordUser,
-} from "../service";
-import { ConfirmationCardDeleteUser } from "../components/cards/confirmationDeleteUserCard";
-import { ConfirmationUpdatePassword } from "../components/cards/confirmationChangePasswordCard";
+import { Suspense } from "react";
+import Analytics from "./analytics";
+import Accountdetails from "./accountDetails";
+import AnalyticsSkeleton from "./analyticsSkeleton";
+import { Cog6ToothIcon } from "@heroicons/react/24/outline";
+import Loading from "./loading";
+import { getUserAnalytics } from "../service";
 
-export default function Account() {
-  const [updatingEmail, setUpdatingEmail] = useState<boolean>(false);
-  const [newPassword, setNewPassword] = useState<string>("");
-  const [email, setEmail] = useState<string>("test@test.com");
-  const [deletingUserAccount, setDeletingUserAccount] =
-    useState<boolean>(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
-
-  useEffect(() => {
-    fetchAccountDetails();
-  }, []);
-
-  const fetchAccountDetails = async () => {
-    try {
-      setIsLoading(true);
-      const response = await getAccountDetails();
-      const data = await response?.json();
-      console.log(data);
-    } catch (error) {
-      console.error("Failed to fetch conversations:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleDeleteUserAccount = async () => {
-    if (deletingUserAccount) {
-      console.log(1);
-      // call API to delete the conversation
-      const response = await deleteUserAccount();
-
-      if (!response?.ok) {
-        setDeleteError("The user could not be deleted.");
-      } else {
-        setDeletingUserAccount(false);
-        router.push(`/signup`);
-      }
-    }
-  };
+export default async function Account() {
+  const analyticsResponse = getUserAnalytics();
 
   return (
-    <div className="flex flex-col h-[100dvh] px-2">
-      <div className="flex-1 overflow-y-auto">
-        <div className="rounded-xl border bg-transparent p-6 m-6 space-y-4 w-full md:w-1/2 mx-auto">
-          <h2 className="text-lg font-semibold">Account Details</h2>
+    <div className="flex flex-col overflow-y-auto h-[100dvh] bg-slate-900 text-gray-100 p-4 md:p-8 transition-all duration-300 font-sans">
+      <div className="flex-1 max-w-4xl mx-auto w-full">
+        {/* Header */}
+        <header className="mb-8">
+          <h1 className="text-3xl font-bold flex items-center gap-3">
+            <Cog6ToothIcon className="h-7 w-7 text-blue-400" />
+            Account Management
+          </h1>
+          <p className="text-gray-400 mt-2">
+            Manage your account details and security
+          </p>
+        </header>
 
-          {/* Email Row */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Email</p>
-              <p className="font-medium">user@example.com</p>
-            </div>
-            <button
-              onClick={() => setDeletingUserAccount(true)}
-              className="px-4 py-2 bg-red-400 rounded-lg hover:bg-red-600"
-            >
-              Delete
-            </button>
-          </div>
+        {/* Updating account details such as deleting account and change password */}
+        <Accountdetails />
 
-          {/* Delete confirmation card */}
-          {deletingUserAccount && (
-            <ConfirmationCardDeleteUser
-              error={deleteError}
-              setDeletingUserAccount={setDeletingUserAccount}
-              setDeleteError={setDeleteError}
-              handleDelete={handleDeleteUserAccount}
-            />
-          )}
-
-          {/* Password Row */}
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-500">Password</p>
-              <p className="font-medium">••••••••</p>
-            </div>
-            <button
-              onClick={() => setUpdatingEmail(true)}
-              className="px-4 py-2 bg-gray-600 rounded-lg hover:bg-gray-900"
-            >
-              Update
-            </button>
-          </div>
-
-          {/* Update confirmation card */}
-          {updatingEmail && (
-            <ConfirmationUpdatePassword
-              error={deleteError}
-              userEmail={email}
-              setUpdatingEmail={setUpdatingEmail}
-              setDeleteError={setDeleteError}
-            />
-          )}
-        </div>
+        <Suspense fallback={<AnalyticsSkeleton/>}>
+          <Analytics analyticsPromise={analyticsResponse} />
+        </Suspense>
       </div>
     </div>
   );

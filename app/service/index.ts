@@ -1,4 +1,5 @@
-import { IPayload } from "../utils/chatUtils";
+import { IAnalytics } from "../account/analytics";
+import { IAnswer, IPayload } from "../utils/chatUtils";
 import { IModelList } from "../utils/listModels";
 import { IUser } from "../utils/userUtils";
 const URL: string = process.env.FULL_URL || "";
@@ -166,4 +167,21 @@ export const updatePasswordUser = async (newPassword: string): Promise<Response 
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(newPassword),
   });
+};
+
+export const addUserAnalytics = async (analytics: IAnswer): Promise<Response | null> => {
+  return await fetch(`${URL}/api/user-analytics`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(analytics),
+  });
+};
+
+export const getUserAnalytics = async (): Promise<IAnalytics[]> => {
+  const response = await fetch(`${URL}/api/get-user-analytics`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" }
+  });
+  if (!response.ok) return [];
+  return response.json() as Promise<IAnalytics[]>;
 };

@@ -1,7 +1,7 @@
 
 CREATE TABLE Users
 (
-  userID SERIAL PRIMARY KEY,
+  userID UUID PRIMARY KEY DEFAULT uuidv7(),
   email VARCHAR(100) UNIQUE NOT NULL,
   userPassword VARCHAR(100) NOT NULL,
   userRole VARCHAR(50) NOT NULL DEFAULT 'regular_user'
@@ -9,9 +9,9 @@ CREATE TABLE Users
 
 CREATE TABLE Conversations
 (
-  convID SERIAL PRIMARY KEY,
+  convID UUID PRIMARY KEY DEFAULT uuidv7(),
   title VARCHAR(100),
-  userID int,
+  userID UUID,
   createdAt TIMESTAMP NOT NULL,
   updatedAt TIMESTAMP,
   isDeleted BOOLEAN NOT NULL,
@@ -22,24 +22,50 @@ CREATE TABLE Conversations
 
 CREATE TABLE Messages
 (
-  messID SERIAL PRIMARY KEY,
+  messID UUID PRIMARY KEY DEFAULT uuidv7(),
   roleSender VARCHAR(50),
   model VARCHAR(50),
   textMessage TEXT,
-  convID int,
+  convID UUID,
   createdAt TIMESTAMP NOT NULL,
   CONSTRAINT FK_convMess FOREIGN KEY (convID)
     REFERENCES Conversations(convID)
 );
 
-CREATE TABLE email_verification_codes (
-  id SERIAL PRIMARY KEY,
+CREATE TABLE Email_verification_codes (
+  id UUID PRIMARY KEY DEFAULT uuidv7(),
   email VARCHAR(255) UNIQUE NOT NULL,
   code CHAR(6) NOT NULL,
   expires_at TIMESTAMP NOT NULL,
   created_at TIMESTAMP DEFAULT NOW(),
   verified BOOLEAN DEFAULT FALSE,
   UNIQUE(email, code)
+);
+
+CREATE TABLE Users_analytics
+(
+  id UUID PRIMARY KEY DEFAULT uuidv7(),
+  userID UUID,
+  created_at TIMESTAMP DEFAULT NOW(),
+  total_duration BIGINT, 
+  load_duration BIGINT,
+  prompt_eval_count BIGINT,
+  prompt_eval_duration BIGINT,
+  eval_count BIGINT,
+  eval_duration BIGINT,
+  defaultModel TEXT,
+  CONSTRAINT FK_UserAnalytics FOREIGN KEY (userID)
+    REFERENCES Users(userID)
+);
+
+CREATE TABLE Users_settings
+(
+  id UUID PRIMARY KEY DEFAULT uuidv7(),
+  userID UUID,
+  colorTheme TEXT DEFAULT 'DARK',
+  defaultModel TEXT,
+  CONSTRAINT FK_UserSettings FOREIGN KEY (userID)
+    REFERENCES Users(userID)
 );
 
 -- Create ONE database user for your entire application

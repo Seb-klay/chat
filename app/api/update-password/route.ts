@@ -15,7 +15,7 @@ export async function PUT(
     // get user id in cookie
     // const session = (await cookies()).get("session")?.value;
     // const sessionUser: JWTPayload | undefined = await decrypt(session);
-    const sessionUser = 1 // to delete after testing !
+    const sessionUser = '019bf62e-12bb-716a-b66e-6c78c3e52dd6'  // to delete after testing !
 
     if (!sessionUser){
         return NextResponse.json("No user has been found with these credentials. Try to login again or you are not allowed to see this conversation.", { status: 404 });

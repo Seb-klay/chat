@@ -80,7 +80,7 @@ export async function POST(req: Request) {
       for (const chunk of mockChunks) {
         // Create the JSON object matching your model's format
         const payload = JSON.stringify({
-          model: "tinyllama",
+          model: "llama3.2:3b",
           created_at: new Date().toISOString(),
           response: chunk,
           done: false
@@ -95,12 +95,14 @@ export async function POST(req: Request) {
 
       // Final "done" message
       const finalPayload = JSON.stringify({
-        model: "tinyllama",
-        created_at: new Date().toISOString(),
-        response: "",
-        done: true,
-        done_reason: "stop",
-        context: [529, 29989]
+        model: 'llama3.2:3b',
+        created_at: '2026-01-25T17:32:51.861260784Z',
+        total_duration: 82617974642,
+        load_duration: 69127099622,
+        prompt_eval_count: 44,
+        prompt_eval_duration: 6792859223,
+        eval_count: 20,
+        eval_duration: 6269251027
       });
       
       controller.enqueue(encoder.encode(finalPayload + "\n"));
