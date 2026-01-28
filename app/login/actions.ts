@@ -4,7 +4,7 @@ import { z } from "zod";
 import { createSession, deleteSession } from "../lib/session";
 import { redirect } from "next/navigation";
 import { IUser, validatePassword } from "../utils/userUtils";
-import { getUser } from "../service";
+import { getUserWithEmail } from "../service";
 
 // used to validate login form
 const loginSchema = z.object({
@@ -31,7 +31,7 @@ export async function login(prevState: any, formData: FormData) {
     };
 
     // check if user is in DB and return id, password and role
-    const response = await getUser(userToLogin);
+    const response = await getUserWithEmail(userToLogin);
     const userInDB: IUser = await response?.json();
 
     if (

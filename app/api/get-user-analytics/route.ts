@@ -17,7 +17,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
 
     if (!sessionUser) {
       throw new Error(
-        "No user has been found with these credentials. Try to login again or you are not allowed to see this conversation."
+        "No user has been found with these credentials. Try to login again or you are not allowed to see this conversation.",
       );
     }
 

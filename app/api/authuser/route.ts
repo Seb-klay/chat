@@ -14,6 +14,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       [email]
     );
 
+    if (!response) throw new Error("The user could not be found. Try again please.");
+
     const user: IUser = {
       id: response.rows[0].userid,
       email: email,
@@ -21,25 +23,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       role: response.rows[0].role,
     };
 
-    // TODO make this post a GET, 
-
-    // //make it server side
-
     // update the answer !
-    return new NextResponse(JSON.stringify(user), {
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-      },
-    });
+    return NextResponse.json( user, { status: 200 });
   } catch (err) {
-    return new NextResponse(JSON.stringify(err), {
-      headers: {
-        "Content-Type": "text/event-stream",
-        "Cache-Control": "no-cache",
-        Connection: "keep-alive",
-      },
-    });
+    return NextResponse.json( err, { status: 500 });
   }
 }

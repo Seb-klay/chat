@@ -1,16 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteUserAccount } from "../service";
+import { deleteUserAccount, getEmail } from "../service";
 import { ConfirmationCardDeleteUser } from "../components/cards/confirmationDeleteUserCard";
 import { ConfirmationUpdatePassword } from "../components/cards/confirmationChangePasswordCard";
 import {
   UserCircleIcon,
   EnvelopeIcon,
-  TrashIcon,
   LockClosedIcon,
-  KeyIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { DeleteButton } from "../components/buttons/deleteButton";
@@ -19,10 +17,25 @@ import { UpdateButton } from "../components/buttons/updateButton";
 export default function Accountdetails() {
   const [deletingUserAccount, setDeletingUserAccount] =
     useState<boolean>(false);
-  const [updatingEmail, setUpdatingEmail] = useState<boolean>(false);
+  const [updatingPassword, setUpdatingPassword] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [email, setEmail] = useState<string>("test@test.com");
+  const [email, setEmail] = useState<string>("");
   const router = useRouter();
+
+    useEffect(() => {
+    const loadEmail = async () => {
+      try {
+        const response = await getEmail();
+        if (!response) throw new Error("No email could be found.");
+        const emailUser = await response.json();
+        setEmail(emailUser[0].email);
+      } catch (err) {
+        console.error("Failed to load email. ", err);
+      }
+    };
+
+    loadEmail();
+  }, []);
 
   const handleDeleteUserAccount = async () => {
     if (deletingUserAccount) {
@@ -36,8 +49,6 @@ export default function Accountdetails() {
       }
     }
   };
-
-  const cancelEvent = () => {};
 
   return (
     <div className="rounded-2xl p-6 bg-slate-800/70 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30 w-full mx-auto">
@@ -61,7 +72,7 @@ export default function Accountdetails() {
               </div>
               <div>
                 <p className="text-sm text-gray-400">Email Address</p>
-                <p className="font-medium">user@example.com</p>
+                <p className="font-medium">{ email }</p>
               </div>
             </div>
 
@@ -99,19 +110,19 @@ export default function Accountdetails() {
             </div>
 
             <UpdateButton
-              onUpdate={() => setUpdatingEmail(true)}
+              onUpdate={() => setUpdatingPassword(true)}
               buttonName="Update Password"
             />
           </div>
         </div>
 
         {/* Update confirmation card */}
-        {updatingEmail && (
+        {updatingPassword && (
           <div className="mt-4">
             <ConfirmationUpdatePassword
               userEmail={email}
               cancelUpdate={() => {
-                (setUpdatingEmail(false), setError(null));
+                (setUpdatingPassword(false), setError(null));
               }}
               onError={error}
             />

@@ -3,7 +3,7 @@
 import { encryptPassword, IUser } from "@/app/utils/userUtils";
 import { validatePassword } from "../../utils/userUtils";
 import z from "zod";
-import { getUser, updatePasswordUser } from "@/app/service";
+import { getUserWithEmail, updatePasswordUser } from "@/app/service";
 
 const updatePasswordSchema = z
   .object({
@@ -51,7 +51,7 @@ export async function updatePassword(prevState: any, formData: FormData) {
     };
 
     // check if user is in DB and return id, password and role
-    const response = await getUser(checkUser);
+    const response = await getUserWithEmail(checkUser);
     const userInDB: IUser = await response?.json();
 
     if (

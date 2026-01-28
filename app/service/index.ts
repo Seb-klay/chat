@@ -99,13 +99,20 @@ export const getConversationHistory = async (conversationID: string): Promise<Re
 });
 };
 
-export const getUser = async (user: IUser): Promise<Response | null> => {
+export const getUserWithEmail = async (user: IUser): Promise<Response | null> => {
   return await fetch(`${URL}/api/authuser`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(user),
   });
 };
+
+export const getEmail = async (): Promise<Response | null> => {
+  return await fetch(`${URL}/api/get-email`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" }
+  });
+}
 
 // user services that send the message to /api/message API
 export const createUser = async (user: IUser): Promise<Response | null> => {
@@ -127,12 +134,12 @@ export const deleteUserAccount = async (): Promise<Response | null> => {
   });
 };
 
-export const getAccountDetails = async (): Promise<Response | null> => {
-  return await fetch(`${URL}/api/account-details`, {
-    method: "GET",
-    headers: { "Content-Type": "application/json" }
-  });
-};
+// export const getAccountDetails = async (): Promise<Response | null> => {
+//   return await fetch(`${URL}/api/account-details`, {
+//     method: "GET",
+//     headers: { "Content-Type": "application/json" }
+//   });
+// };
 
 export const validateUser = async (
   email: string,

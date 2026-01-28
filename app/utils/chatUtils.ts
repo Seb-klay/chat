@@ -40,6 +40,7 @@ export const summaryConversationAndUpdate = async (
   const titleToSummarize =
     "Summarize this text in 6 words : " + newConversation.title;
 
+    // TODO remove after testing :
   // const response = await summaryConversation(titleToSummarize, newConversation.defaultmodel).catch((err) => {
   //   throw new Error("Could not generate new title of conversation. " + err);
   // });
