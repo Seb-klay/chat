@@ -134,12 +134,20 @@ export const deleteUserAccount = async (): Promise<Response | null> => {
   });
 };
 
-// export const getAccountDetails = async (): Promise<Response | null> => {
-//   return await fetch(`${URL}/api/account-details`, {
-//     method: "GET",
-//     headers: { "Content-Type": "application/json" }
-//   });
-// };
+export const getUserSettings = async (): Promise<Response | null> => {
+  return await fetch(`${URL}/api/get-user-settings`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" }
+  });
+};
+
+export const updateUserSettings = async (newTheme: string | null, newModel: IModelList | null): Promise<Response | null> => {
+  return await fetch(`${URL}/api/update-user-settings`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ newTheme: newTheme, newModel: newModel }),
+  });
+};
 
 export const validateUser = async (
   email: string,

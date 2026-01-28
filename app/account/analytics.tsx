@@ -112,7 +112,7 @@ export default function Analytics({
 
   return (
     <div style={{ width: "100%", height: 300 }}>
-    <div style={{ backgroundColor: theme.colors.background_second, color: theme.colors.secondary }} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30 mt-6">
+    <div style={{ backgroundColor: theme.colors.background_second, color: theme.colors.primary }} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30 mt-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-semibold flex items-center gap-2">

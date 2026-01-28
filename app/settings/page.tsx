@@ -9,23 +9,25 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { MODELS } from "../utils/listModels";
 import { useTheme } from "../components/contexts/theme-provider";
+import { useModel } from "../components/contexts/model-provider";
 
 export default function Settings() {
-  const [selectedModelId, setSelectedModelId] = useState<number>(1);
-  //const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [showToast, setShowToast] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
   const { theme, mode, toggleTheme } = useTheme();
   const isDarkMode = mode === 'dark';
+  const { selectedModel, allModels, updateModel } = useModel();
 
   // Handle model selection
   const handleModelSelect = (modelId: number) => {
-    if (modelId !== selectedModelId) {
-      setSelectedModelId(modelId);
-      const selectedModel = MODELS[modelId];
-      showToastMessage(`Switched to ${selectedModel.model_name} model`);
+    if (modelId !== selectedModel.id) {
+      const newModel = allModels.find(m => m.id === modelId);
+    
+      if (newModel) {
+        updateModel(newModel);
+        showToastMessage(`Switched to ${newModel.model_name}`);
+      }
     }
   };
 
@@ -74,7 +76,7 @@ export default function Settings() {
                   AI Model Selection
                 </h2>
                 <span className="text-xs bg-blue-900/40 text-blue-300 px-3 py-1 rounded-full">
-                  Active Models: {Object.keys(MODELS).length}
+                  Active Models: {allModels.length}
                 </span>
               </div>
 
@@ -84,16 +86,17 @@ export default function Settings() {
 
               {/* Model List */}
               <div className="space-y-4">
-                {Object.values(MODELS).map((model) => {
-                  const isSelected = model.id === selectedModelId;
+                {allModels.map((model) => {
+                  const isSelected = model.id === selectedModel.id;
                   return (
                     <div
                       key={model.id}
-                      className={`p-4 rounded-xl transition-all duration-300 ${
-                        isSelected
-                          ? "bg-blue-900/20 border border-blue-500/40"
-                          : "bg-slate-800/40 hover:bg-slate-800/60 border border-transparent"
-                      }`}
+                      style={{
+                        backgroundColor: isSelected 
+                          ? theme.colors.tertiary_background
+                          : "transparent",
+                      }}
+                      className={`p-4 rounded-xl transition-all duration-300`}
                     >
                       <div className="flex items-center gap-6 justify-between">
                         <div className="text-center">
@@ -138,11 +141,11 @@ export default function Settings() {
               </h2>
               <div className="py-2">
                 <p className="font-medium">
-                  {MODELS[selectedModelId]?.model_name.split(":")[0]}
+                  {selectedModel.model_name.split(":")[0]}
                 </p>
                 <p style={{color: theme.colors.secondary}} className="text-sm mt-1">
                   Parameters:{" "}
-                  {MODELS[selectedModelId]?.model_name.split(":")[1]}
+                  {selectedModel.model_name.split(":")[1] || " - "}
                 </p>
               </div>
               <div className="mt-2 pt-4 border-t border-gray-700/50">
@@ -199,7 +202,7 @@ export default function Settings() {
                       id="theme-toggle"
                       className="sr-only"
                       checked={isDarkMode}
-                      onChange={toggleTheme}
+                      onChange={() => { toggleTheme(!isDarkMode) }}
                     />
                     <label
                       htmlFor="theme-toggle"

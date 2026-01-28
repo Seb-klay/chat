@@ -80,7 +80,7 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Add function abort message
 - [x] Create page "forgot password"
 - [x] Add delete account
-- [ ] Add user settings to the UI and DB
+- [x] Add user settings to the UI and DB
 - [ ] Error handling
 - [ ] Handle logs using promtail and loki (grafana)
 - [ ] Implement backup solution for data

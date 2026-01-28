@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import ClientLayout from "./clientLayout"
+import ClientLayout from "./clientLayout";
 import { ThemeProvider } from "./components/contexts/theme-provider";
+import { ModelProvider } from "./components/contexts/model-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,11 +21,11 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  width: 'device-width',
+  width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  viewportFit: 'cover',
-}
+  viewportFit: "cover",
+};
 
 export default function RootLayout({
   children,
@@ -36,13 +37,15 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {/* context for colour theme (dark or light) */}
         <ThemeProvider>
-        {/* used to hide side bar if user not authenticated */}
-        <ClientLayout>
-          <main className="w-full">
-            {children}
-          </main>
-        </ClientLayout>
+          {/* used to update AI model */}
+          <ModelProvider>
+            {/* used to hide side bar if user not authenticated */}
+            <ClientLayout>
+              <main className="w-full">{children}</main>
+            </ClientLayout>
+          </ModelProvider>
         </ThemeProvider>
       </body>
     </html>

@@ -134,7 +134,7 @@ export default function Accountdetails() {
         {/* Additional Info */}
         <div className="mt-8 pt-6 border-t border-gray-700/50">
           <div style={{ color: theme.colors.secondary }} className="flex items-start gap-3 text-sm">
-            <InformationCircleIcon className="h-5 w-5 text-gray-500 flex-shrink-0 mt-0.5" />
+            <InformationCircleIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
             <p>
               Account changes are permanent. Make sure you have backup access
               before deleting your account. Account settings are secured with
