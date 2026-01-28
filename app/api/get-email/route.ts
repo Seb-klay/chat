@@ -6,7 +6,6 @@ import { getPool } from "../../backend/database/utils/databaseUtils";
 // import { JWTPayload } from "jose";
 // import { decrypt } from "@/app/lib/session";
 
-// Create conversation
 export async function GET(
   request: NextRequest
 ): Promise<NextResponse> {
@@ -35,7 +34,6 @@ export async function GET(
     if (!response) throw new Error("The user could not be found.");
 
     return NextResponse.json( response.rows, { status: 200 });
-
   } catch (err) {
     return NextResponse.json(err, { status: 500 });
   }

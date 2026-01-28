@@ -3,6 +3,7 @@ import { IModelList } from "../../utils/listModels";
 import ChooseAiModel from "../buttons/buttonAiModel";
 import { SendButton } from "../buttons/sendButton";
 import { AbortButton } from "../buttons/abortButton";
+import { useTheme } from "../contexts/theme-provider";
 
 type ChatInputProps = {
   onThought: boolean;
@@ -23,6 +24,7 @@ export default function ChatInput({
     id: 1,
     model_name: "llama3.2:3b",
   });
+  const { theme } = useTheme();
 
   useEffect(() => {
     const textarea = textareaRef.current;
@@ -60,7 +62,7 @@ export default function ChatInput({
   };
 
   return (
-    <div className="w-full mx-auto bg-slate-950 bottom-0">
+    <div className="w-full mx-auto bottom-0">
       {/* Main Input Container */}
       <div className="relative">
         <textarea
@@ -69,10 +71,10 @@ export default function ChatInput({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type your message here..."
-          className="w-full p-4 pr-36 bg-gray-900 text-gray-100 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden overflow-y-scroll resize-none min-h-[30px] md:min-h-[60px]"
+           style={{backgroundColor: theme.colors.background_second, color: theme.colors.primary, height: "auto"}}
+          className="w-full p-4 pr-36 border-gray-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden overflow-y-scroll resize-none min-h-[30px] md:min-h-[60px]"
           rows={1}
           disabled={onChatbotWriting}
-          style={{ height: "auto" }}
         />
 
         {/* Button Container */}

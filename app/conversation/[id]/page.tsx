@@ -12,6 +12,7 @@ import { useParams } from "next/navigation";
 import Dialog from "../../components/dialogs/dialogs";
 import DialogsSkeleton from "../../components/dialogs/dialogsSkeleton";
 import { sendChatMessage } from "@/app/service/aiService";
+import { useTheme } from "@/app/components/contexts/theme-provider";
 
   export type IConversation = {
     convid: string;
@@ -24,6 +25,7 @@ import { sendChatMessage } from "@/app/service/aiService";
 
 export default function ConversationPage() {
   const params = useParams();
+  const { theme, mode } = useTheme();
   const conversationId = params.id as string; // used to get the id in the URL
   const [messages, setMessages] = useState<IMessage[]>([]); // list of messages history
   const scrollRef = useRef<HTMLDivElement>(null); // used to go at the bottom of the page
@@ -163,7 +165,7 @@ export default function ConversationPage() {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] px-2">
+    <div style={{ backgroundColor: theme.colors.background, color: theme.colors.primary}}  className="flex flex-col h-[100dvh] px-2">
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
         <div className="space-y-2 bg-transparent rounded-lg w-full md:w-1/2 mx-auto">
@@ -179,9 +181,9 @@ export default function ConversationPage() {
 
           {onAiThought && (
             <div className="flex space-x-2 mb-6">
-              <div className="dot bg-gray-100 w-2 h-2 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-              <div className="dot bg-gray-100 w-2 h-2 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-              <div className="dot bg-gray-100 w-2 h-2 rounded-full animate-bounce"></div>
+              <div style={{backgroundColor: theme.colors.primary}} className="dot w-2 h-2 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
+              <div style={{backgroundColor: theme.colors.primary}} className="dot w-2 h-2 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
+              <div style={{backgroundColor: theme.colors.primary}} className="dot w-2 h-2 rounded-full animate-bounce"></div>
             </div>
           )}
 
@@ -191,8 +193,8 @@ export default function ConversationPage() {
       </div>
 
       {/* Chat Input */}
-      <div className="w-full md:w-1/2 mx-auto bg-slate-950 sticky bottom-0">
-        <div className="bg-transparent rounded-lg">
+      <div className="w-full md:w-1/2 mx-auto sticky bottom-0">
+        <div className="rounded-lg">
           <ChatInput
             onThought={onAiThought}
             onChatbotWriting={onAiWriting}

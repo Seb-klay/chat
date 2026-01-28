@@ -3,12 +3,15 @@ import ReactMarkdown from "react-markdown";
 import gfm from "remark-gfm";
 import raw from "rehype-raw";
 import { CodeBlock } from "./codeBlock";
+import { useTheme } from "../contexts/theme-provider";
 
 interface DialogProps {
   messages: IMessage[];
 }
 
 const Dialogs: React.FC<DialogProps> = ({ messages }) => {
+  const { theme } = useTheme();
+  
   return (
     <div className=" space-y-2 bg-transparent rounded-lg">
       {messages
@@ -21,11 +24,10 @@ const Dialogs: React.FC<DialogProps> = ({ messages }) => {
             }`}
           >
             <div
-              className={`max-w-xs md:max-w-xl px-4 py-2 rounded-lg mt-3 md:mt-6 mb-3 md:mb-6 ${
-                m.role === "user"
-                  ? "bg-gray-900 text-gray-100"
-                  : "bg-transparent text-gray-100"
-              }`}
+              style={{
+                backgroundColor: m.role === "user" ? theme.colors.background_second : "transparent"
+              }}
+              className="max-w-xs md:max-w-xl px-4 py-2 rounded-lg mt-3 md:mt-6 mb-3 md:mb-6"
             >
               <ReactMarkdown
                 remarkPlugins={[gfm as any]}

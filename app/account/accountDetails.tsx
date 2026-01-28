@@ -13,6 +13,7 @@ import {
 } from "@heroicons/react/24/outline";
 import { DeleteButton } from "../components/buttons/deleteButton";
 import { UpdateButton } from "../components/buttons/updateButton";
+import { useTheme } from "../components/contexts/theme-provider";
 
 export default function Accountdetails() {
   const [deletingUserAccount, setDeletingUserAccount] =
@@ -21,8 +22,9 @@ export default function Accountdetails() {
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState<string>("");
   const router = useRouter();
+  const { theme } = useTheme();
 
-    useEffect(() => {
+  useEffect(() => {
     const loadEmail = async () => {
       try {
         const response = await getEmail();
@@ -51,7 +53,7 @@ export default function Accountdetails() {
   };
 
   return (
-    <div className="rounded-2xl p-6 bg-slate-800/70 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30 w-full mx-auto">
+    <div style={{ backgroundColor: theme.colors.background_second, color: theme.colors.primary}} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30 w-full mx-auto">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold flex items-center gap-2">
           <UserCircleIcon className="h-6 w-6 text-blue-400" />
@@ -64,15 +66,15 @@ export default function Accountdetails() {
 
       {/* Email Section */}
       <div className="space-y-4">
-        <div className="p-4 rounded-xl bg-slate-800/40 hover:bg-slate-800/60 border border-transparent transition-all duration-300">
+        <div className="p-4 rounded-xl hover:opacity-60 border border-transparent transition-all duration-300">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-slate-800">
                 <EnvelopeIcon className="h-5 w-5 text-blue-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Email Address</p>
-                <p className="font-medium">{ email }</p>
+                <p style={{ color: theme.colors.secondary}} className="text-sm">Email Address</p>
+                <p className="font-medium">{email}</p>
               </div>
             </div>
 
@@ -97,14 +99,14 @@ export default function Accountdetails() {
         )}
 
         {/* Password Section */}
-        <div className="p-4 rounded-xl bg-slate-800/40 hover:bg-slate-800/60 border border-transparent transition-all duration-300">
+        <div className="p-4 rounded-xl hover:opacity-60 border border-transparent transition-all duration-300">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-lg bg-slate-800">
                 <LockClosedIcon className="h-5 w-5 text-green-400" />
               </div>
               <div>
-                <p className="text-sm text-gray-400">Password</p>
+                <p style={{ color: theme.colors.secondary}} className="text-sm">Password</p>
                 <p className="font-medium">••••••••</p>
               </div>
             </div>
@@ -131,12 +133,12 @@ export default function Accountdetails() {
 
         {/* Additional Info */}
         <div className="mt-8 pt-6 border-t border-gray-700/50">
-          <div className="flex items-start gap-3 text-sm text-gray-400">
+          <div style={{ color: theme.colors.secondary }} className="flex items-start gap-3 text-sm">
             <InformationCircleIcon className="h-5 w-5 text-gray-500 flex-shrink-0 mt-0.5" />
             <p>
               Account changes are permanent. Make sure you have backup access
-              before deleting your account. Account settings are secured with end-to-end
-              encryption.
+              before deleting your account. Account settings are secured with
+              end-to-end encryption.
             </p>
           </div>
         </div>

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ClientLayout from "./clientLayout"
+import { ThemeProvider } from "./components/contexts/theme-provider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -35,12 +36,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        <ThemeProvider>
         {/* used to hide side bar if user not authenticated */}
         <ClientLayout>
           <main className="w-full">
             {children}
           </main>
         </ClientLayout>
+        </ThemeProvider>
       </body>
     </html>
   );

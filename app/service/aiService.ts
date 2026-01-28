@@ -17,28 +17,19 @@ export const sendChatMessage = async (
 ) => {
   try {
     // store user message
-    await storeMessage(payload).catch((err) => {
-      throw new Error(
-        `Error with status ${response?.status} while storing the message of the user. ` +
-          err
-      );
-    });
+    const responseStore = await storeMessage(payload);
+    if (!responseStore) throw new Error("Error while storing the message of the user. ");
 
     // send user input to AI model
-    const response = await fetch(`/api/chat-messages`, {
+    const responseChat = await fetch(`/api/chat-messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
       signal: abortController.signal,
-    }).catch((err) => {
-      throw new Error(
-        `Error with status ${response?.status} while sending message to the AI. ` +
-          err
-      );
     });
-
+    if (!responseChat) throw new Error("Error while chatting with AI. ");
     // Pass the stream to the handler
-    await handleStream(response, payload, callbacks);
+    await handleStream(responseChat, payload, callbacks);
   } catch (error: any) {
     if (error.name === "AbortError") {
       console.log("Fetch aborted by user");
@@ -90,7 +81,7 @@ const handleStream = async (
           onData(data.response);
         }
 
-        if (data.done === true) {
+        if (data.done) {
           const assistantPlaceholder: IMessage = {
             role: "assistant",
             model: payload.messages.at(-1)!.model,
@@ -117,7 +108,6 @@ const handleStream = async (
             eval_count: data.eval_count,
             eval_duration: data.eval_duration,
           };
-          console.log(data);
 
           const analyticsResponse = await addUserAnalytics(analytics);
 

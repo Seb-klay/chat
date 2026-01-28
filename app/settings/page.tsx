@@ -7,28 +7,18 @@ import {
   MoonIcon,
   SunIcon,
   CheckCircleIcon,
-  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { MODELS } from "../utils/listModels";
+import { useTheme } from "../components/contexts/theme-provider";
 
 export default function Settings() {
   const [selectedModelId, setSelectedModelId] = useState<number>(1);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
+  //const [isDarkMode, setIsDarkMode] = useState<boolean>(true);
   const [showToast, setShowToast] = useState<boolean>(false);
   const [toastMessage, setToastMessage] = useState<string>("");
-
-  // Initialize theme from localStorage
-  useEffect(() => {
-    const savedTheme = localStorage.getItem("theme");
-    if (savedTheme === "light") {
-      setIsDarkMode(false);
-      document.documentElement.classList.remove("dark");
-    } else {
-      setIsDarkMode(true);
-      document.documentElement.classList.add("dark");
-    }
-  }, []);
+  const { theme, mode, toggleTheme } = useTheme();
+  const isDarkMode = mode === 'dark';
 
   // Handle model selection
   const handleModelSelect = (modelId: number) => {
@@ -36,20 +26,6 @@ export default function Settings() {
       setSelectedModelId(modelId);
       const selectedModel = MODELS[modelId];
       showToastMessage(`Switched to ${selectedModel.model_name} model`);
-    }
-  };
-
-  // Handle theme toggle
-  const toggleTheme = () => {
-    const newTheme = !isDarkMode;
-    setIsDarkMode(newTheme);
-
-    if (newTheme) {
-      document.documentElement.classList.add("dark");
-      localStorage.setItem("theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      localStorage.setItem("theme", "light");
     }
   };
 
@@ -63,10 +39,10 @@ export default function Settings() {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-slate-900 text-gray-100 p-4 md:p-8 transition-all duration-300 font-sans">
+    <div style={{ backgroundColor: theme.colors.background, color: theme.colors.primary}} className="flex flex-col h-[100dvh] p-4 md:p-8 transition-all duration-300 font-sans">
       {/* Toast Notification */}
       {showToast && (
-        <div className="fixed bottom-4 right-4 bg-slate-800 text-gray-100 px-4 py-3 rounded-lg shadow-lg border border-slate-700 transition-all duration-300 transform translate-y-0 opacity-100 z-50 backdrop-blur-sm">
+        <div  style={{backgroundColor: theme.colors.tertiary_background}} className="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg border border-slate-700 transition-all duration-300 transform translate-y-0 opacity-100 z-50 backdrop-blur-sm">
           <div className="flex items-center gap-3">
             <i className="fas fa-check-circle text-green-400"></i>
             <span>{toastMessage}</span>
@@ -81,7 +57,7 @@ export default function Settings() {
             <Cog6ToothIcon className="h-5 w-5 text-blue-400" />
             Settings
           </h1>
-          <p className="text-gray-400 mt-2">
+          <p style={{color: theme.colors.secondary}} className="mt-2">
             Configure your AI models and appearance preferences
           </p>
         </header>
@@ -91,7 +67,7 @@ export default function Settings() {
           {/* Left Column - AI Model Selection */}
           <div className="lg:col-span-2 space-y-6">
             {/* AI Model Selection Card */}
-            <div className="rounded-2xl p-6 bg-slate-800/70 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30">
+            <div style={{backgroundColor: theme.colors.background_second}} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-semibold flex items-center gap-2">
                   <CpuChipIcon className="h-5 w-5 text-blue-400" />
@@ -102,7 +78,7 @@ export default function Settings() {
                 </span>
               </div>
 
-              <p className="text-gray-400 mb-6">
+              <p style={{color: theme.colors.secondary}} className="mb-6">
                 The selected model will be your default model.
               </p>
 
@@ -121,14 +97,14 @@ export default function Settings() {
                     >
                       <div className="flex items-center gap-6 justify-between">
                         <div className="text-center">
-                          <p className="text-sm text-gray-400">Model</p>
+                          <p style={{color: theme.colors.secondary}} className="text-sm">Model</p>
                           <p className="font-semibold">
                             {model.model_name.split(":")[0] || "N/A"}
                           </p>
                         </div>
 
                         <div className="text-center">
-                          <p className="text-sm text-gray-400">Parameters</p>
+                          <p style={{color: theme.colors.secondary}} className="text-sm">Parameters</p>
                           <p className="font-semibold">
                             {model.model_name.split(":")[1] || "N/A"}
                           </p>
@@ -136,10 +112,10 @@ export default function Settings() {
 
                         <button
                           onClick={() => handleModelSelect(model.id)}
-                          className={`px-4 py-2 rounded-lg transition-all duration-300 ${
+                          className={`text-gray-100 px-4 py-2 rounded-lg transition-all duration-300 ${
                             isSelected
-                              ? "bg-blue-600 hover:bg-blue-700 text-white"
-                              : "bg-slate-700 hover:bg-slate-600 text-gray-100"
+                              ? "bg-blue-600 hover:bg-blue-700"
+                              : "bg-slate-700 hover:bg-slate-600"
                           }`}
                         >
                           {isSelected ? <>Selected</> : "Select"}
@@ -155,36 +131,36 @@ export default function Settings() {
           {/* Right Column - Theme Settings */}
           <div className="space-y-6">
             {/* Selected Model Info */}
-            <div className="rounded-2xl p-6 bg-slate-800/70 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30">
+            <div style={{backgroundColor: theme.colors.background_second}} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30">
               <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
                 <CheckCircleIcon className="h-5 w-5 text-green-400" />
                 Current Selection
               </h2>
-              <div className="py-4 rounded-xl bg-slate-800/50">
-                <p className="text-gray-300 font-medium">
+              <div className="py-2">
+                <p className="font-medium">
                   {MODELS[selectedModelId]?.model_name.split(":")[0]}
                 </p>
-                <p className="text-sm text-gray-400 mt-1">
+                <p style={{color: theme.colors.secondary}} className="text-sm mt-1">
                   Parameters:{" "}
                   {MODELS[selectedModelId]?.model_name.split(":")[1]}
                 </p>
               </div>
               <div className="mt-2 pt-4 border-t border-gray-700/50">
-                <p className="text-sm text-gray-400">
-                  You can also change model during conversation.
+                <p style={{color: theme.colors.secondary}} className="text-sm">
+                  You can also switch model during conversation.
                 </p>
               </div>
             </div>
 
             {/* Theme Toggle Card */}
-            <div className="rounded-2xl p-6 bg-slate-800/70 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30">
+            <div style={{backgroundColor: theme.colors.background_second}} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30">
               <h2 className="text-xl font-semibold flex items-center gap-2 mb-6">
                 <SwatchIcon className="h-5 w-5 text-purple-400" />
                 Appearance
               </h2>
 
               <div className="space-y-4">
-                <p className="text-gray-400">
+                <p style={{color: theme.colors.secondary}}>
                   Choose between light and dark mode for the interface.
                 </p>
 
@@ -208,7 +184,7 @@ export default function Settings() {
                       <h3 className="font-medium">
                         {isDarkMode ? "Dark Mode" : "Light Mode"}
                       </h3>
-                      <p className="text-sm text-gray-400 dark:text-gray-300">
+                      <p style={{color: theme.colors.secondary}} className="text-sm">
                         {isDarkMode
                           ? "For the night owls."
                           : "Brighter interface."}
@@ -224,7 +200,6 @@ export default function Settings() {
                       className="sr-only"
                       checked={isDarkMode}
                       onChange={toggleTheme}
-                      disabled
                     />
                     <label
                       htmlFor="theme-toggle"
@@ -241,13 +216,6 @@ export default function Settings() {
                     </label>
                   </div>
                 </div>
-              </div>
-
-              <div className="mt-8 pt-6 border-t border-gray-700/50">
-                <p className="text-sm text-gray-400">
-                  <i className="fas fa-sync-alt mr-2"></i>
-                  Soon available.
-                </p>
               </div>
             </div>
           </div>

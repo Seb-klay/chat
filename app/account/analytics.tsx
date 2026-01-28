@@ -34,6 +34,7 @@ export interface IAnalytics {
   eval_count: string;
   eval_duration: string;
 }
+import { useTheme } from "../components/contexts/theme-provider";
 
 // Color palette for models
 const MODEL_COLORS = {
@@ -63,6 +64,7 @@ export default function Analytics({
   >("tokens");
   const dataAnalytics = use(analyticsPromise);
   const [mounted, setMounted] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
   setMounted(true);
@@ -110,17 +112,17 @@ export default function Analytics({
 
   return (
     <div style={{ width: "100%", height: 300 }}>
-    <div className="rounded-2xl p-6 bg-slate-800/70 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30 mt-6">
+    <div style={{ backgroundColor: theme.colors.background_second, color: theme.colors.secondary }} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30 mt-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
         <div>
           <h2 className="text-xl font-semibold flex items-center gap-2">
             <ChartBarIcon className="h-6 w-6 text-blue-400" />
             AI Model Analytics
           </h2>
-          <p className="text-gray-400 mt-1">
+          <p style={{ color: theme.colors.secondary }} className="mt-1">
             Track your model usage and performance over time
           </p>
-          <p className="text-xs text-gray-500 mt-3">
+          <p style={{ color: theme.colors.secondary }} className="text-xs mt-3">
             <InformationCircleIcon className="h-4 w-4 inline-block mr-1" />
             Data reflects the last 7 days of usage. Tokens include both input
             (prompt) and output (response) tokens.
@@ -165,8 +167,8 @@ export default function Analytics({
       <div className="grid grid-cols-1 gap-6">
         {/* Main Chart */}
         <div>
-          <div className="bg-slate-900/40 rounded-xl p-4">
-            <h3 className="text-lg font-medium mb-4 text-gray-300">
+          <div style={{ backgroundColor: theme.colors.background_second, color: theme.colors.secondary }} className="rounded-xl p-4">
+            <h3 className="text-lg font-medium mb-4">
               {activeTab === "tokens" &&
                 "Total Tokens Processed (Input + Output)"}
               {activeTab === "duration" && "Evaluation Duration per Request"}
@@ -299,8 +301,8 @@ export default function Analytics({
         </div>
 
         {/* Model Distribution Pie Chart */}
-        <div className="bg-slate-900/40 rounded-xl p-4">
-          <h3 className="text-lg font-medium mb-4 text-gray-300">
+        <div style={{ backgroundColor: theme.colors.background_second, color: theme.colors.secondary }} className="rounded-xl p-4">
+          <h3 className="text-lg font-medium mb-4">
             Model Usage Distribution
           </h3>
           <div className="h-64">
@@ -342,30 +344,31 @@ export default function Analytics({
               </PieChart>
             </ResponsiveContainer>
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-sm">
-            <span className="text-gray-400">Model Legend:</span>
+          {/* Legends */}
+          <div style={{ backgroundColor: theme.colors.background_second, color: theme.colors.secondary }} className="flex flex-wrap items-center gap-4 text-sm">
+            <span>Model Legend:</span>
             {Object.entries(MODEL_COLORS).map(([model, color]) => (
               <div key={model} className="flex items-center gap-2">
                 <div
                   className="w-3 h-3 rounded-full"
                   style={{ backgroundColor: color }}
                 ></div>
-                <span className="text-gray-300">{model}</span>
+                <span>{model}</span>
               </div>
             ))}
           </div>
         </div>
 
         {/* Performance Metrics */}
-        <div className="bg-slate-900/40 rounded-xl p-4">
-          <h3 className="text-lg font-medium mb-4 text-gray-300">
+        <div style={{ backgroundColor: theme.colors.background_second, color: theme.colors.secondary }} className="rounded-xl p-4">
+          <h3 className="text-lg font-medium mb-4">
             Performance Summary
           </h3>
           <div className="space-y-4">
             {modelSummary.map((model) => (
               <div
                 key={model.model}
-                className="p-3 rounded-lg bg-slate-800/50 border-l-4"
+                className="p-3 rounded-lg border-l-4 hover:opacity-70"
                 style={{ borderLeftColor: model.color }}
               >
                 <div className="flex justify-between items-center mb-2">
@@ -378,13 +381,13 @@ export default function Analytics({
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                   <div>
-                    <p className="text-gray-400">Total Tokens</p>
+                    <p>Total Tokens</p>
                     <p className="font-semibold">
                       {model.total_tokens.toLocaleString()}
                     </p>
                   </div>
                   <div>
-                    <p className="text-gray-400">Avg Eval Time</p>
+                    <p>Avg Eval Time</p>
                     <p className="font-semibold">
                       {(
                         model.total_eval_duration /
@@ -398,8 +401,8 @@ export default function Analytics({
               </div>
             ))}
 
-            <div className="pt-4 border-t border-gray-700/50">
-              <div className="text-sm text-gray-400 space-y-2">
+            <div style={{ color: theme.colors.secondary }} className="pt-4 border-t border-gray-700/50">
+              <div className="text-sm space-y-2">
                 <div className="flex justify-between">
                   <span>Total Requests:</span>
                   <span className="font-medium">

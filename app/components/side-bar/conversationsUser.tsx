@@ -2,6 +2,7 @@ import Link from "next/link";
 import { ConversationDropdown } from "./conversationDropdown";
 import { ConfirmationAction, ConfirmationState, Conversation } from "./appSidebar";
 import React, { useState } from "react";
+import { useTheme } from "../contexts/theme-provider";
 
 type Props = {
   conversation: Conversation;
@@ -14,6 +15,7 @@ export default function ConversationsUser({
 }: Props) {
   const [activeMenu, setActiveMenu] = useState<string | null>(null);
   const [menuRect, setMenuRect] = useState<DOMRect | null>(null);
+  const { theme } = useTheme();
 
   if (!conversation) return null;
 
@@ -41,7 +43,7 @@ export default function ConversationsUser({
         >
           <div className="flex justify-between items-start">
             <div className="flex-1 min-w-0 pr-8">
-              <h3 className="text-gray-100 font-medium truncate">{title}</h3>
+              <h3 style={{color: theme.colors.primary}} className="font-medium truncate">{title}</h3>
             </div>
           </div>
         </Link>
@@ -52,7 +54,8 @@ export default function ConversationsUser({
             onClick={(e) => {
               openMenu(convid, e);
             }}
-            className="p-1.5 text-gray-400 hover:text-gray-100 hover:bg-gray-700 rounded"
+            style={{color: theme.colors.secondary}}
+            className="p-1.5 hover:text-gray-100 hover:bg-gray-700 rounded"
             aria-label="Conversation options"
           >
             <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">

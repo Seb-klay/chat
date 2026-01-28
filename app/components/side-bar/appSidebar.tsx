@@ -11,6 +11,7 @@ import { useParams } from "next/navigation";
 import ConversationsUser from "./conversationsUser";
 import { ConfirmationConvCard } from "../cards/confirmationConvCard";
 import { IConversation } from "@/app/conversation/[id]/page";
+import { useTheme } from "../contexts/theme-provider";
 
 export interface Conversation {
   convid: string;
@@ -37,6 +38,7 @@ export default function ConversationSidebar() {
   const [confirmationState, setConfirmationState] =
     useState<ConfirmationState | null>(null);
   const [onError, setOnError] = useState<string | null>(null); // for confirmation cards
+  const { theme } = useTheme();
 
   useEffect(() => {
     fetchConversations();
@@ -169,7 +171,8 @@ export default function ConversationSidebar() {
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        className="fixed top-4 left-4 z-50 p-2.5 rounded-lg bg-gray-800 text-gray-100 shadow-lg hover:bg-gray-700 transition-all md:hidden"
+        style={{ backgroundColor: theme.colors.background_second, color: theme.colors.primary }}
+        className="fixed top-4 left-4 z-50 p-2.5 rounded-lg shadow-lg hover:opacity-70 transition-all md:hidden"
         aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
       >
         <div className="w-5 h-5 relative">
@@ -193,8 +196,12 @@ export default function ConversationSidebar() {
 
       {/* Sidebar */}
       <div
+        style={{
+          backgroundColor: theme.colors.background_second,
+          color: theme.colors.primary,
+        }}
         className={`
-          h-screen bg-gray-900 border-r border-gray-800
+          h-screen border-r border-gray-800
           transition-all duration-300 z-40 flex flex-col 
           ${isCollapsed ? "w-0 md:w-20" : "w-full md:w-64"}
         `}
@@ -207,7 +214,10 @@ export default function ConversationSidebar() {
             }`}
           >
             {!isCollapsed && (
-              <h2 className="text-lg font-semibold text-gray-100 my-auto">
+              <h2
+                style={{ color: theme.colors.primary }}
+                className="text-lg font-semibold my-auto"
+              >
                 Conversations
               </h2>
             )}
@@ -215,7 +225,7 @@ export default function ConversationSidebar() {
             {/* Collapse button - top right */}
             <button
               onClick={() => setIsCollapsed(!isCollapsed)}
-              className={`p-2 rounded hover:bg-gray-800 text-gray-400 hover:text-gray-100 hidden md:block ${
+              className={`p-2 rounded hover:opacity-70 hidden md:block ${
                 isCollapsed ? "justify-center" : "justify-end"
               }`}
               title={isCollapsed ? "Expand" : "Collapse"}
@@ -241,8 +251,9 @@ export default function ConversationSidebar() {
             {/* User Account */}
             <Link
               href="/account"
+              style={{ color: theme.colors.secondary }}
               className={`
-                flex items-center p-2 rounded-lg hover:bg-gray-800 text-gray-300
+                flex items-center p-2 rounded-lg hover:opacity-70
                 ${isCollapsed ? "justify-center" : "justify-start"}
               `}
               title={isCollapsed ? "Account" : ""}
@@ -266,8 +277,9 @@ export default function ConversationSidebar() {
             {/* Parameters/Settings */}
             <Link
               href="/settings"
+              style={{ color: theme.colors.secondary }}
               className={`
-                flex items-center p-2 rounded-lg hover:bg-gray-800 text-gray-300
+                flex items-center p-2 rounded-lg hover:opacity-70
                 ${isCollapsed ? "justify-center" : "justify-start"}
               `}
               title={isCollapsed ? "Settings" : ""}
@@ -336,7 +348,10 @@ export default function ConversationSidebar() {
               }
             >
               {conversations.length === 0 ? (
-                <div className="p-4 text-center text-gray-500">
+                <div
+                  style={{ color: theme.colors.secondary }}
+                  className="p-4 text-center"
+                >
                   No conversations yet
                 </div>
               ) : (
@@ -357,7 +372,10 @@ export default function ConversationSidebar() {
                       return (
                         <div key={groupName}>
                           {/* Section Header */}
-                          <div className="px-4 pt-8 pb-2 text-xs font-semibold text-gray-500">
+                          <div
+                            style={{ color: theme.colors.secondary }}
+                            className="px-4 pt-8 pb-2 text-xs font-semibold"
+                          >
                             {groupName}
                           </div>
 
@@ -365,12 +383,14 @@ export default function ConversationSidebar() {
                             return (
                               <div
                                 key={conv.convid}
-                                className={`group relative px-2 transition-colors rounded-lg overflow-x-hidden ${
-                                  String(currentConversationId) ===
-                                  String(conv.convid)
-                                    ? "bg-gradient-to-br from-slate-600 to-slate-800 text-gray-100 font-medium shadow-inner hover:from-blue-900/50 hover:to-blue-800/30"
-                                    : "border-transparent text-gray-300 hover:bg-gray-800"
-                                }`}
+                                style={{
+                                  backgroundColor:
+                                    String(currentConversationId) ===
+                                    String(conv.convid)
+                                      ? theme.colors.tertiary_background
+                                      : "transparent",
+                                }}
+                                className="group relative px-2 transition-colors rounded-lg overflow-x-hidden hover:opacity-70"
                               >
                                 <ConversationsUser
                                   conversation={conv}
@@ -402,8 +422,9 @@ export default function ConversationSidebar() {
         {/* Footer */}
         <div className="p-4 border-t border-gray-800">
           <div
+            style={{ color: theme.colors.secondary }}
             className={`
-            flex items-center p-2 rounded-lg hover:bg-gray-800 text-gray-300
+            flex items-center p-2 rounded-lg hover:opacity-70
             ${isCollapsed ? "justify-center" : "justify-start"}
           `}
           >

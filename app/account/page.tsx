@@ -5,7 +5,6 @@ import Analytics from "./analytics";
 import Accountdetails from "./accountDetails";
 import AnalyticsSkeleton from "./analyticsSkeleton";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
-import Loading from "./loading";
 import { getUserAnalytics } from "../service";
 
 export default async function Account() {
