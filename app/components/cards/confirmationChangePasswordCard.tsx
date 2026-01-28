@@ -5,17 +5,15 @@ import { updatePassword } from "./utils";
 import { useFormStatus } from "react-dom";
 
 type PropsCard = {
-  error?: string | null;
   userEmail: string;
-  setUpdatingEmail: React.Dispatch<React.SetStateAction<boolean>>;
-  setDeleteError: React.Dispatch<React.SetStateAction<string | null>>;
+  cancelUpdate: () => void;
+  onError?: string | null;
 };
 
 export function ConfirmationUpdatePassword({
-  error,
   userEmail,
-  setUpdatingEmail,
-  setDeleteError
+  cancelUpdate,
+  onError,
 }: PropsCard) {
   const [state, updatePasswordAction] = useActionState(
     updatePassword,
@@ -24,7 +22,7 @@ export function ConfirmationUpdatePassword({
 
     useEffect(() => {
     if (state?.success) {
-        setUpdatingEmail(false);
+        cancelUpdate;
     }
     }, [state]);
 
@@ -137,16 +135,13 @@ export function ConfirmationUpdatePassword({
           </div>
 
           {/* Global error */}
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {onError && <p className="text-sm text-red-400">{onError}</p>}
 
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-4">
             <button
               type="button"
-              onClick={() => {
-                setUpdatingEmail(false);
-                setDeleteError(null);
-              }}
+              onClick={cancelUpdate}
               className="rounded-lg bg-gray-700 px-4 py-2 hover:bg-gray-600 transition"
             >
               Cancel

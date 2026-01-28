@@ -60,11 +60,12 @@ export function ConfirmationConvCard({
         <div className="actions flex justify-around mx-auto">
           <CancelButton onCancel={onCancel} />
 
-          {action === "delete" && <DeleteButton onDelete={onDelete} />}
+          {action === "delete" && <DeleteButton onDelete={onDelete} buttonName="Delete" />}
 
           {action === "rename" && (
             <UpdateButton 
               onUpdate={() => onRename(newTitle)}
+              buttonName="Rename"
             />
           )}
 

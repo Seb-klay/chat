@@ -1,10 +1,8 @@
-'use client'
+"use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import {
-  deleteUserAccount
-} from "../service";
+import { deleteUserAccount } from "../service";
 import { ConfirmationCardDeleteUser } from "../components/cards/confirmationDeleteUserCard";
 import { ConfirmationUpdatePassword } from "../components/cards/confirmationChangePasswordCard";
 import {
@@ -15,29 +13,31 @@ import {
   KeyIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
+import { DeleteButton } from "../components/buttons/deleteButton";
+import { UpdateButton } from "../components/buttons/updateButton";
 
 export default function Accountdetails() {
   const [deletingUserAccount, setDeletingUserAccount] =
     useState<boolean>(false);
   const [updatingEmail, setUpdatingEmail] = useState<boolean>(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState<string>("test@test.com");
   const router = useRouter();
 
   const handleDeleteUserAccount = async () => {
     if (deletingUserAccount) {
-      console.log(1);
       // call API to delete the conversation
       const response = await deleteUserAccount();
-
       if (!response?.ok) {
-        setDeleteError("The user could not be deleted.");
+        setError("The user could not be deleted.");
       } else {
         setDeletingUserAccount(false);
         router.push(`/signup`);
       }
     }
   };
+
+  const cancelEvent = () => {};
 
   return (
     <div className="rounded-2xl p-6 bg-slate-800/70 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30 w-full mx-auto">
@@ -65,13 +65,10 @@ export default function Accountdetails() {
               </div>
             </div>
 
-            <button
-              onClick={() => setDeletingUserAccount(true)}
-              className="px-4 py-2 rounded-lg transition-all duration-300 bg-red-600/20 hover:bg-red-600/30 text-red-400 hover:text-red-300 border border-red-500/30"
-            >
-              <TrashIcon className="h-4 w-4 inline-block mr-2" />
-              Delete Account
-            </button>
+            <DeleteButton
+              onDelete={() => setDeletingUserAccount(true)}
+              buttonName="Delete Account"
+            />
           </div>
         </div>
 
@@ -79,10 +76,11 @@ export default function Accountdetails() {
         {deletingUserAccount && (
           <div className="mt-4">
             <ConfirmationCardDeleteUser
-              error={deleteError}
-              setDeletingUserAccount={setDeletingUserAccount}
-              setDeleteError={setDeleteError}
+              cancelDelete={() => {
+                (setDeletingUserAccount(false), setError(null));
+              }}
               handleDelete={handleDeleteUserAccount}
+              onError={error}
             />
           </div>
         )}
@@ -100,13 +98,10 @@ export default function Accountdetails() {
               </div>
             </div>
 
-            <button
-              onClick={() => setUpdatingEmail(true)}
-              className="px-4 py-2 rounded-lg transition-all duration-300 bg-blue-600 hover:bg-blue-700 text-white"
-            >
-              <KeyIcon className="h-4 w-4 inline-block mr-2" />
-              Update Password
-            </button>
+            <UpdateButton
+              onUpdate={() => setUpdatingEmail(true)}
+              buttonName="Update Password"
+            />
           </div>
         </div>
 
@@ -114,10 +109,11 @@ export default function Accountdetails() {
         {updatingEmail && (
           <div className="mt-4">
             <ConfirmationUpdatePassword
-              error={deleteError}
               userEmail={email}
-              setUpdatingEmail={setUpdatingEmail}
-              setDeleteError={setDeleteError}
+              cancelUpdate={() => {
+                (setUpdatingEmail(false), setError(null));
+              }}
+              onError={error}
             />
           </div>
         )}
@@ -128,8 +124,7 @@ export default function Accountdetails() {
             <InformationCircleIcon className="h-5 w-5 text-gray-500 flex-shrink-0 mt-0.5" />
             <p>
               Account changes are permanent. Make sure you have backup access
-              before deleting your account. Password updates require email
-              verification. Account settings are secured with end-to-end
+              before deleting your account. Account settings are secured with end-to-end
               encryption.
             </p>
           </div>
