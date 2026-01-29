@@ -7,7 +7,7 @@ import {
   getUserConversations,
   updateTitleConversation,
 } from "@/app/service";
-import { useParams } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
 import ConversationsUser from "./conversationsUser";
 import { ConfirmationConvCard } from "../cards/confirmationConvCard";
 import { IConversation } from "@/app/conversation/[id]/page";
@@ -102,12 +102,12 @@ export default function ConversationSidebar() {
       const response = await deleteConversation(
         confirmationState.conversationId,
       );
-
       if (!response.ok) {
         setOnError("The conversation could not be deleted.");
       } else {
         fetchConversations();
         setConfirmationState(null);
+        redirect("/");
       }
     }
   };
@@ -172,7 +172,10 @@ export default function ConversationSidebar() {
       {/* Mobile Toggle Button */}
       <button
         onClick={() => setIsCollapsed(!isCollapsed)}
-        style={{ backgroundColor: theme.colors.background_second, color: theme.colors.primary }}
+        style={{
+          backgroundColor: theme.colors.background_second,
+          color: theme.colors.primary,
+        }}
         className="fixed top-4 left-4 z-50 p-2.5 rounded-lg shadow-lg hover:opacity-70 transition-all md:hidden"
         aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
       >
@@ -202,8 +205,7 @@ export default function ConversationSidebar() {
           color: theme.colors.primary,
         }}
         className={`
-          h-screen
-          transition-all duration-300 z-40 flex flex-col 
+          h-[100dvh] transition-all duration-300 z-40 flex flex-col 
           ${isCollapsed ? "w-0 md:w-20" : "w-full md:w-64"}
         `}
       >
@@ -427,7 +429,7 @@ export default function ConversationSidebar() {
             style={{ color: theme.colors.primary }}
             className={`
             flex items-center p-2 rounded-lg hover:opacity-70
-            ${isCollapsed ? "justify-center text-center mx-auto" : "justify-start"}
+            ${isCollapsed ? "justify-center text-center mx-auto hidden md:block" : "justify-start"}
           `}
           >
             <svg

@@ -76,16 +76,16 @@ const handleStream = async (
       try {
         const data: IAnswer = JSON.parse(trimmed);
 
-        if (data.response) {
-          aiResponse += data.response;
-          onData(data.response);
+        if (data.message?.content) {
+          aiResponse += data.message?.content;
+          onData(data.message?.content);
         }
 
         if (data.done) {
           const assistantPlaceholder: IMessage = {
-            role: "assistant",
+            role: data.message?.role || "assistant",
             model: payload.messages.at(-1)!.model,
-            prompt: aiResponse,
+            content: aiResponse,
           };
           // create payload
           var payloadFromAI: IPayload = {

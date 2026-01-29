@@ -4,6 +4,10 @@ services:
   gemma:
     image: ollama/ollama
     container_name: gemma-3
+    restart: unless-stopped
+    environment:
+      - OLLAMA_KEEP_ALIVE=-1
+      #- OLLAMA_NUM_PARALLEL=4 for several request at the same time
     ports:
       - 11437:11434  # Map host 11437 to container 11434
     volumes:

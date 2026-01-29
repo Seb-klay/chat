@@ -66,7 +66,7 @@ const Dialogs: React.FC<DialogProps> = ({ messages }) => {
                   ),
                 }}
               >
-                {m.prompt}
+                {m.content}
               </ReactMarkdown>
             </div>
           </div>

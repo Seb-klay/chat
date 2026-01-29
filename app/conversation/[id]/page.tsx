@@ -70,7 +70,8 @@ export default function ConversationPage() {
           throw new Error(err);
         });
         const newConversation: IConversation[] = await response?.json();
-        await sendMessage(newConversation[0].title, newConversation[0].defaultmodel);
+        sendMessage(newConversation[0].title, newConversation[0].defaultmodel);
+        setLoadingConversation(false); // show conversation to user
         // rename conversation
         await summaryConversationAndUpdate(newConversation[0]);
       // otherwise just load the history
@@ -80,13 +81,14 @@ export default function ConversationPage() {
           const newMessage: IMessage = {
             role: chat.role,
             model: chat.model,
-            prompt: chat.prompt,
+            content: chat.content,
           };
           messageHistory.push(newMessage);
         }
         setMessages(messageHistory);
+        setLoadingConversation(false); // once conversation is loaded, display it
       }
-      setLoadingConversation(false);
+      
     } catch (error) {
       console.error(error);
     }
@@ -105,12 +107,12 @@ export default function ConversationPage() {
     const messageFromUser: IMessage = {
       role: "user",
       model: selectedModel,
-      prompt: messageText,
+      content: messageText,
     };
     const assistantPlaceholder: IMessage = {
       role: "assistant", // This ensures it uses the "Bot" styling/side
       model: selectedModel,
-      prompt: "",
+      content: "",
     };
     // store USER message in history
     setMessages((prev) => [...prev, messageFromUser, assistantPlaceholder]);
@@ -136,7 +138,7 @@ export default function ConversationPage() {
           onData: (chunk: string) => {
             setMessages((prev) => {
               const last = prev[prev.length - 1];
-              const updated = { ...last, prompt: last.prompt + chunk };
+              const updated = { ...last, content: last.content + chunk };
               return [...prev.slice(0, -1), updated];
             });
           },

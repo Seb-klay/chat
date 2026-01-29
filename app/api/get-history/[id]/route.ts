@@ -27,7 +27,7 @@ export async function GET(
     const pool = getPool();
 
     const response = await pool.query(
-      `SELECT rolesender as role, model, textmessage as prompt
+      `SELECT rolesender as role, model, textmessage as content
        FROM messages 
        WHERE convid = $1
        ORDER BY createdat ASC`,
