@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ConversationDropdown } from "./conversationDropdown";
-import { ConfirmationAction, ConfirmationState, Conversation } from "./appSidebar";
+import { ConfirmationState, Conversation } from "./appSidebar";
 import React, { useState } from "react";
 import { useTheme } from "../contexts/theme-provider";
 

@@ -12,6 +12,7 @@ import ConversationsUser from "./conversationsUser";
 import { ConfirmationConvCard } from "../cards/confirmationConvCard";
 import { IConversation } from "@/app/conversation/[id]/page";
 import { useTheme } from "../contexts/theme-provider";
+import { logout } from "@/app/login/actions";
 
 export interface Conversation {
   convid: string;
@@ -201,13 +202,13 @@ export default function ConversationSidebar() {
           color: theme.colors.primary,
         }}
         className={`
-          h-screen border-r border-gray-800
+          h-screen
           transition-all duration-300 z-40 flex flex-col 
           ${isCollapsed ? "w-0 md:w-20" : "w-full md:w-64"}
         `}
       >
         {/* Header Section - Always visible */}
-        <div className="p-2 border-b border-gray-800">
+        <div className="p-2">
           <div
             className={`flex justify-between my-4 ${
               isCollapsed ? "flex-col items-center" : ""
@@ -251,7 +252,7 @@ export default function ConversationSidebar() {
             {/* User Account */}
             <Link
               href="/account"
-              style={{ color: theme.colors.secondary }}
+              style={{ color: theme.colors.primary }}
               className={`
                 flex items-center p-2 rounded-lg hover:opacity-70
                 ${isCollapsed ? "justify-center" : "justify-start"}
@@ -277,7 +278,7 @@ export default function ConversationSidebar() {
             {/* Parameters/Settings */}
             <Link
               href="/settings"
-              style={{ color: theme.colors.secondary }}
+              style={{ color: theme.colors.primary }}
               className={`
                 flex items-center p-2 rounded-lg hover:opacity-70
                 ${isCollapsed ? "justify-center" : "justify-start"}
@@ -342,7 +343,7 @@ export default function ConversationSidebar() {
           <div className="flex-1 overflow-y-scroll">
             <Suspense
               fallback={
-                <div className="p-4 flex justify-center">
+                <div className="p-2 flex justify-center">
                   <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
                 </div>
               }
@@ -374,7 +375,7 @@ export default function ConversationSidebar() {
                           {/* Section Header */}
                           <div
                             style={{ color: theme.colors.secondary }}
-                            className="px-4 pt-8 pb-2 text-xs font-semibold"
+                            className="px-2 pt-4 pb-2 text-xs font-semibold"
                           >
                             {groupName}
                           </div>
@@ -420,12 +421,13 @@ export default function ConversationSidebar() {
         )}
 
         {/* Footer */}
-        <div className="p-4 border-t border-gray-800">
-          <div
-            style={{ color: theme.colors.secondary }}
+        <div className="py-2">
+          <button
+            onClick={logout}
+            style={{ color: theme.colors.primary }}
             className={`
             flex items-center p-2 rounded-lg hover:opacity-70
-            ${isCollapsed ? "justify-center" : "justify-start"}
+            ${isCollapsed ? "justify-center text-center mx-auto" : "justify-start"}
           `}
           >
             <svg
@@ -442,7 +444,7 @@ export default function ConversationSidebar() {
               />
             </svg>
             {!isCollapsed && <span className="ml-3">Logout</span>}
-          </div>
+          </button>
         </div>
       </div>
     </>

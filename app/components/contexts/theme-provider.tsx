@@ -25,7 +25,7 @@ const darkTheme: Theme = {
   colors: {
     background: "#0f172b", // bg-slate-950 #020617 or slate-900 #0f172b
     background_second: "#1e293b", // bg-gray-900 #101828 or slate-800
-    tertiary_background: "rgba(30, 64, 175, 0.2)", // bg-blue-900
+    tertiary_background: "rgba(30, 64, 175, 0.4)", // bg-blue-900
     primary: "#f3f4f6", // gray-100 for text
     secondary: "#d1d5dc", // gray-300
   },
@@ -35,7 +35,7 @@ const lightTheme: Theme = {
   colors: {
     background: "#e5e7eb", // gray-200
     background_second: "#cbd5e1", // slate-300
-    tertiary_background: "rgba(219, 234, 254, 0.4)", // Lighter blue for selected card
+    tertiary_background: "rgba(219, 234, 254, 0.8)", // Lighter blue for selected card
     primary: "#4a5568", // Warm medium-dark gray (gray-700)
     secondary: "#718096", // Warm medium gray (gray-600)
   },

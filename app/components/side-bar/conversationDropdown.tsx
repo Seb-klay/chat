@@ -2,7 +2,7 @@
 
 import { createPortal } from "react-dom";
 import { ConfirmationAction, ConfirmationState, Conversation } from "./appSidebar";
-import { useState } from "react";
+import { useTheme } from "../contexts/theme-provider";
 
 type Props = {
   anchorRect: DOMRect | null;
@@ -17,6 +17,7 @@ export function ConversationDropdown({
   onOption,
   setActiveMenu,
 }: Props) {
+  const { theme } = useTheme();
   if (!anchorRect) return null;
   const { top, right } = anchorRect;
 
@@ -38,17 +39,19 @@ export function ConversationDropdown({
         top: top - 8,
         left: right - 192,
         zIndex: 9999,
+        backgroundColor: theme.colors.background,
+        color: theme.colors.primary
       }}
-      className="w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl"
+      className="w-48 rounded-lg shadow-xl"
     >
-      <div className="absolute right-2 bottom-full mb-1 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-xl z-100">
+      <div style={{ backgroundColor: theme.colors.background }}  className="absolute right-2 bottom-full mb-1 w-48 rounded-lg shadow-xl z-100">
         <div className="py-1">
           {/* Rename Option */}
           <button
             onClick={(e) => {
               sendAction(e, "rename", conv.convid);
             }}
-            className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+            className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-700"
           >
             <svg
               className="w-4 h-4 mr-3"
@@ -97,7 +100,7 @@ export function ConversationDropdown({
               // Implement share functionality
               setActiveMenu(null);
             }}
-            className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700"
+            className="flex items-center w-full px-4 py-2 text-sm hover:bg-gray-700"
           >
             <svg
               className="w-4 h-4 mr-3"

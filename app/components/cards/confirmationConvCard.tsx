@@ -2,6 +2,7 @@ import { useState } from "react";
 import { DeleteButton } from "../buttons/deleteButton";
 import { CancelButton } from "../buttons/cancelButton";
 import { UpdateButton } from "../buttons/updateButton";
+import { useTheme } from "../contexts/theme-provider";
 
 type PropsCard = {
   action: "delete" | "rename" | "share";
@@ -21,6 +22,7 @@ export function ConfirmationConvCard({
   onError,
 }: PropsCard) {
   const [newTitle, setNewTitle] = useState<string | undefined>(undefined);
+  const { theme } = useTheme();
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -32,8 +34,8 @@ export function ConfirmationConvCard({
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-      <div className="text-gray-100 bg-gray-800 p-6 rounded-lg shadow-lg w-80">
+    <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
+      <div style={{ backgroundColor: theme.colors.background_second, color: theme.colors.primary}} className="p-6 rounded-lg shadow-lg w-80">
         {action === "delete" && (
           <div className="flex flex-col">
             <h1 className="font-bold">Delete conversation</h1>
@@ -48,9 +50,9 @@ export function ConfirmationConvCard({
               onChange={(e) => setNewTitle(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="New title"
-              className="w-full p-4 pr-36 bg-gray-900 text-gray-100 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden overflow-y-scroll resize-none min-h-[30px] md:min-h-[60px]"
+              className="w-full p-4 pr-36 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden overflow-y-scroll resize-none min-h-[30px] md:min-h-[60px]"
               rows={1}
-              style={{ height: "auto" }}
+              style={{ backgroundColor: theme.colors.tertiary_background, color: theme.colors.primary, height: "auto" }}
             />
           </div>
         )}
