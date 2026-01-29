@@ -54,7 +54,6 @@ export async function signup(prevState: any, formData: FormData) {
     // send verification code
     const responseCode = await sendVerificationCode(email);
     if (responseCode.success) {
-      //await createSession(newUser.id);
       return {
         success: true,
         temporaryData: {
