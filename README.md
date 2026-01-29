@@ -1,6 +1,6 @@
 # AI Chatbot Platform with Docker and PostgreSQL
 
-A modern web application that allows you to converse with multiple open-source AI models (LLaMA 3, Gemma 3, Tinyllama, ...) or add them directly from ollama repo while seamlessly switching between them during conversations. Built with containerized AI models, PostgreSQL database, and a responsive web interface in NextJS 15. Self hosted and do not require API keys or subscriptions.
+A modern web application that allows you to converse with multiple open-weight AI models (LLaMA 3, Gemma 3, Tinyllama, ...) or add them directly from ollama repo while seamlessly switching between them during conversations. Built with containerized AI models, PostgreSQL database, and a responsive web interface in NextJS 15. Self hosted and do not require API keys or subscriptions.
 
 ![AI Chatbot Interface](https://img.shields.io/badge/Status-Almost%20Complete-success) ![Docker](https://img.shields.io/badge/Docker-Containers-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
 
@@ -10,7 +10,7 @@ A modern web application that allows you to converse with multiple open-source A
 
 ## Features
 
-- **Multiple AI Models**: Switch between open weight models during conversations
+- **Multiple AI Models**: Switch between open-weight models during conversations
 - **Real-time Streaming**: Watch responses generate in real-time
 - **User Management**: Secure authentication with email validation
 - **Conversation History**: Store and retrieve past conversations
@@ -91,6 +91,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ### ✅ Completed Features
 **Web Interface**:
 - [x] Create web interface
+
 **Multiple Chatbots and real time streaming**:
 - [x] First hard-coded message to chatbot (tinyllama)
 - [x] Custom messages to chatbot using inputs
@@ -100,17 +101,21 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Making the new chatbots communicate with the app
 - [x] Create a feature to choose the model on the interface
 - [x] Add docker-compose file to project that gives the image of the 3 containers and run them
+
 **Database Layer**:
 - [x] Run a DB on Docker to store conversations 
 - [x] Add storing layer
+
 **User Authentication**:
 - [x] Add identifying layer to identify user and store conversation on his account
 - [x] Add signup page
 - [x] Email validation
+
 **Conversation Management**:
 - [x] Finish function "create conversation"
 - [x] Create feature (sidebar) to choose the conversation on the interface
-**Finish UI**:
+
+**Finish UI details**:
 - [x] Update interface (general UI : headers, conversation section, selection button, etc.)
 - [x] Add function abort message
 - [x] Create page "forgot password"
