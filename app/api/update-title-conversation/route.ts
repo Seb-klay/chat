@@ -1,4 +1,4 @@
-'use server'
+"use server";
 
 import { NextResponse } from "next/server";
 import { getPool } from "../../backend/database/utils/databaseUtils";
@@ -6,33 +6,31 @@ import { getPool } from "../../backend/database/utils/databaseUtils";
 // import { JWTPayload } from "jose";
 // import { decrypt } from "@/app/lib/session";
 
-// Create conversation
-export async function PUT(
-    request: Request
-): Promise<NextResponse> {
+export async function PUT(request: Request): Promise<NextResponse> {
   try {
     // get user id in cookie
     // const session = (await cookies()).get("session")?.value;
     // const sessionUser: JWTPayload | undefined = await decrypt(session);
-    const sessionUser = '019bf62e-12bb-716a-b66e-6c78c3e52dd6'  // to delete after testing !
-
-    const { id, newTitle  } = await request.json();
-
-    if (!sessionUser){
-        return NextResponse.json("No user has been found with these credentials. Try to login again or you are not allowed to see this conversation.", { status: 404 });
-    }
-
+    const sessionUser = "019bf62e-12bb-716a-b66e-6c78c3e52dd6"; // to delete after testing !
+    const { id, newTitle } = await request.json();
     const pool = getPool();
-
+    if (!sessionUser)
+      return NextResponse.json(
+        {
+          error:
+            "No user has been found with these credentials. Try to login again or you are not allowed to see this conversation.",
+        },
+        { status: 404 },
+      );
+    // update title conversation
     const response = await pool.query(
       `UPDATE conversations
         SET title = $1, updatedat = $2
         WHERE convid = $3`,
-      [newTitle, new Date(Date.now()), id]
+      [newTitle, new Date(Date.now()), id],
     );
 
     return NextResponse.json(response.rows, { status: 200 });
-
   } catch (err) {
     return NextResponse.json(err, { status: 500 });
   }

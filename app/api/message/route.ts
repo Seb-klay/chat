@@ -2,19 +2,22 @@ import { getPool } from "@/app/backend/database/utils/databaseUtils";
 import { IMessage } from "@/app/utils/chatUtils";
 import { NextRequest, NextResponse } from "next/server";
 
-// Create message in conversation
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     const { message, conversationId } = await request.json();
     const { role, model, content }: IMessage = message.at(-1);
-
     const pool = getPool();
-
-    pool.query(
+    // create new message in conversation
+    const response = pool.query(
       `INSERT INTO messages (rolesender, model, textmessage, convid, createdat) 
       values ($1, $2, $3, $4, $5)`,
-      [role, model, content, conversationId, new Date(Date.now())]
+      [role, model, content, conversationId, new Date(Date.now())],
     );
+    if (!response)
+      return NextResponse.json(
+        { error: "Message could not be stored. " },
+        { status: 400 },
+      );
 
     return NextResponse.json({ status: 200 });
   } catch (err) {

@@ -1,7 +1,7 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-import { IModelList, MODELS } from "../../utils/listModels";
+import { MODELS } from "../../utils/listModels";
 
 export async function POST(request: NextRequest) {
   try {
@@ -9,7 +9,7 @@ export async function POST(request: NextRequest) {
     const aiModel = JSON.parse(model);
     // get AI URL from list
     const AI_MODEL_URL: string = MODELS[aiModel.id].address;
-    
+    // send prompt to AI
     const response = await fetch(AI_MODEL_URL + "/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -18,14 +18,12 @@ export async function POST(request: NextRequest) {
         prompt: titleToSummarize,
         stream: false,
       }),
-    }).catch((err) => {
-      throw new Error("Title generation failed. " + err);
     });
-
-    if (!response.ok) {
-        return NextResponse.json("The new title could not be generated. ", { status: response.status });
-    }
-
+    if (!response.ok)
+      return NextResponse.json(
+        { error: "Title generation failed. " },
+        { status: 400 },
+      );
     const data = await response.json();
 
     return NextResponse.json(data.response, { status: 200 });

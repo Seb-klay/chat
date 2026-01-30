@@ -4,36 +4,34 @@ import { NextRequest, NextResponse } from "next/server";
 import { MODELS } from "@/app/utils/listModels";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const { email, encrPassword }: IUser = await request.json();
-
-  const pool = getPool();
-
   try {
-    // create new user
+    const { email, encrPassword }: IUser = await request.json();
+    const pool = getPool();
+    // create new user and create user preferences
     const response = await pool.query(
-      `INSERT INTO users (email, userpassword) values ($1, $2) 
-      RETURNING userid, email, userrole`,
-      [email, encrPassword]
+      `WITH new_user AS (
+        INSERT INTO users (email, userpassword) 
+        VALUES ($1, $2) 
+        RETURNING userid, email, userrole
+      )
+      INSERT INTO users_settings (userid, colortheme, defaultmodel)
+      SELECT userid, $3, $4 FROM new_user`,
+      [email, encrPassword, "dark", MODELS[1]],
     );
-    if (!response) throw new Error("Could not create new user. ");
+    if (!response)
+      return NextResponse.json(
+        { error: "Could not create new user. " },
+        { status: 400 },
+      );
 
     const newUser: IUser = {
       id: response.rows[0].userid,
       email: email,
       encrPassword: encrPassword,
-      role: response.rows[0].userrole
+      role: response.rows[0].userrole,
     };
-
-    // create user preferences
-    const responsePreferences = await pool.query(
-      `INSERT INTO users_settings (userid, colortheme, defaultmodel)
-      values ($1, $2, $3)`,
-      [newUser.id, "dark", MODELS[1]]
-    );
-    if (!responsePreferences) throw new Error("Could not create user preferences. ");
-
-    return NextResponse.json(newUser, { status : 200});
+    return NextResponse.json(newUser, { status: 200 });
   } catch (err) {
-    return NextResponse.json(err, { status: 500});
+    return NextResponse.json(err, { status: 500 });
   }
 }

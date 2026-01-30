@@ -3,12 +3,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 // Update table "email_verification_codes"
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  const objects = await request.json();
-  const { email, code } = objects;
-
-  const pool = getPool();
-
   try {
+    const objects = await request.json();
+    const { email, code } = objects;
+    const pool = getPool();
+    // get user verification code
     const response = await pool.query(
       `SELECT 1
         FROM email_verification_codes
@@ -18,14 +17,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             AND verified = false`,
       [email, code]
     );
-
     if (response.rowCount === 0) {
       return NextResponse.json(
         { error: "Invalid or expired verification code" },
         { status: 400 }
       );
     }
-
     //Mark as verified
     const update = await pool.query(
       `UPDATE email_verification_codes
@@ -34,7 +31,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         RETURNING *`,
       [email, code]
     );
-
     if (update.rowCount === 0) {
       return NextResponse.json(
         { error: "Code already used or invalid" },

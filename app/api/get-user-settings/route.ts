@@ -1,4 +1,4 @@
-'use server'
+"use server";
 
 import { NextRequest, NextResponse } from "next/server";
 import { getPool } from "../../backend/database/utils/databaseUtils";
@@ -6,38 +6,42 @@ import { getPool } from "../../backend/database/utils/databaseUtils";
 // import { JWTPayload } from "jose";
 // import { decrypt } from "@/app/lib/session";
 
-// Create conversation
-export async function GET(
-  request: NextRequest
-): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // get user id in cookie
     // const session = (await cookies()).get("session")?.value;
     // const sessionUser: JWTPayload | undefined = await decrypt(session);
-    const sessionUser = '019bf62e-12bb-716a-b66e-6c78c3e52dd6' // to delete after testing !
-
-    if (!sessionUser){
-        return NextResponse.json("No user has been found with these credentials. Try to login again or you are not allowed to see this conversation.", { status: 404 });
-    }
-
+    const sessionUser = "019bf62e-12bb-716a-b66e-6c78c3e52dd6"; // to delete after testing !
     const pool = getPool();
-
+    if (!sessionUser)
+      return NextResponse.json(
+        {
+          error:
+            "No user has been found with these credentials. Try to login again or you are not allowed to see this conversation.",
+        },
+        { status: 404 },
+      );
+    // get user settings
     const response = await pool.query(
-        `
-        SELECT
+      `SELECT
           colortheme, defaultmodel
         FROM users_settings
-        WHERE userid = $1
-        `,
-      [sessionUser]
+        WHERE userid = $1`,
+      [sessionUser],
     );
+    if (!response)
+      return NextResponse.json(
+        { error: "The user settings could not be loaded." },
+        { status: 400 },
+      );
 
-    if (!response){
-        throw new Error("The user settings could not be loaded.");
-    }
-
-    return NextResponse.json( { colortheme: response.rows[0].colortheme, defaultmodel: response.rows[0].defaultmodel }, { status: 200 });
-
+    return NextResponse.json(
+      {
+        colortheme: response.rows[0].colortheme,
+        defaultmodel: response.rows[0].defaultmodel,
+      },
+      { status: 200 },
+    );
   } catch (err) {
     return NextResponse.json(err, { status: 500 });
   }

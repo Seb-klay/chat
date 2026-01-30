@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
         ? JSON.parse(lastMessage.model)
         : lastMessage.model;
     const AI_MODEL_URL: string = MODELS[model.id].address;
-
+    // send request to AI
     const response = await fetch(AI_MODEL_URL + "/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -21,12 +21,16 @@ export async function POST(request: NextRequest) {
         model: model.model_name,
         messages: messages.map((m: any) => ({
           role: m.role,
-          content: m.content
+          content: m.content,
         })),
         stream: isStream,
       }),
     });
-    if (!response.ok) throw new Error("AI message could not be generated. ");
+    if (!response.ok)
+      return NextResponse.json(
+        { error: "AI message could not be generated. " },
+        { status: 400 },
+      );
 
     return new NextResponse(response.body, {
       headers: {
