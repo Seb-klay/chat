@@ -8,7 +8,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const { role, model, content }: IMessage = message.at(-1);
     const pool = getPool();
     // create new message in conversation
-    const response = pool.query(
+    const response = await pool.query(
       `INSERT INTO messages (rolesender, model, textmessage, convid, createdat) 
       values ($1, $2, $3, $4, $5)`,
       [role, model, content, conversationId, new Date(Date.now())],
@@ -19,7 +19,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { status: 400 },
       );
 
-    return NextResponse.json({ status: 200 });
+    return NextResponse.json({ message: "Message stored successfully. " }, { status: 200 });
   } catch (err) {
     return NextResponse.json(err, { status: 500 });
   }

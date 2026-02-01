@@ -51,7 +51,7 @@ export default function ConversationSidebar() {
       const data = await response.json();
       setConversations(data.conversations || []);
     } catch (error) {
-      console.error("Failed to fetch conversations:", error);
+      throw new Error("Failed to fetch conversations: " + error);
     }
   };
 
@@ -92,7 +92,7 @@ export default function ConversationSidebar() {
       );
       setConfirmationState(null);
     } catch (err) {
-      console.error(err);
+      throw new Error("Failed to rename conversations: " + err);
     }
   };
 
@@ -212,7 +212,7 @@ export default function ConversationSidebar() {
         {/* Header Section - Always visible */}
         <div className="p-2">
           <div
-            className={`flex justify-between my-4 ${
+            className={`flex justify-between my-2 ${
               isCollapsed ? "flex-col items-center" : ""
             }`}
           >

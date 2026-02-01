@@ -18,7 +18,7 @@ export const sendChatMessage = async (
   try {
     // store user message
     const responseStore = await storeMessage(payload);
-    if (!responseStore) throw new Error("Error while storing the message of the user. ");
+    if (!responseStore?.ok) throw new Error(`Response ${responseStore?.status} occurred while storing the message of the user. `);
 
     // send user input to AI model
     const responseChat = await fetch(`/api/chat-messages`, {
@@ -27,12 +27,13 @@ export const sendChatMessage = async (
       body: JSON.stringify(payload),
       signal: abortController.signal,
     });
-    if (!responseChat) throw new Error("Error while chatting with AI. ");
+    if (!responseChat.ok) throw new Error(`Response ${responseChat.status} occurred while chatting with AI. `);
     // Pass the stream to the handler
     await handleStream(responseChat, payload, callbacks);
   } catch (error: any) {
     if (error.name === "AbortError") {
-      console.log("Fetch aborted by user");
+      // TODO store conversation as is...
+      
     } else {
       callbacks.onError(error);
     }
@@ -95,7 +96,6 @@ const handleStream = async (
           };
           // store AI message
           const storingResponse = await storeMessage(payloadFromAI);
-
           if (!storingResponse?.ok) throw new Error(`Response with status ${storingResponse?.status} while storing the message of the user.`);
           // store analytics detail
           const analytics: IAnswer = {
@@ -108,16 +108,15 @@ const handleStream = async (
             eval_count: data.eval_count,
             eval_duration: data.eval_duration,
           };
-
+          // store Analytics
           const analyticsResponse = await addUserAnalytics(analytics);
-
           if (!analyticsResponse?.ok) throw new Error(`Response with status ${analyticsResponse?.status} while storing user's analytics.`);
           // stop loading icons
           onCompleted();
           return;
         }
       } catch (e) {
-        onError("Error parsing stream chunk" + e);
+        onError(String(e));
       }
     }
   }

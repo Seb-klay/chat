@@ -2,7 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import ChatInput from "../../components/textInput/chatInput";
-import { IMessage, IPayload, summaryConversationAndUpdate } from "../../utils/chatUtils";
+import {
+  IMessage,
+  IPayload,
+  summaryConversationAndUpdate,
+} from "../../utils/chatUtils";
 import {
   getConversationHistory,
   getSingleConversations,
@@ -13,19 +17,20 @@ import Dialog from "../../components/dialogs/dialogs";
 import DialogsSkeleton from "../../components/dialogs/dialogsSkeleton";
 import { sendChatMessage } from "@/app/service/aiService";
 import { useTheme } from "@/app/components/contexts/theme-provider";
+import { Toaster, toast } from "sonner";
 
-  export type IConversation = {
-    convid: string;
-    title: string;
-    userid: string;
-    createdat: string;
-    updatedat: string;
-    defaultmodel: IModelList;
-  };
+export type IConversation = {
+  convid: string;
+  title: string;
+  userid: string;
+  createdat: string;
+  updatedat: string;
+  defaultmodel: IModelList;
+};
 
 export default function ConversationPage() {
   const params = useParams();
-  const { theme, mode } = useTheme();
+  const { theme } = useTheme();
   const conversationId = params.id as string; // used to get the id in the URL
   const [messages, setMessages] = useState<IMessage[]>([]); // list of messages history
   const scrollRef = useRef<HTMLDivElement>(null); // used to go at the bottom of the page
@@ -60,21 +65,31 @@ export default function ConversationPage() {
   const loadConversationHistory = async (id: string) => {
     try {
       setLoadingConversation(true);
-      const loadHistory = await getConversationHistory(id).catch((err) => {
-        throw new Error("The user history could not load. " + err);
-      });
+      const loadHistory = await getConversationHistory(id);
+      if (!loadHistory.ok)
+        toast.warning(
+          `Response ${loadHistory.status} occurred while loading conversation history. `,
+        );
       const history: IMessage[] = await loadHistory?.json();
+
       // in case of a new conversation
       if (history.length === 0) {
-        const response = await getSingleConversations(id).catch((err) => {
-          throw new Error(err);
-        });
+        const response = await getSingleConversations(id);
+        if (!loadHistory?.ok)
+          toast.warning(
+            `Response ${response?.status} occurred while loading conversation. `,
+          );
         const newConversation: IConversation[] = await response?.json();
         sendMessage(newConversation[0].title, newConversation[0].defaultmodel);
         setLoadingConversation(false); // show conversation to user
         // rename conversation
-        await summaryConversationAndUpdate(newConversation[0]);
-      // otherwise just load the history
+        await summaryConversationAndUpdate(newConversation[0], {
+          onError: (err) => {
+            toast.warning(`Bad response while summarizing title : ` + err);
+          },
+        });
+
+        // otherwise just load the history
       } else {
         var messageHistory: IMessage[] = [];
         for (let chat of history) {
@@ -88,9 +103,8 @@ export default function ConversationPage() {
         setMessages(messageHistory);
         setLoadingConversation(false); // once conversation is loaded, display it
       }
-      
     } catch (error) {
-      console.error(error);
+      toast.error(String(error));
     }
   };
 
@@ -147,7 +161,7 @@ export default function ConversationPage() {
           onError: (err) => {
             setOnAiThought(false);
             setOnAiWriting(false);
-            console.error("Stream failed:", err);
+            toast.warning(String(err));
           },
 
           onWrite: () => {
@@ -159,15 +173,23 @@ export default function ConversationPage() {
           onCompleted: () => {
             setOnAiWriting(false);
           },
-        }
+        },
       );
     } catch (err) {
-      console.error(err);
+      toast.error(String(err));
     }
   };
 
   return (
-    <div style={{ backgroundColor: theme.colors.background, color: theme.colors.primary}}  className="flex flex-col h-[100dvh] px-2">
+    <div
+      style={{
+        backgroundColor: theme.colors.background,
+        color: theme.colors.primary,
+      }}
+      className="flex flex-col h-[100dvh] px-2"
+    >
+      {/* Notifications */}
+      <Toaster richColors position="top-center" />
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
         <div className="space-y-2 bg-transparent rounded-lg w-full md:w-1/2 mx-auto">
@@ -183,9 +205,18 @@ export default function ConversationPage() {
 
           {onAiThought && (
             <div className="flex space-x-2 mb-6">
-              <div style={{backgroundColor: theme.colors.primary}} className="dot w-2 h-2 rounded-full animate-bounce [animation-delay:-0.3s]"></div>
-              <div style={{backgroundColor: theme.colors.primary}} className="dot w-2 h-2 rounded-full animate-bounce [animation-delay:-0.15s]"></div>
-              <div style={{backgroundColor: theme.colors.primary}} className="dot w-2 h-2 rounded-full animate-bounce"></div>
+              <div
+                style={{ backgroundColor: theme.colors.primary }}
+                className="dot w-2 h-2 rounded-full animate-bounce [animation-delay:-0.3s]"
+              ></div>
+              <div
+                style={{ backgroundColor: theme.colors.primary }}
+                className="dot w-2 h-2 rounded-full animate-bounce [animation-delay:-0.15s]"
+              ></div>
+              <div
+                style={{ backgroundColor: theme.colors.primary }}
+                className="dot w-2 h-2 rounded-full animate-bounce"
+              ></div>
             </div>
           )}
 

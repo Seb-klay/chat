@@ -102,7 +102,7 @@ export const storeMessage = async (
 
 export const getConversationHistory = async (
   conversationID: string,
-): Promise<Response | null> => {
+) => {
   return await fetch(`${URL}/api/get-history/${conversationID}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },

@@ -37,7 +37,6 @@ export const getPool = (): Pool => {
     pool = new Pool(configs);
 
     pool.on('error', (err) => {
-      console.error('Unexpected error on idle client', err);
       process.exit(1);
     });
   }
@@ -48,7 +47,6 @@ export const getPool = (): Pool => {
 // Shut down pool when app shuts down
 export const shutDownPool = async () => {
     if (pool) {
-        await pool.end()
-        console.log('pool has drained')
+        await pool.end();
     }
 }

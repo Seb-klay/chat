@@ -39,7 +39,6 @@ import { validateUser, verifySignupCode } from '../service';
         success: true,
       };
     } catch (error) {
-        console.error('Error sending verification code:', error);
       return { 
         success: false, 
         message: "" + error
@@ -79,7 +78,6 @@ import { validateUser, verifySignupCode } from '../service';
       //return result.rows.length > 0;
       return false
     } catch (error) {
-      console.error('Error checking verification:', error);
       return false;
     }
   }

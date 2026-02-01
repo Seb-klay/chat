@@ -55,7 +55,7 @@ export const ModelProvider = ({ children }: { children: React.ReactNode }) => {
           setSelectedModel(modelOfUser);
         }
       } catch (error) {
-        console.error("Failed to fetch settings:", error);
+        throw new Error("Failed to fetch settings: " + error);
       } finally {
         setIsLoading(false);
       }

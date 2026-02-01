@@ -38,7 +38,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    return NextResponse.json({ status: 200 });
+    return NextResponse.json({ message: "Code verified successfully. " },{ status: 200 });
   } catch (err) {
     return NextResponse.json(err, { status: 500 });
   }

@@ -26,9 +26,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { status: 400 },
       );
 
-    return NextResponse.json({ status: 200 });
+    return NextResponse.json({ message: "User validated successfully. " },{ status: 200 });
   } catch (err) {
-    console.error(err);
     return NextResponse.json(err, { status: 500 });
   }
 }

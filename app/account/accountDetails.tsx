@@ -14,6 +14,7 @@ import {
 import { DeleteButton } from "../components/buttons/deleteButton";
 import { UpdateButton } from "../components/buttons/updateButton";
 import { useTheme } from "../components/contexts/theme-provider";
+import { Toaster, toast } from "sonner";
 
 export default function Accountdetails() {
   const [deletingUserAccount, setDeletingUserAccount] =
@@ -32,7 +33,7 @@ export default function Accountdetails() {
         const emailUser = await response.json();
         setEmail(emailUser[0].email);
       } catch (err) {
-        console.error("Failed to load email. ", err);
+        toast.error(String(err));
       }
     };
 
@@ -54,6 +55,8 @@ export default function Accountdetails() {
 
   return (
     <div style={{ backgroundColor: theme.colors.background_second, color: theme.colors.primary}} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30 w-full mx-auto">
+      {/* Notifications */}
+      <Toaster richColors position="top-center" />
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-xl font-semibold flex items-center gap-2">
           <UserCircleIcon className="h-6 w-6 text-blue-400" />

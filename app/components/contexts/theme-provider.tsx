@@ -59,8 +59,8 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         if (!response) throw new Error("User settings could not be loaded.");
         const { colortheme } = await response.json();
         if (colortheme) setMode(colortheme);
-      } catch (err) {
-        console.error("Theme load failed", err);
+      } catch (error) {
+        throw new Error("Failed to fetch color theme: " + error);
       }
     }
     initTheme();

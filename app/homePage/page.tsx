@@ -4,6 +4,7 @@ import { createConversation } from "../service";
 import { IModelList } from "../utils/listModels";
 import { useState } from "react";
 import { useTheme } from "../components/contexts/theme-provider";
+import { Toaster, toast } from "sonner";
 
 export default function HomePage() {
   const router = useRouter();
@@ -12,18 +13,16 @@ export default function HomePage() {
 
   const createAndRedirect = async (
     userInput: string,
-    selectedModel: IModelList
+    selectedModel: IModelList,
   ) => {
     if (!userInput.trim()) return;
     setOnAiThought(true);
     try {
       // Create new conversation with input as title and default model
-      const response = await createConversation(userInput, selectedModel).catch(
-        (err) => {
-          throw new Error(
-            `Error with status ${response?.status} while creating a conversation.` + err
-          );
-        }
+      const response = await createConversation(userInput, selectedModel);
+      if (!response?.ok)
+        toast.warning(
+          `Response ${response?.status} occurred while creating new conversation. `,
       );
 
       const data = await response?.json();
@@ -32,14 +31,17 @@ export default function HomePage() {
       // Redirect to the new conversation
       router.push(`/conversation/${conversationId}`);
     } catch (err) {
-      console.error("Error:", err);
+      toast.error(String(err));
     } finally {
       setOnAiThought(false);
     }
   };
 
   return (
-    <div style={{ color: theme.colors.primary }}  className="min-h-[100dvh] flex flex-col items-center justify-center p-4 w-full md:w-1/2 lg:w-1/2 mr-auto ml-auto">
+    <div
+      style={{ color: theme.colors.primary }}
+      className="min-h-[100dvh] flex flex-col items-center justify-center p-4 w-full md:w-1/2 lg:w-1/2 mr-auto ml-auto"
+    >
       {/* Header with icon and text */}
       <div className="mb-8 text-center">
         {/* Icon */}
@@ -60,10 +62,8 @@ export default function HomePage() {
         </div>
 
         {/* Text */}
-        <h2 className="text-2xl font-bold mb-2">
-          How can I help you today?
-        </h2>
-        <p style={{color: theme.colors.secondary}} className="text-gray-400">
+        <h2 className="text-2xl font-bold mb-2">How can I help you today?</h2>
+        <p style={{ color: theme.colors.secondary }} className="text-gray-400">
           Start a conversation with our AI assistant
         </p>
       </div>
