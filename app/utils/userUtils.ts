@@ -10,18 +10,16 @@ export interface IUser {
 // cost factor
 const salt = genSaltSync(16);
 
-// TODO crypting password
 export function encryptPassword(password: string) {
     // hash password
     const encrPassword = hashSync(password, salt);
     return encrPassword;
-
 }
 
-export function validatePassword(password: string, passwordDb: string) {
+export async function validatePassword(password: string, passwordDb: string) {
     try{
-        return compareSync(password, passwordDb); // true or false
+      return await compareSync(password, passwordDb); // true or false
     } catch (err) {
-      throw new Error("Email or password invalid.");
+      throw new Error("Email or password could not be compared. ");
     }
 }

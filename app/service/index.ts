@@ -187,6 +187,18 @@ export const validateUser = async (
   });
 };
 
+export const isAccountUsed = async (
+  email: string,
+): Promise<Response | null> => {
+  return await fetch(`${URL}/api/is-account-used`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: email }),
+  }).catch((err) => {
+    throw new Error(err);
+  });
+};
+
 export const verifySignupCode = async (
   email: string,
   code: string,
@@ -206,7 +218,7 @@ export const updatePasswordUser = async (
   return await fetch(`${URL}/api/update-password`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(newPassword),
+    body: JSON.stringify({newPassword}),
   }).catch((err) => {
     throw new Error(err);
   });

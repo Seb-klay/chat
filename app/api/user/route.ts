@@ -10,15 +10,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // create new user and create user preferences
     const response = await pool.query(
       `WITH new_user AS (
-        INSERT INTO users (email, userpassword) 
-        VALUES ($1, $2) 
+        INSERT INTO users (email, userpassword)
+        VALUES ($1, $2)
         RETURNING userid, email, userrole
+      ),
+      settings AS (
+        INSERT INTO users_settings (userid, colortheme, defaultmodel)
+        SELECT userid, $3, $4 FROM new_user
       )
-      INSERT INTO users_settings (userid, colortheme, defaultmodel)
-      SELECT userid, $3, $4 FROM new_user`,
+      SELECT userid, userrole FROM new_user`,
       [email, encrPassword, "dark", MODELS[1]],
     );
-    if (!response)
+    if (!response.rows[0].userid)
       return NextResponse.json(
         { error: "Could not create new user. " },
         { status: 400 },
@@ -30,8 +33,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       encrPassword: encrPassword,
       role: response.rows[0].userrole,
     };
+    console.log(newUser)
     return NextResponse.json(newUser, { status: 200 });
   } catch (err) {
+    console.log(err);
     return NextResponse.json(err, { status: 500 });
   }
 }

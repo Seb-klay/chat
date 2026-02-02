@@ -2,7 +2,7 @@
 
 // lib/verification-service.ts
 import { emailService } from '@/app/service/emailService';
-import { validateUser, verifySignupCode } from '../service';
+import { isAccountUsed, validateUser, verifySignupCode } from '../service';
 
   // Generate 6-digit code
   function generateCode(): string {
@@ -70,15 +70,11 @@ import { validateUser, verifySignupCode } from '../service';
   // Check if email is verified
   export async function isEmailVerified(email: string): Promise<boolean> {
     try {
-      // const result = await pool.query(
-      //   `SELECT verified FROM email_verification_codes 
-      //    WHERE email = $1 AND verified = true`,
-      //   [email]
-      // );
-      //return result.rows.length > 0;
-      return false
+      const result = await isAccountUsed(email);
+      const isVerified = await result?.json();
+      return isVerified[0]
     } catch (error) {
-      return false;
+      throw new Error(String(error));
     }
   }
 

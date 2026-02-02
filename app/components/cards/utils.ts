@@ -42,12 +42,9 @@ export async function updatePassword(prevState: any, formData: FormData) {
   try {
     const { email, currentPassword, password, confirmPassword } = result.data;
 
-    // encrypt password before storing it
-    const encrPassword = encryptPassword(currentPassword);
-
     const checkUser: IUser = {
       email: email,
-      encrPassword: encrPassword,
+      encrPassword: currentPassword, // raw password !
     };
 
     // check if user is in DB and return id, password and role
@@ -56,7 +53,7 @@ export async function updatePassword(prevState: any, formData: FormData) {
 
     if (
       !userInDB ||
-      !validatePassword(checkUser.encrPassword, userInDB.encrPassword)
+      !await validatePassword(checkUser.encrPassword, userInDB.encrPassword)
     ) {
       return {
         errors: {
@@ -64,22 +61,20 @@ export async function updatePassword(prevState: any, formData: FormData) {
         },
       };
     }
-
-    const responsePsw = await updatePasswordUser(password);
+    // save new password in DB
+    const encrPassword = encryptPassword(password);
+    const responsePsw = await updatePasswordUser(encrPassword);
 
     if (responsePsw?.ok) {
       return {
         success: true,
-        temporaryData: {
-          currentPassword: currentPassword,
-          password: encrPassword,
-        },
+        errors: undefined
       };
     } else {
       return {
         success: false,
         errors: {
-          password: ["Could not change password."],
+          password: ["Password could not be changed. Try again please. "],
         },
       };
     }

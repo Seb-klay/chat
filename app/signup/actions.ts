@@ -5,25 +5,25 @@ import { redirect } from "next/navigation";
 import { IUser, encryptPassword } from "../utils/userUtils";
 import { createUser } from "../service";
 import { createSession } from "../lib/session";
-import { sendVerificationCode, verifyCode } from "./verificationService";
+import { isEmailVerified, sendVerificationCode, verifyCode } from "./verificationService";
 
 // step 1 : sign up
 const signupSchema = z
   .object({
-    email: z.email({ message: "Invalid email address" }).trim().toLowerCase(),
+    email: z.email({ message: "Invalid email address. " }).trim().toLowerCase(),
 
     password: z
       .string()
-      .min(8, { message: "Password must be at least 8 characters" })
+      .min(8, { message: "Password must be at least 8 characters. " })
       .regex(/[A-Z]/, {
-        message: "Password must contain at least one uppercase letter",
+        message: "Password must contain at least one uppercase letter. ",
       })
       .regex(/[a-z]/, {
-        message: "Password must contain at least one lowercase letter",
+        message: "Password must contain at least one lowercase letter. ",
       })
-      .regex(/[0-9]/, { message: "Password must contain at least one number" })
+      .regex(/[0-9]/, { message: "Password must contain at least one number. " })
       .regex(/[^A-Za-z0-9]/, {
-        message: "Password must contain at least one special character",
+        message: "Password must contain at least one special character. ",
       }),
 
     confirmPassword: z
@@ -35,18 +35,48 @@ const signupSchema = z
     path: ["confirmPassword"], // This shows error on confirmPassword field
   });
 
+type SignupErrors = {
+  email?: string[];
+  password?: string[];
+  confirmPassword?: string[];
+  general?: string[];
+};
+
+const emptySignupErrors: SignupErrors = {
+  email: undefined,
+  password: undefined,
+  confirmPassword: undefined,
+  general: undefined,
+};
+
 export async function signup(prevState: any, formData: FormData) {
   const result = signupSchema.safeParse(Object.fromEntries(formData));
 
   if (!result.success) {
     return {
       success: false,
-      errors: result.error.flatten().fieldErrors,
+      temporaryData: undefined,
+      errors: { 
+        ...emptySignupErrors, 
+        ...result.error.flatten().fieldErrors
+      }
     };
   }
 
   try {
     const { email, password } = result.data;
+
+    // check if email already exists
+    if (await isEmailVerified(email)) {
+      return {
+        success: true,
+        temporaryData: undefined,
+        errors: {
+          ...emptySignupErrors, 
+          email: ["This email is already used. Please, login or try with another email address. "]
+        },
+      };
+    }
 
     // encrypt password before storing it
     const encrPassword = encryptPassword(password);
@@ -60,19 +90,25 @@ export async function signup(prevState: any, formData: FormData) {
           email: email,
           encrPassword: encrPassword,
         },
-        errors: null,
+        errors: emptySignupErrors,
       };
     }
 
     // Error if didn't returned before
     return {
       success: false,
-      errors: { general: ["An error occurred. Try again please."] },
+      temporaryData: undefined,
+      errors: { 
+        ...emptySignupErrors, 
+        general: ["An error occurred. Please try again. "] },
     };
   } catch (err) {
     return {
       success: false,
-      errors: err,
+      errors: {
+        ...emptySignupErrors, 
+        general: [ String(err) ]
+      },
     };
   }
 }
@@ -97,6 +133,7 @@ export async function verifyAndRegister(prevState: any, formData: FormData) {
   }
 
   const { code, encrPassword, email } = validatedFields.data;
+  let success = false;
 
   try {
     // Verify the code
@@ -126,14 +163,16 @@ export async function verifyAndRegister(prevState: any, formData: FormData) {
 
     // check if response is ok
     if (responseUser?.ok && newUser.id) {
-      // Create session
+      success = true;
       await createSession(newUser.id);
-    }
+    } 
+
   } catch (error) {
     return {
-      errors: { code: ["An error occurred. Please try again." + error] },
+      errors: { code: ["An error occurred. Please try again. " + error] },
     };
   }
   //redirect to conversation page
-  redirect(`${process.env.FULL_URL}/`);
+  if (success)
+    redirect(`${process.env.FULL_URL}/`);
 }

@@ -26,7 +26,7 @@ export function ConfirmationUpdatePassword({
 
     useEffect(() => {
     if (state?.success) {
-        cancelUpdate;
+        cancelUpdate();
     }
     }, [state]);
 
