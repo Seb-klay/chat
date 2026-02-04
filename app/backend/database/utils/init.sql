@@ -4,7 +4,8 @@ CREATE TABLE Users
   userID UUID PRIMARY KEY DEFAULT uuidv7(),
   email VARCHAR(100) UNIQUE NOT NULL,
   userPassword VARCHAR(100) NOT NULL,
-  userRole VARCHAR(50) NOT NULL DEFAULT 'regular_user'
+  userRole VARCHAR(50) NOT NULL DEFAULT 'regular_user',
+  isDeleted BOOLEAN NOT NULL DEFAULT false
 );
 
 CREATE TABLE Conversations
@@ -62,7 +63,7 @@ CREATE TABLE Users_settings
 (
   id UUID PRIMARY KEY DEFAULT uuidv7(),
   userID UUID,
-  colorTheme TEXT DEFAULT 'DARK',
+  colorTheme TEXT DEFAULT 'dark',
   defaultModel TEXT,
   CONSTRAINT FK_UserSettings FOREIGN KEY (userID)
     REFERENCES Users(userID)

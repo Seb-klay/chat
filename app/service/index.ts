@@ -16,6 +16,7 @@ export const createConversation = async (
       defaultModel: defaultModel,
     }),
   }).catch((err) => {
+    console.log(err)
     throw new Error(err);
   });
 };
@@ -151,6 +152,18 @@ export const deleteUserAccount = async (): Promise<Response | null> => {
   });
 };
 
+export const updatePasswordUser = async (
+  newPassword: string,
+): Promise<Response | null> => {
+  return await fetch(`${URL}/api/update-password`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({newPassword}),
+  }).catch((err) => {
+    throw new Error(err);
+  });
+};
+
 export const getUserSettings = async (): Promise<Response | null> => {
   return await fetch(`${URL}/api/get-user-settings`, {
     method: "GET",
@@ -207,18 +220,6 @@ export const verifySignupCode = async (
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: email, code: code }),
-  }).catch((err) => {
-    throw new Error(err);
-  });
-};
-
-export const updatePasswordUser = async (
-  newPassword: string,
-): Promise<Response | null> => {
-  return await fetch(`${URL}/api/update-password`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({newPassword}),
   }).catch((err) => {
     throw new Error(err);
   });

@@ -8,14 +8,14 @@ import { getPool } from "../../../backend/database/utils/databaseUtils";
 
 export async function GET(
   request: Request,
-  { params }: { params: Promise<{ id: string }> },
+  { params }: { params: { id: string } },
 ): Promise<NextResponse> {
   try {
     // get user id in cookie
     // const session = (await cookies()).get("session")?.value;
     // const sessionUser: JWTPayload | undefined = await decrypt(session);
-    const sessionUser = "019bf62e-12bb-716a-b66e-6c78c3e52dd6"; // to delete after testing !
-    const { id } = await params;
+    const sessionUser = "019c2842-3c28-7d06-b7a1-3539934859a7"; // to delete after testing !
+    const { id } = params;
     const pool = getPool();
     if (!sessionUser)
       return NextResponse.json(

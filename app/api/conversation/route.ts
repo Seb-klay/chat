@@ -12,7 +12,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     // get user id in cookie
     // const session = (await cookies()).get("session")?.value;
     // const sessionUser: JWTPayload | undefined = await decrypt(session);
-    const sessionUser = "019bf62e-12bb-716a-b66e-6c78c3e52dd6"; // to delete after testing !
+    const sessionUser = "019c297a-d495-7959-9115-3d6fd0acc02b"; // to delete after testing !
     const pool = getPool();
     if (!sessionUser)
       return NextResponse.json(
