@@ -65,11 +65,16 @@ Run the Postgres database on docker container :
 
 ```bash
 cd app/backend/database/test
-docker-compose --env-file ../../../../.env -f compose.postgresdb_testenv.yml up
+docker-compose --env-file ../../../../.env -f compose.test.yml up
 ```
 
 > [!IMPORTANT]
 > For production environment, it is important to use the "production" folder.
+
+```bash
+cd app/backend/database/prod
+docker-compose --env-file ../../../../.env -f compose.prod.yml up
+```
 
 4. **Start up the interface**
 Finally, run the development server in terminal:

@@ -74,17 +74,3 @@ WITH PASSWORD 'regular_user';
 GRANT CONNECT ON DATABASE chat_db TO regular_user;
 GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO regular_user;
 GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO regular_user;
-
-
-INSERT INTO users
-  (email, userPassword)
-VALUES
-  ('test@test.com', '$2b$16$UOw3/3Nt22eICQ4SVCAFpOiNIfU9LWA1wBOc9cqS/bWh3xovCb4y2');
-INSERT INTO users
-  (email, userPassword)
-VALUES
-  ('test2@test.com', '$2b$16$UOw3/3Nt22eICQ4SVCAFpOiNIfU9LWA1wBOc9cqS/bWh3xovCb4y2');
-INSERT INTO users
-  (email, userPassword)
-VALUES
-  ('test3@test.com', '$2b$16$UOw3/3Nt22eICQ4SVCAFpOiNIfU9LWA1wBOc9cqS/bWh3xovCb4y2');
