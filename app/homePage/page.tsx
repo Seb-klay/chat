@@ -42,6 +42,8 @@ export default function HomePage() {
       style={{ color: theme.colors.primary }}
       className="min-h-[100dvh] flex flex-col items-center justify-center p-4 w-full md:w-1/2 lg:w-1/2 mr-auto ml-auto"
     >
+      {/* Notifications */}
+      <Toaster richColors position="top-center" />
       {/* Header with icon and text */}
       <div className="mb-8 text-center">
         {/* Icon */}

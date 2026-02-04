@@ -71,7 +71,7 @@ export default function ChatInput({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           placeholder="Type your message here..."
-           style={{backgroundColor: theme.colors.background_second, color: theme.colors.primary, height: "auto"}}
+          style={{backgroundColor: theme.colors.background_second, color: theme.colors.primary, height: "auto"}}
           className="w-full p-4 pr-36 border-gray-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden overflow-y-scroll resize-none min-h-[30px] md:min-h-[60px]"
           rows={1}
           disabled={onChatbotWriting}

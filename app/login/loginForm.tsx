@@ -114,7 +114,7 @@ export function LoginForm() {
   );
 }
 
-function SubmitButton() {
+export function SubmitButton() {
   const { pending } = useFormStatus();
 
   return (

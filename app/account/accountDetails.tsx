@@ -29,8 +29,8 @@ export default function Accountdetails() {
     const loadEmail = async () => {
       try {
         const response = await getEmail();
-        if (!response) throw new Error("No email could be found.");
-        const emailUser = await response.json();
+        if (!response?.ok) toast.warning("No email could be found.");
+        const emailUser = await response?.json();
         setEmail(emailUser[0].email);
       } catch (err) {
         toast.error(String(err));
