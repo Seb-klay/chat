@@ -30,12 +30,31 @@ const updatePasswordSchema = z
     path: ["confirmPassword"],
   });
 
+type UpdateErrors = {
+  email?: string[];
+  currentPassword?: string[];
+  password?: string[];
+  confirmPassword?: string[];
+  general?: string[];
+};
+
+const emptyUpdateErrors: UpdateErrors = {
+  email: undefined,
+  currentPassword: undefined,
+  password: undefined,
+  confirmPassword: undefined,
+  general: undefined,
+};
+
 export async function updatePassword(prevState: any, formData: FormData) {
   const result = updatePasswordSchema.safeParse(Object.fromEntries(formData));
 
   if (!result.success) {
     return {
-      errors: result.error.flatten().fieldErrors,
+      errors: {
+        ...emptyUpdateErrors,
+        ...result.error.flatten().fieldErrors,
+      },
     };
   }
 
@@ -53,10 +72,11 @@ export async function updatePassword(prevState: any, formData: FormData) {
 
     if (
       !userInDB ||
-      !await validatePassword(checkUser.encrPassword, userInDB.encrPassword)
+      !(await validatePassword(checkUser.encrPassword, userInDB.encrPassword))
     ) {
       return {
         errors: {
+          ...emptyUpdateErrors,
           currentPassword: ["Invalid password."],
         },
       };
@@ -68,12 +88,13 @@ export async function updatePassword(prevState: any, formData: FormData) {
     if (responsePsw?.ok) {
       return {
         success: true,
-        errors: undefined
+        errors: emptyUpdateErrors,
       };
     } else {
       return {
         success: false,
         errors: {
+          ...emptyUpdateErrors,
           password: ["Password could not be changed. Try again please. "],
         },
       };
@@ -81,7 +102,8 @@ export async function updatePassword(prevState: any, formData: FormData) {
   } catch (err) {
     return {
       errors: {
-        password: ["A problem arose. Try again please."],
+        ...emptyUpdateErrors,
+        general: ["A problem arose. Try again please."],
       },
     };
   }

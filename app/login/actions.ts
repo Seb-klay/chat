@@ -15,12 +15,27 @@ const loginSchema = z.object({
     .trim(),
 });
 
+type LoginErrors = {
+  email?: string[];
+  password?: string[];
+  general?: string[];
+};
+
+const emptyLoginErrors: LoginErrors = {
+  email: undefined,
+  password: undefined,
+  general: undefined,
+};
+
 export async function login(prevState: any, formData: FormData) {
   const result = loginSchema.safeParse(Object.fromEntries(formData));
 
   if (!result.success) {
     return {
-      errors: result.error.flatten().fieldErrors,
+      errors: { 
+        ...emptyLoginErrors, 
+        ...result.error.flatten().fieldErrors
+      }
     };
   }
 
@@ -39,7 +54,8 @@ export async function login(prevState: any, formData: FormData) {
       !validatePassword(userToLogin.encrPassword, userInDB.encrPassword)
     ) {
       return {
-        errors: {
+      errors: { 
+        ...emptyLoginErrors, 
           password: ["Invalid password"],
         },
       };
@@ -51,7 +67,8 @@ export async function login(prevState: any, formData: FormData) {
     }
   } catch (err: any) {
     return {
-      errors: {
+      errors: { 
+        ...emptyLoginErrors, 
         password: [err.message],
       },
     };

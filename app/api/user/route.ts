@@ -33,10 +33,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       encrPassword: encrPassword,
       role: response.rows[0].userrole,
     };
-    console.log(newUser)
+
     return NextResponse.json(newUser, { status: 200 });
   } catch (err) {
-    console.log(err);
     return NextResponse.json(err, { status: 500 });
   }
 }

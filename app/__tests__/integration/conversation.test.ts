@@ -124,7 +124,7 @@ describe("Conversation Integration", () => {
       `http://localhost:3000/api/get-single-conversation/${targetId}`,
     );
     const response = await getSingleConversations.GET(req, {
-      params: { id: targetId },
+      params: Promise.resolve({ id: targetId }),
     });
 
     const data = await response.json();
@@ -228,7 +228,7 @@ describe("Conversation Integration", () => {
       `http://localhost:3000/api/get-history/${newConvID}`,
     );
     const response = await getHistoryRoute.GET(getReq, {
-      params: { id: newConvID },
+      params: Promise.resolve({ id: newConvID }),
     });
 
     const history = await response.json();

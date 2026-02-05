@@ -16,7 +16,6 @@ export const createConversation = async (
       defaultModel: defaultModel,
     }),
   }).catch((err) => {
-    console.log(err)
     throw new Error(err);
   });
 };
@@ -128,6 +127,7 @@ export const getEmail = async (): Promise<Response | null> => {
   return await fetch(`${URL}/api/get-email`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
+    cache: 'force-cache'
   }).catch((err) => {
     throw new Error(err);
   });

@@ -8,7 +8,7 @@ import { getPool } from "../../../backend/database/utils/databaseUtils";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
     // get user id in cookie

@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/navigation";
 import ChatInput from "../components/textInput/chatInput";
 import { createConversation } from "../service";

@@ -7,7 +7,7 @@ import { createUser } from "../service";
 import { createSession } from "../lib/session";
 import { isEmailVerified, sendVerificationCode, verifyCode } from "./verificationService";
 
-// step 1 : sign up
+// sign up
 const signupSchema = z
   .object({
     email: z.email({ message: "Invalid email address. " }).trim().toLowerCase(),
