@@ -47,6 +47,7 @@ jobs:
         run: npm ci
 
       - name: Start Database
+        working-directory: ./app/backend/database/test
         run: docker compose -f compose.test.yml up -d
 
       - name: Run Integration tests
