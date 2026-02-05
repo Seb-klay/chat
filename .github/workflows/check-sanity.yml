@@ -46,8 +46,35 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Create .env.test file
+        # Created .env file 
+        working-directory: ./app
+        run: |
+          cat <<EOF > .env
+          POSTGRES_USER="admin"
+          POSTGRES_PASSWORD="mypassword"
+          POSTGRES_DB="chat_db"
+          POSTGRES_HOST="localhost"
+          POSTGRES_REG_USER="regular_user"
+          POSTGRES_REG_PASSWORD="regular_user"
+          SESSION_SECRET=JKLSFD8493UIF94085
+          FULL_URL="http://localhost:3000"
+          EMAIL_HOST="smtp.ethereal.email"
+          EMAIL_PORT="587"
+          EMAIL_SECURE="false"
+          EMAIL_USER="test@test.com"
+          EMAIL_PASSWORD="test123"
+          LLAMA3_URL="http://localhost:11435"
+          TINYLLAMA_URL="http://localhost:11434"
+          GEMMA3_URL="http://localhost:11437"
+          EOF
+
       - name: Start Database
         working-directory: ./app/backend/database/test
+        env:
+          POSTGRES_USER: "admin"
+          POSTGRES_PASSWORD: "mypassword"
+          POSTGRES_DB: "chat_db"
         run: docker compose -f compose.test.yml up -d
 
       - name: Run Integration tests
@@ -63,5 +90,6 @@ jobs:
 
       - name: Stop Containers
         if: always()
+        working-directory: ./app/backend/database/test
         run: docker compose -f compose.test.yml down
   # TODO : Integrate deployment
