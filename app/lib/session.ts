@@ -13,8 +13,10 @@ export async function createSession(userId: string) {
 
   (await cookies()).set("session", session, {
     httpOnly: true,
-    secure: true,
+    secure: false,
     expires: expiresAt,
+    path: "/",
+    sameSite: "lax",
   });
 }
 
@@ -37,11 +39,12 @@ export async function encrypt(payload: SessionPayload) {
 
 export async function decrypt(session: string | undefined = "") {
   try {
-    const { payload } = await jwtVerify(session, encodedKey, {
+    const { payload } = await jwtVerify(String(session), encodedKey, {
       algorithms: ["HS256"],
     });
     return payload;
   } catch (error) {
     //throw new Error("Failed to verify session. " + error);
+    console.log("error");
   }
 }

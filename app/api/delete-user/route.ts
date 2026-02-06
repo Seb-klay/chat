@@ -2,19 +2,18 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { getPool } from "../../backend/database/utils/databaseUtils";
-// import { cookies } from "next/headers";
-// import { JWTPayload } from "jose";
-// import { decrypt } from "@/app/lib/session";
+import { cookies } from "next/headers";
+import { JWTPayload } from "jose";
+import { decrypt } from "@/app/lib/session";
 
 export async function DELETE(request: NextRequest): Promise<NextResponse> {
   try {
-    // Get the conversation ID from the URL query
-    // get user id in cookie
-    // const session = (await cookies()).get("session")?.value;
-    // const sessionUser: JWTPayload | undefined = await decrypt(session);
-    const sessionUser = "019c297a-d495-7959-9115-3d6fd0acc02b"; // to delete after testing !
+    // get cookie for user id
+    const cookie = (await cookies()).get("session");
+    const sessionUser: JWTPayload | undefined = await decrypt(cookie?.value);
+    const userID = sessionUser?.userId;
     const pool = getPool();
-    if (!sessionUser)
+    if (!userID)
       return NextResponse.json(
         { error: "Conversation ID is required. " },
         { status: 404 },
@@ -25,7 +24,7 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
        SET isDeleted = true
        WHERE userid = $1
        RETURNING *`,
-      [sessionUser],
+      [userID],
     );
     if (response.rowCount === 0)
       return NextResponse.json(

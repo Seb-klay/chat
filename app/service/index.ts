@@ -1,8 +1,13 @@
+// 'use client'
+
 import { IAnalytics } from "../account/analytics";
 import { IAnswer, IPayload } from "../utils/chatUtils";
 import { IModelList } from "../utils/listModels";
 import { IUser } from "../utils/userUtils";
 const URL: string = process.env.FULL_URL || "";
+// import { cookies } from "next/headers";
+// const cookie = await cookies();
+// const cookieString = cookie.toString();
 
 export const createConversation = async (
   title: string,
@@ -15,6 +20,10 @@ export const createConversation = async (
       title: title,
       defaultModel: defaultModel,
     }),
+    credentials: "include",
+    cache: 'no-store',
+    keepalive: false,
+    mode: 'cors',
   }).catch((err) => {
     throw new Error(err);
   });
@@ -35,7 +44,9 @@ export const deleteConversation = async (conversationID: string) => {
 export const getUserConversations = async () => {
   return await fetch(`${URL}/api/get-user-conversation`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json"
+    },
   }).catch((err) => {
     throw new Error(err);
   });
@@ -240,7 +251,9 @@ export const addUserAnalytics = async (
 export const getUserAnalytics = async (): Promise<IAnalytics[]> => {
   const response = await fetch(`${URL}/api/get-user-analytics`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
+    headers: { 
+      "Content-Type": "application/json"
+     },
   }).catch((err) => {
     throw new Error(err);
   });

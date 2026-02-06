@@ -2,22 +2,22 @@
 
 import { NextResponse } from "next/server";
 import { getPool } from "../../../backend/database/utils/databaseUtils";
-// import { cookies } from "next/headers";
-// import { JWTPayload } from "jose";
-// import { decrypt } from "@/app/lib/session";
+import { cookies } from "next/headers";
+import { JWTPayload } from "jose";
+import { decrypt } from "@/app/lib/session";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse> {
   try {
-    // get user id in cookie
-    // const session = (await cookies()).get("session")?.value;
-    // const sessionUser: JWTPayload | undefined = await decrypt(session);
-    const sessionUser = '019c297a-d495-7959-9115-3d6fd0acc02b'  // to delete after testing !
+    // get cookie for user id
+    const cookie = (await cookies()).get("session");
+    const sessionUser: JWTPayload | undefined = await decrypt(cookie?.value);
+    const userID = sessionUser?.userId;
     const { id } = await params;
     const pool = getPool();
-    if (!sessionUser) return NextResponse.json({ error: "No user has been found with these credentials. Try to login again or you are not allowed to see this conversation."}, { status: 404 });
+    if (!userID) return NextResponse.json({ error: "No user has been found with these credentials. Try to login again or you are not allowed to see this conversation."}, { status: 404 });
     // Get conversation infos
     const response = await pool.query(
       `SELECT convid, title, defaultModel, createdat, updatedat
@@ -25,7 +25,7 @@ export async function GET(
        WHERE userid = $1
        AND convid = $2
        AND isdeleted = false`,
-      [sessionUser, id]
+      [userID, id]
     );
     if (!response) return NextResponse.json({ error: "Conversation info could not be loaded. "}, { status: 400 });
 

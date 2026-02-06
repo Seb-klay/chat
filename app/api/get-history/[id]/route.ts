@@ -2,22 +2,22 @@
 
 import { NextResponse } from "next/server";
 import { getPool } from "../../../backend/database/utils/databaseUtils";
-// import { cookies } from "next/headers";
-// import { JWTPayload } from "jose";
-// import { decrypt } from "@/app/lib/session";
+import { cookies } from "next/headers";
+import { JWTPayload } from "jose";
+import { decrypt } from "@/app/lib/session";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
   try {
-    // get user id in cookie
-    // const session = (await cookies()).get("session")?.value;
-    // const sessionUser: JWTPayload | undefined = await decrypt(session);
-    const sessionUser = "019c2842-3c28-7d06-b7a1-3539934859a7"; // to delete after testing !
+    // get cookie for user id
+    const cookie = (await cookies()).get("session");
+    const sessionUser: JWTPayload | undefined = await decrypt(cookie?.value);
+    const userID = sessionUser?.userId;
     const { id } = await params;
     const pool = getPool();
-    if (!sessionUser)
+    if (!userID)
       return NextResponse.json(
         {
           error:
