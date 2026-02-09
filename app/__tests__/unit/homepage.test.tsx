@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import HomePage from "../../homePage/page";
+import HomePage from "../../(main)/homePage/page";
 import { createConversation } from "../../service";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";

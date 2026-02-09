@@ -8,7 +8,7 @@ export function LoginForm() {
   const [state, loginAction] = useActionState(login, undefined);
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-gradient-to-br from-gray-900 to-black p-4">
+    <div className="min-h-dvh flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-2xl font-bold text-gray-100 mb-2">Welcome Back</h1>
@@ -121,9 +121,9 @@ export function SubmitButton() {
     <button
       disabled={pending}
       type="submit"
-      className="w-full bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-gray-100 font-semibold py-3.5 px-4 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
+      className="w-full bg-linear-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-700 hover:via-indigo-700 hover:to-purple-700 text-gray-100 font-semibold py-3.5 px-4 rounded-xl transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/25 hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 disabled:cursor-not-allowed group relative overflow-hidden"
     >
-      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+      <div className="absolute inset-0 bg-linear-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
         Login
     </button>
   );

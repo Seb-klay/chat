@@ -10,9 +10,9 @@ import {
 import { redirect, useParams } from "next/navigation";
 import ConversationsUser from "./conversationsUser";
 import { ConfirmationConvCard } from "../cards/confirmationConvCard";
-import { IConversation } from "@/app/conversation/[id]/page";
+import { IConversation } from "@/app/(main)/conversation/[id]/page";
 import { useTheme } from "../contexts/theme-provider";
-import { logout } from "@/app/login/actions";
+import { logout } from "@/app/(auth)/login/actions";
 
 export interface Conversation {
   convid: string;
@@ -205,7 +205,7 @@ export default function ConversationSidebar() {
           color: theme.colors.primary,
         }}
         className={`
-          h-[100dvh] transition-all duration-300 z-40 flex flex-col 
+          h-dvh transition-all duration-300 z-40 flex flex-col 
           ${isCollapsed ? "w-0 md:w-20" : "w-full md:w-64"}
         `}
       >
@@ -313,7 +313,7 @@ export default function ConversationSidebar() {
             <Link
               href="/"
               className={`
-                flex items-center p-2 rounded-lg duration-500 ease-in-out bg-gradient-to-br from-indigo-500 to-indigo-800 hover:to-violet-900 text-gray-100
+                flex items-center p-2 rounded-lg duration-500 ease-in-out bg-linear-to-br from-indigo-500 to-indigo-800 hover:to-violet-900 text-gray-100
                 ${
                   isCollapsed
                     ? "justify-center items-center hidden md:block md:mx-auto"

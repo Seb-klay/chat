@@ -14,14 +14,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const sessionUser: JWTPayload | undefined = await decrypt(cookie?.value);
     const userID = sessionUser?.userId;
     const pool = getPool();
-    if (!userID)
-      return NextResponse.json(
-        {
-          error:
-            "No user could be found with these credentials. Try again please. ",
-        },
-        { status: 404 },
-      );
+    
     // Create conversation
     const response = await pool.query(
       `INSERT INTO conversations (title, userid, createdat, updatedat, defaultModel, isDeleted) 

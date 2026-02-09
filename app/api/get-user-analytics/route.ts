@@ -13,14 +13,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     const sessionUser: JWTPayload | undefined = await decrypt(cookie?.value);
     const userID = sessionUser?.userId;
     const pool = getPool();
-    if (!userID)
-      return NextResponse.json(
-        {
-          error:
-            "No user has been found with these credentials. Try to login again or you are not allowed to see this conversation.",
-        },
-        { status: 404 },
-      );
+
     // get analytics of one user of the last 7 days
     const response = await pool.query(
       `SELECT

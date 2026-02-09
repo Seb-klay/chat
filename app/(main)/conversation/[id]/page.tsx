@@ -1,20 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import ChatInput from "../../components/textInput/chatInput";
+import ChatInput from "../../../components/textInput/chatInput";
 import {
   IMessage,
   IPayload,
   summaryConversationAndUpdate,
-} from "../../utils/chatUtils";
+} from "../../../utils/chatUtils";
 import {
   getConversationHistory,
   getSingleConversations,
-} from "../../service/index";
-import { IModelList } from "../../utils/listModels";
+} from "../../../service/index";
+import { IModelList } from "../../../utils/listModels";
 import { useParams } from "next/navigation";
-import Dialog from "../../components/dialogs/dialogs";
-import DialogsSkeleton from "../../components/dialogs/dialogsSkeleton";
+import Dialog from "../../../components/dialogs/dialogs";
+import DialogsSkeleton from "../../../components/dialogs/dialogsSkeleton";
 import { sendChatMessage } from "@/app/service/aiService";
 import { useTheme } from "@/app/components/contexts/theme-provider";
 import { Toaster, toast } from "sonner";

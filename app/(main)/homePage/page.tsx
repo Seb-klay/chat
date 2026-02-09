@@ -1,11 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import ChatInput from "../components/textInput/chatInput";
-import { createConversation } from "../service";
-import { IModelList } from "../utils/listModels";
+import ChatInput from "../../components/textInput/chatInput";
+import { createConversation } from "../../service";
+import { IModelList } from "../../utils/listModels";
 import { useState } from "react";
-import { useTheme } from "../components/contexts/theme-provider";
+import { useTheme } from "../../components/contexts/theme-provider";
 import { Toaster, toast } from "sonner";
 
 export default function HomePage() {

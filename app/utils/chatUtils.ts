@@ -1,5 +1,6 @@
-import { IConversation } from "../conversation/[id]/page";
+import { IConversation } from "../(main)/conversation/[id]/page";
 import { summaryConversation, updateTitleConversation } from "../service/index";
+import { useRouter } from 'next/router'
 
 type role = "user" | "assistant" | "system";
 

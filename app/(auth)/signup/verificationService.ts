@@ -2,7 +2,7 @@
 
 // lib/verification-service.ts
 import { emailService } from '@/app/service/emailService';
-import { isAccountUsed, validateUser, verifySignupCode } from '../service';
+import { isAccountUsed, validateUser, verifySignupCode } from '../../service';
 
   // Generate 6-digit code
   function generateCode(): string {

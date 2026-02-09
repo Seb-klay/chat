@@ -45,7 +45,7 @@ export const ModelProvider = ({ children }: { children: React.ReactNode }) => {
     async function fetchDefaultModel() {
       try {
         const response = await getUserSettings();
-        if (!response) throw new Error("User settings could not be loaded.");
+        if (!response?.ok) throw new Error("User settings could not be loaded.");
         const { defaultmodel } = await response.json();
         const model = JSON.parse(defaultmodel);
         // match the ID from DB with local MODELS
@@ -55,7 +55,8 @@ export const ModelProvider = ({ children }: { children: React.ReactNode }) => {
           setSelectedModel(modelOfUser);
         }
       } catch (error) {
-        throw new Error("Failed to fetch settings: " + error);
+        setSelectedModel(MODELS[1]);
+        // throw new Error("Failed to fetch settings: " + error);
       } finally {
         setIsLoading(false);
       }

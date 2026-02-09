@@ -6,7 +6,7 @@ import {
   act,
 } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import AccountDetails from "../../account/accountDetails";
+import AccountDetails from "../../(main)/account/accountDetails";
 import { getEmail, deleteUserAccount } from "../../service";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";

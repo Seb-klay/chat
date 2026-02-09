@@ -2,23 +2,23 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { deleteUserAccount, getEmail } from "../service";
-import { ConfirmationCardDeleteUser } from "../components/cards/confirmationDeleteUserCard";
-import { ConfirmationUpdatePassword } from "../components/cards/confirmationChangePasswordCard";
+import { deleteUserAccount, getEmail } from "../../service";
+import { ConfirmationCardDeleteUser } from "../../components/cards/confirmationDeleteUserCard";
+import { ConfirmationUpdatePassword } from "../../components/cards/confirmationChangePasswordCard";
 import {
   UserCircleIcon,
   EnvelopeIcon,
   LockClosedIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { DeleteButton } from "../components/buttons/deleteButton";
-import { UpdateButton } from "../components/buttons/updateButton";
-import { useTheme } from "../components/contexts/theme-provider";
+import { DeleteButton } from "../../components/buttons/deleteButton";
+import { UpdateButton } from "../../components/buttons/updateButton";
+import { useTheme } from "../../components/contexts/theme-provider";
 import { Toaster, toast } from "sonner";
+import { logout } from "@/app/(auth)/login/actions";
 
 export default function Accountdetails() {
-  const [deletingUserAccount, setDeletingUserAccount] =
-    useState<boolean>(false);
+  const [deletingUserAccount, setDeletingUserAccount] = useState<boolean>(false);
   const [updatingPassword, setUpdatingPassword] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [email, setEmail] = useState<string>("");
@@ -48,13 +48,20 @@ export default function Accountdetails() {
         setError("The user could not be deleted.");
       } else {
         setDeletingUserAccount(false);
+        await logout();
         router.push(`/signup`);
       }
     }
   };
 
   return (
-    <div style={{ backgroundColor: theme.colors.background_second, color: theme.colors.primary}} className="rounded-2xl p-6 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30 w-full mx-auto">
+    <div
+      style={{
+        backgroundColor: theme.colors.background_second,
+        color: theme.colors.primary,
+      }}
+      className="rounded-2xl p-6 backdrop-blur-xl border border-white/10 shadow-2xl shadow-black/30 w-full mx-auto"
+    >
       {/* Notifications */}
       <Toaster richColors position="top-center" />
       <div className="flex items-center justify-between mb-6">
@@ -76,7 +83,12 @@ export default function Accountdetails() {
                 <EnvelopeIcon className="h-5 w-5 text-blue-400" />
               </div>
               <div>
-                <p style={{ color: theme.colors.secondary}} className="text-sm">Email Address</p>
+                <p
+                  style={{ color: theme.colors.secondary }}
+                  className="text-sm"
+                >
+                  Email Address
+                </p>
                 <p className="font-medium">{email}</p>
               </div>
             </div>
@@ -109,7 +121,12 @@ export default function Accountdetails() {
                 <LockClosedIcon className="h-5 w-5 text-green-400" />
               </div>
               <div>
-                <p style={{ color: theme.colors.secondary}} className="text-sm">Password</p>
+                <p
+                  style={{ color: theme.colors.secondary }}
+                  className="text-sm"
+                >
+                  Password
+                </p>
                 <p className="font-medium">••••••••</p>
               </div>
             </div>
@@ -136,8 +153,11 @@ export default function Accountdetails() {
 
         {/* Additional Info */}
         <div className="mt-8 pt-6 border-t border-gray-700/50">
-          <div style={{ color: theme.colors.secondary }} className="flex items-start gap-3 text-sm">
-            <InformationCircleIcon className="h-5 w-5 flex-shrink-0 mt-0.5" />
+          <div
+            style={{ color: theme.colors.secondary }}
+            className="flex items-start gap-3 text-sm"
+          >
+            <InformationCircleIcon className="h-5 w-5 shrink-0 mt-0.5" />
             <p>
               Account changes are permanent. Make sure you have backup access
               before deleting your account. Account settings are secured with

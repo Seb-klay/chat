@@ -60,7 +60,8 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
         const { colortheme } = await response.json();
         if (colortheme) setMode(colortheme);
       } catch (error) {
-        throw new Error("Failed to fetch color theme: " + error);
+        setMode('dark');
+        // throw new Error("Failed to fetch color theme: " + error);
       }
     }
     initTheme();

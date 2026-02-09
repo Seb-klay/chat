@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import React from "react";
-import { LoginForm, SubmitButton } from "../../login/loginForm";
+import { LoginForm, SubmitButton } from "../../(auth)/login/loginForm";
 import * as ReactDOMModule from "react-dom";
 import { useActionState } from "react";
 

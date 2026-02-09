@@ -1,13 +1,8 @@
-// 'use client'
-
-import { IAnalytics } from "../account/analytics";
+import { IAnalytics } from "../(main)/account/analytics";
 import { IAnswer, IPayload } from "../utils/chatUtils";
 import { IModelList } from "../utils/listModels";
 import { IUser } from "../utils/userUtils";
 const URL: string = process.env.FULL_URL || "";
-// import { cookies } from "next/headers";
-// const cookie = await cookies();
-// const cookieString = cookie.toString();
 
 export const createConversation = async (
   title: string,
@@ -138,7 +133,6 @@ export const getEmail = async (): Promise<Response | null> => {
   return await fetch(`${URL}/api/get-email`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
-    cache: 'force-cache'
   }).catch((err) => {
     throw new Error(err);
   });

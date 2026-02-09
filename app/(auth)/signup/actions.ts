@@ -2,9 +2,9 @@
 
 import { z } from "zod";
 import { redirect } from "next/navigation";
-import { IUser, encryptPassword } from "../utils/userUtils";
-import { createUser } from "../service";
-import { createSession } from "../lib/session";
+import { IUser, encryptPassword } from "../../utils/userUtils";
+import { createUser } from "../../service";
+import { createSession } from "../../lib/session";
 import { isEmailVerified, sendVerificationCode, verifyCode } from "./verificationService";
 
 // sign up

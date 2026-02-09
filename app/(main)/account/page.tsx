@@ -1,18 +1,19 @@
-//export const dynamic = "force-dynamic";
+"use client";
 
-import { Suspense } from "react";
 import Analytics from "./analytics";
 import Accountdetails from "./accountDetails";
-import AnalyticsSkeleton from "./analyticsSkeleton";
 import { Cog6ToothIcon } from "@heroicons/react/24/outline";
-import { getUserAnalytics } from "../service";
+import { useTheme } from "../../components/contexts/theme-provider";
 
-export default async function Account() {
-  const analyticsResponse = getUserAnalytics();
+export default function Account() {
+  const { theme } = useTheme();
 
   return (
-    <div className="flex flex-col overflow-y-auto h-[100dvh] bg-slate-900 text-gray-100 p-4 md:p-8 transition-all duration-300 font-sans">
-      <div className="flex-1 max-w-4xl mx-auto w-full mb-6">
+    <div
+      style={{ backgroundColor: theme.colors.background, color: theme.colors.primary }}
+      className="flex flex-col overflow-y-auto h-dvh p-4 md:p-8 transition-all duration-300 font-sans"
+    >
+      <div className="flex-1 max-w-4xl mx-auto w-full">
         {/* Header */}
         <header className="mb-8">
           <h1 className="text-3xl font-bold flex items-center gap-3">
@@ -27,9 +28,8 @@ export default async function Account() {
         {/* Updating account details such as deleting account and change password */}
         <Accountdetails />
 
-        <Suspense fallback={<AnalyticsSkeleton/>}>
-          <Analytics analyticsPromise={analyticsResponse} />
-        </Suspense>
+        {/* Showing user stats such as model usage, frequency, tokens, etc. */}
+        <Analytics />
       </div>
     </div>
   );

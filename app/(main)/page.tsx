@@ -2,7 +2,7 @@
 
 //import Input from "./conversation/[id]/page"
 import HomePage from "./homePage/page"
-import { useTheme } from "./components/contexts/theme-provider";
+import { useTheme } from "../components/contexts/theme-provider";
 
 export default function Home() {
   const { theme } = useTheme();

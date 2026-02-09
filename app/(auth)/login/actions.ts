@@ -1,10 +1,10 @@
 "use server";
 
 import { z } from "zod";
-import { createSession, deleteSession } from "../lib/session";
+import { createSession, deleteSession } from "../../lib/session";
 import { redirect } from "next/navigation";
-import { IUser, validatePassword } from "../utils/userUtils";
-import { getUserWithEmail } from "../service";
+import { IUser, validatePassword } from "../../utils/userUtils";
+import { getUserWithEmail } from "../../service";
 
 // used to validate login form
 const loginSchema = z.object({
@@ -32,10 +32,10 @@ export async function login(prevState: any, formData: FormData) {
 
   if (!result.success) {
     return {
-      errors: { 
-        ...emptyLoginErrors, 
-        ...result.error.flatten().fieldErrors
-      }
+      errors: {
+        ...emptyLoginErrors,
+        ...result.error.flatten().fieldErrors,
+      },
     };
   }
 
@@ -54,8 +54,8 @@ export async function login(prevState: any, formData: FormData) {
       !validatePassword(userToLogin.encrPassword, userInDB.encrPassword)
     ) {
       return {
-      errors: { 
-        ...emptyLoginErrors, 
+        errors: {
+          ...emptyLoginErrors,
           password: ["Invalid password"],
         },
       };
@@ -67,8 +67,8 @@ export async function login(prevState: any, formData: FormData) {
     }
   } catch (err: any) {
     return {
-      errors: { 
-        ...emptyLoginErrors, 
+      errors: {
+        ...emptyLoginErrors,
         password: [err.message],
       },
     };

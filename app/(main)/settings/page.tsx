@@ -9,8 +9,8 @@ import {
   CheckCircleIcon,
 } from "@heroicons/react/24/outline";
 import { useState } from "react";
-import { useTheme } from "../components/contexts/theme-provider";
-import { useModel } from "../components/contexts/model-provider";
+import { useTheme } from "../../components/contexts/theme-provider";
+import { useModel } from "../../components/contexts/model-provider";
 
 export default function Settings() {
   const [showToast, setShowToast] = useState<boolean>(false);
@@ -41,7 +41,7 @@ export default function Settings() {
   };
 
   return (
-    <div style={{ backgroundColor: theme.colors.background, color: theme.colors.primary}} className="flex flex-col h-[100dvh] p-4 md:p-8 transition-all duration-300 font-sans">
+    <div style={{ backgroundColor: theme.colors.background, color: theme.colors.primary}} className="flex flex-col h-dvh p-4 md:p-8 transition-all duration-300 font-sans">
       {/* Toast Notification */}
       {showToast && (
         <div  style={{backgroundColor: theme.colors.tertiary_background}} className="fixed bottom-4 right-4 px-4 py-3 rounded-lg shadow-lg border border-slate-700 transition-all duration-300 transform translate-y-0 opacity-100 z-50 backdrop-blur-sm">
@@ -211,7 +211,7 @@ export default function Settings() {
                       <div className="relative">
                         <div className="w-14 h-8 rounded-full bg-slate-800/70 dark:bg-gray-200/70 backdrop-blur-md border border-white/10 dark:border-gray-700/50"></div>
                         <div
-                          className={`absolute top-1 w-6 h-6 rounded-full transition-all duration-300 shadow-lg flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 ${
+                          className={`absolute top-1 w-6 h-6 rounded-full transition-all duration-300 shadow-lg flex items-center justify-center bg-linear-to-br from-blue-500 to-purple-600 ${
                             isDarkMode ? "left-7" : "left-1"
                           }`}
                         ></div>

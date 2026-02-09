@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import Settings from "../../settings/page";
+import Settings from "../../(main)/settings/page";
 import * as modelHooks from "../../components/contexts/model-provider"; 
 import * as themeHooks from "../../components/contexts/theme-provider";
 

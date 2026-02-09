@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import ConversationPage from "../../conversation/[id]/page";
+import ConversationPage from "../../(main)/conversation/[id]/page";
 import { getConversationHistory, getSingleConversations } from "../../service";
 import {
   IMessage,

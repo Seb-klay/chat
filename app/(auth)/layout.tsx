@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
-import ClientLayout from "./clientLayout";
-import { ThemeProvider } from "./components/contexts/theme-provider";
-import { ModelProvider } from "./components/contexts/model-provider";
+import "../globals.css";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -37,16 +34,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {/* context for colour theme (dark or light) */}
-        <ThemeProvider>
-          {/* used to update AI model */}
-          <ModelProvider>
-            {/* used to hide side bar if user not authenticated */}
-            <ClientLayout>
-              <main className="w-full">{children}</main>
-            </ClientLayout>
-          </ModelProvider>
-        </ThemeProvider>
+        <main className="w-full">{children}</main>
       </body>
     </html>
   );
