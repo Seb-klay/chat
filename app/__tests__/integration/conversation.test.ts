@@ -48,7 +48,7 @@ const testModel = { id: 1, model_name: "llama3.2:3b" };
 describe("Conversation Integration", () => {
   beforeAll(async () => {
     // wait for db to connect in github actions
-    sleep(5000);
+    new Promise((resolve) => setTimeout(resolve, 5000));
     
     const seed = await pool.query(
       `
