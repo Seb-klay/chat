@@ -31,7 +31,7 @@ vi.mock("react-dom", async () => {
 });
 
 // Intercept the server action file to avoid reaching session (with server only)
-vi.mock("../../login/actions.ts", () => {
+vi.mock("../../(auth)/login/actions.ts", () => {
   return {
     login: vi.fn(async (prevState, formData) => {
       // Return a mock successful response or error state

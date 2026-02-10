@@ -5,7 +5,7 @@ import { HomeIcon, ArrowLeftIcon, ExclamationTriangleIcon } from '@heroicons/rea
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-gray-900 text-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-linear-to-br from-slate-900 via-slate-800 to-gray-900 text-gray-100 flex items-center justify-center p-4">
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/10 rounded-full blur-3xl"></div>
         <div className="absolute top-60 -left-40 w-80 h-80 bg-purple-500/10 rounded-full blur-3xl"></div>
@@ -17,15 +17,15 @@ export default function NotFound() {
           {/* Error Code */}
           <div className="text-center mb-8">
             <div className="relative inline-flex items-center justify-center">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 blur-2xl opacity-30 rounded-full w-48 h-48"></div>
-              <div className="relative bg-gradient-to-br from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-full p-6">
+              <div className="absolute inset-0 bg-linear-to-r from-blue-500 to-purple-600 blur-2xl opacity-30 rounded-full w-48 h-48"></div>
+              <div className="relative bg-linear-to-br from-red-500/20 to-orange-500/20 border border-red-500/30 rounded-full p-6">
                 <ExclamationTriangleIcon className="h-24 w-24 text-red-400" />
               </div>
             </div>
-            <h1 className="text-8xl md:text-9xl font-bold bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent mt-6">
+            <h1 className="text-8xl md:text-9xl font-bold bg-linear-to-r from-red-400 to-orange-400 bg-clip-text text-transparent mt-6">
               404
             </h1>
-            <div className="h-1 w-32 bg-gradient-to-r from-red-500 to-orange-500 mx-auto rounded-full mt-4"></div>
+            <div className="h-1 w-32 bg-linear-to-r from-red-500 to-orange-500 mx-auto rounded-full mt-4"></div>
           </div>
 
           {/* Message */}
@@ -40,7 +40,7 @@ export default function NotFound() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link
               href="/"
-              className="group flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-blue-500/25"
+              className="group flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-medium transition-all duration-300 hover:scale-[1.02] shadow-lg shadow-blue-500/25"
             >
               <HomeIcon className="h-5 w-5 group-hover:scale-110 transition-transform" />
               <span>Back to Homepage</span>

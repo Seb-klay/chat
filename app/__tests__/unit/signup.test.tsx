@@ -1,7 +1,7 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import React, { useActionState } from "react";
-import { SignupForm } from "../../signup/signupForm";
+import { useActionState } from "react";
+import { SignupForm } from "../../(auth)/signup/signupForm";
 
 vi.mock("react", async () => {
   const actual = await vi.importActual<typeof import("react")>("react");
@@ -12,7 +12,7 @@ vi.mock("react", async () => {
 });
 
 // Intercept the server action file to avoid reaching session (with server only)
-vi.mock("../../signup/actions.ts", () => {
+vi.mock("../../(auth)/signup/actions.ts", () => {
   return {
     signup: vi.fn(async (prevState, formData) => {
       return { success: false, errors: {} };

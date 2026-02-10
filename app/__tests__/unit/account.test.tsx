@@ -42,6 +42,13 @@ vi.mock("../../components/buttons/deleteButton", () => ({
   ),
 }));
 
+// Intercept the server action file to avoid reaching session (with server only)
+vi.mock("../../(auth)/login/actions.ts", () => {
+  return {
+    logout: vi.fn(),
+  };
+});
+
 vi.mock("../../components/cards/confirmationDeleteUserCard", () => ({
   ConfirmationCardDeleteUser: ({
     handleDelete,

@@ -1,6 +1,6 @@
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
-import Sidebar from "../../components/side-bar/appSidebar"; // Adjust path accordingly
+import Sidebar from "../../components/side-bar/appSidebar";
 import {
   getUserConversations,
   deleteConversation,
@@ -23,7 +23,7 @@ vi.mock("../../service", () => ({
 }));
 
 // Intercept the server action file to avoid reaching session (with server only)
-vi.mock("../../login/actions.ts", () => {
+vi.mock("../../(auth)/login/actions.ts", () => {
   return {
     logout: vi.fn(),
   };

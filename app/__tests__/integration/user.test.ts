@@ -1,11 +1,6 @@
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  beforeEach,
-  afterEach,
-} from "vitest";
+// @vitest-environment node
+
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getPool } from "../../backend/database/utils/databaseUtils";
 import { NextRequest } from "next/server";
 import * as authUserRoute from "../../api/authuser/route";
@@ -16,12 +11,27 @@ import * as updateSettingsRoute from "../../api/update-user-settings/route";
 import * as getSettingsRoute from "../../api/get-user-settings/route";
 import { IUser } from "@/app/utils/userUtils";
 
-// Mock headers to simulate an active session
+// Mock headers for cookies
 vi.mock("next/headers", () => ({
   cookies: vi.fn(() => ({
-    get: vi.fn().mockReturnValue({ value: "test-session-token" }),
+    // Mock the .get("session") call to return an object with a .value
+    get: vi.fn(() => ({ value: "mocked-jwt-string" })),
+    set: vi.fn(),
+    delete: vi.fn(),
   })),
 }));
+
+// Mock decrypt function
+const { decryptMock } = vi.hoisted(() => {
+  return {
+    decryptMock: vi.fn(),
+  };
+});
+vi.mock("../../lib/session", () => {
+  return {
+    decrypt: decryptMock,
+  };
+});
 
 const pool = getPool();
 
@@ -51,6 +61,11 @@ describe("User Integration Endpoints", () => {
       "INSERT INTO users_settings (userid, colortheme, defaultmodel) VALUES ($1, $2, $3)",
       [userID, "dark", '{"id": "1", "model_name": "llama3.2:3b"}'],
     );
+
+    // mock decrypt function
+    decryptMock.mockResolvedValue({
+      userId: userID,
+    });
   });
 
   afterEach(async () => {
@@ -144,16 +159,16 @@ describe("User Integration Endpoints", () => {
       typeof data.defaultmodel === "string"
         ? JSON.parse(data.defaultmodel)
         : data.defaultmodel;
-    expect(receivedModel).toEqual({
-      id: "1",
-      model_name: "llama3.2:3b",
+    expect(receivedModel).toEqual({ 
+      id: 2, 
+      model_name: "gemma3" 
     });
   });
 
   it("soft deletes a user account", async () => {
     const req = new NextRequest("http://localhost:3000/api/delete-user", {
       method: "DELETE",
-      headers: { "Content-Type": "application/json" }
+      headers: { "Content-Type": "application/json" },
     });
 
     const response = await deleteUserRoute.DELETE(req);

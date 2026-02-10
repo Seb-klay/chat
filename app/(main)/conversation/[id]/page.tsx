@@ -186,7 +186,7 @@ export default function ConversationPage() {
         backgroundColor: theme.colors.background,
         color: theme.colors.primary,
       }}
-      className="flex flex-col h-[100dvh] px-2"
+      className="flex flex-col h-dvh px-2"
     >
       {/* Notifications */}
       <Toaster richColors position="top-center" />

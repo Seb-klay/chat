@@ -42,14 +42,14 @@ export default function HomePage() {
   return (
     <div
       style={{ color: theme.colors.primary }}
-      className="min-h-[100dvh] flex flex-col items-center justify-center p-4 w-full md:w-1/2 lg:w-1/2 mr-auto ml-auto"
+      className="min-h-dvh flex flex-col items-center justify-center p-4 w-full md:w-1/2 lg:w-1/2 mr-auto ml-auto"
     >
       {/* Notifications */}
       <Toaster richColors position="top-center" />
       {/* Header with icon and text */}
       <div className="mb-8 text-center">
         {/* Icon */}
-        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
+        <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
           <svg
             className="w-6 h-6"
             fill="none"

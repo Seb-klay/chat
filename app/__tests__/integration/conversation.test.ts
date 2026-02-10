@@ -1,11 +1,6 @@
-import {
-  describe,
-  it,
-  expect,
-  vi,
-  afterAll,
-  beforeEach,
-} from "vitest";
+// @vitest-environment node
+
+import { describe, it, expect, vi, afterAll, beforeEach } from "vitest";
 import { getPool } from "../../backend/database/utils/databaseUtils";
 import { NextRequest } from "next/server";
 import * as createConversation from "../../api/conversation/route";
@@ -18,10 +13,27 @@ import * as getHistoryRoute from "../../api/get-history/[id]/route";
 import { IPayload } from "@/app/utils/chatUtils";
 import { IUser } from "@/app/utils/userUtils";
 
-// Mock headers with cookie FOR WHEN I REMOVE COOKIE IN ENDPOINT !
+// Mock headers for cookies
 vi.mock("next/headers", () => ({
-  cookies: vi.fn(),
+  cookies: vi.fn(() => ({
+    // Mock the .get("session") call to return an object with a .value
+    get: vi.fn(() => ({ value: "mocked-jwt-string" })),
+    set: vi.fn(),
+    delete: vi.fn(),
+  })),
 }));
+
+// Mock decrypt function
+const { decryptMock } = vi.hoisted(() => {
+  return {
+    decryptMock: vi.fn(),
+  };
+});
+vi.mock("../../lib/session", () => {
+  return {
+    decrypt: decryptMock,
+  };
+});
 
 const pool = getPool();
 
@@ -47,6 +59,11 @@ describe("Conversation Integration", () => {
     );
 
     userID = seed.rows[0].userid;
+
+    // mock decrypt function
+    decryptMock.mockResolvedValue({
+      userId: userID,
+    });
   });
 
   afterAll(async () => {
