@@ -44,12 +44,6 @@ const testUser: IUser = {
 
 describe("User Integration Endpoints", () => {
   beforeEach(async () => {
-    await pool.query(
-      "DELETE FROM users_settings WHERE userid IN (SELECT userid FROM users WHERE email = $1)",
-      [testUser.email],
-    );
-    await pool.query("DELETE FROM users WHERE email = $1", [testUser.email]);
-
     // Insert Parent
     const seed = await pool.query(
       "INSERT INTO users (email, userpassword) VALUES ($1, $2) RETURNING userid",

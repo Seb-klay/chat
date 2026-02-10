@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { describe, it, expect, vi, afterAll, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterEach } from "vitest";
 import { getPool } from "../../backend/database/utils/databaseUtils";
 import { NextRequest } from "next/server";
 import * as createConversation from "../../api/conversation/route";
@@ -46,10 +46,7 @@ const testUser: IUser = {
 const testModel = { id: 1, model_name: "llama3.2:3b" };
 
 describe("Conversation Integration", () => {
-  beforeEach(async () => {
-    await pool.query("DELETE FROM messages");
-    await pool.query("DELETE FROM Conversations");
-
+  beforeAll(async () => {
     const seed = await pool.query(
       `
         SELECT userid, userPassword
@@ -67,7 +64,7 @@ describe("Conversation Integration", () => {
     });
   });
 
-  afterAll(async () => {
+  afterEach(async () => {
     await pool.query("DELETE FROM messages");
     await pool.query("DELETE FROM conversations");
   });

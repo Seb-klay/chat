@@ -45,17 +45,7 @@ describe("User Utility API Integration", () => {
   };
 
   beforeEach(async () => {
-    // Cleanup and Seed
-    await pool.query("DELETE FROM users_analytics WHERE userid = $1", [userID]);
-    await pool.query("DELETE FROM email_verification_codes WHERE email = $1", [
-      testUser.email,
-    ]);
-    await pool.query(
-      "DELETE FROM users_settings WHERE userid IN (SELECT userid FROM users WHERE email = $1)",
-      [testUser.email],
-    );
-    await pool.query("DELETE FROM users WHERE email = $1", [testUser.email]);
-
+    // Seed
     const seed = await pool.query(
       `
         WITH inserted_users AS (
