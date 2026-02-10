@@ -10,6 +10,7 @@ import * as updatePasswordRoute from "../../api/update-password/route";
 import * as updateSettingsRoute from "../../api/update-user-settings/route";
 import * as getSettingsRoute from "../../api/get-user-settings/route";
 import { IUser } from "@/app/utils/userUtils";
+const URL: string = process.env.FULL_URL || "";
 
 // Mock headers for cookies
 vi.mock("next/headers", () => ({
@@ -77,7 +78,7 @@ describe("User Integration Endpoints", () => {
   });
 
   it("verifies the seeded user exists via authuser endpoint", async () => {
-    const req = new NextRequest("http://localhost:3000/api/authuser", {
+    const req = new NextRequest(`${URL}/api/authuser`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(testUser),
@@ -91,7 +92,7 @@ describe("User Integration Endpoints", () => {
   });
 
   it("authenticates/gets user with email", async () => {
-    const req = new NextRequest("http://localhost:3000/api/authuser", {
+    const req = new NextRequest(`${URL}/api/authuser`, {
       method: "POST",
       body: JSON.stringify({ email: testUser.email }),
     });
@@ -104,7 +105,7 @@ describe("User Integration Endpoints", () => {
   });
 
   it("retrieves the current user's email", async () => {
-    const req = new NextRequest("http://localhost:3000/api/get-email");
+    const req = new NextRequest(`${URL}/api/get-email`);
     const response = await getEmailRoute.GET(req);
     const data = await response.json();
 
@@ -114,7 +115,7 @@ describe("User Integration Endpoints", () => {
 
   it("updates the user password", async () => {
     const newPassword = "new_secure_password_456";
-    const req = new NextRequest("http://localhost:3000/api/update-password", {
+    const req = new NextRequest(`${URL}/api/update-password`, {
       method: "PUT",
       body: JSON.stringify({ newPassword }),
     });
@@ -137,7 +138,7 @@ describe("User Integration Endpoints", () => {
     };
 
     const updateReq = new NextRequest(
-      "http://localhost:3000/api/update-user-settings",
+      `${URL}/api/update-user-settings`,
       {
         method: "PUT",
         body: JSON.stringify(settings),
@@ -148,7 +149,7 @@ describe("User Integration Endpoints", () => {
     expect(updateRes.status).toBe(200);
 
     const getReq = new NextRequest(
-      "http://localhost:3000/api/get-user-settings",
+      `${URL}/api/get-user-settings`,
     );
     const getRes = await getSettingsRoute.GET(getReq);
     const data = await getRes.json();
@@ -166,7 +167,7 @@ describe("User Integration Endpoints", () => {
   });
 
   it("soft deletes a user account", async () => {
-    const req = new NextRequest("http://localhost:3000/api/delete-user", {
+    const req = new NextRequest(`${URL}/api/delete-user`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });

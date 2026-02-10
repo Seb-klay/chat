@@ -12,6 +12,7 @@ import * as storeMessageRoute from "../../api/message/route";
 import * as getHistoryRoute from "../../api/get-history/[id]/route";
 import { IPayload } from "@/app/utils/chatUtils";
 import { IUser } from "@/app/utils/userUtils";
+const URL: string = process.env.FULL_URL || "";
 
 // Mock headers for cookies
 vi.mock("next/headers", () => ({
@@ -91,7 +92,7 @@ describe("Conversation Integration", () => {
     );
 
     const req = new NextRequest(
-      "http://localhost:3000/api/get-user-conversation",
+      `${URL}/api/get-user-conversation`,
     );
     const response = await getUserConversations.GET(req);
     const data = await response.json();
@@ -103,7 +104,7 @@ describe("Conversation Integration", () => {
   it("creates a conversation without a running server", async () => {
     const testTitle = "test 2";
 
-    const req = new NextRequest("http://localhost:3000/api/conversation", {
+    const req = new NextRequest(`${URL}/api/conversation`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: testTitle, defaultModel: testModel }),
@@ -138,7 +139,7 @@ describe("Conversation Integration", () => {
     const targetId = seed.rows[0].convid;
 
     const req = new NextRequest(
-      `http://localhost:3000/api/get-single-conversation/${targetId}`,
+      `${URL}/api/get-single-conversation/${targetId}`,
     );
     const response = await getSingleConversations.GET(req, {
       params: Promise.resolve({ id: targetId }),
@@ -164,7 +165,7 @@ describe("Conversation Integration", () => {
     const targetId = seed.rows[0].convid;
 
     const req = new NextRequest(
-      "http://localhost:3000/api/update-title-conversation",
+      `${URL}/api/update-title-conversation`,
       {
         method: "PUT",
         body: JSON.stringify({ id: targetId, newTitle: "New Shiny Title" }),
@@ -195,7 +196,7 @@ describe("Conversation Integration", () => {
     const targetId = seed.rows[0].convid;
 
     const req = new NextRequest(
-      "http://localhost:3000/api/delete-conversation",
+      `${URL}/api/delete-conversation`,
       {
         method: "DELETE",
         body: JSON.stringify({ id: targetId }),
@@ -230,7 +231,7 @@ describe("Conversation Integration", () => {
       isStream: true,
     };
 
-    const postReq = new NextRequest("http://localhost:3000/api/message", {
+    const postReq = new NextRequest(`${URL}/api/message`, {
       method: "POST",
       body: JSON.stringify({
         message: messagePayload.messages,
@@ -242,7 +243,7 @@ describe("Conversation Integration", () => {
     expect(postRes.status).toBe(200);
 
     const getReq = new NextRequest(
-      `http://localhost:3000/api/get-history/${newConvID}`,
+      `${URL}/api/get-history/${newConvID}`,
     );
     const response = await getHistoryRoute.GET(getReq, {
       params: Promise.resolve({ id: newConvID }),
