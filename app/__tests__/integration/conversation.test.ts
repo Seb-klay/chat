@@ -46,26 +46,25 @@ const testUser: IUser = {
 const testModel = { id: 1, model_name: "llama3.2:3b" };
 
 describe("Conversation Integration", () => {
-  beforeAll(async () => {
-    // wait for db to connect in github actions
-    new Promise((resolve) => setTimeout(resolve, 5000));
-    
-    const seed = await pool.query(
-      `
-        SELECT userid, userPassword
-        FROM users
-        WHERE email = $1
-        `,
-      [testUser.email],
-    );
-
-    userID = seed.rows[0].userid;
-
-    // mock decrypt function
-    decryptMock.mockResolvedValue({
-      userId: userID,
-    });
-  });
+beforeAll(async () => {
+  let retries = 60;
+  while (retries > 0) {
+    try {
+      const seed = await pool.query(
+        "SELECT userid FROM users WHERE email = $1",
+        [testUser.email]
+      );
+      userID = seed.rows[0].userid;
+      decryptMock.mockResolvedValue({ userId: userID });
+      break; // Success! Exit the loop.
+    } catch (err) {
+      retries -= 1;
+      if (retries === 0) throw err; // Out of attempts
+      console.log(`DB not ready, retrying... (${retries} attempts left)`);
+      await new Promise(res => setTimeout(res, 1000));
+    }
+  }
+});
 
   afterEach(async () => {
     await pool.query("DELETE FROM messages");
