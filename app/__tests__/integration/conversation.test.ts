@@ -47,6 +47,9 @@ const testModel = { id: 1, model_name: "llama3.2:3b" };
 
 describe("Conversation Integration", () => {
   beforeAll(async () => {
+    // wait for db to connect in github actions
+    sleep(5000);
+    
     const seed = await pool.query(
       `
         SELECT userid, userPassword
@@ -67,10 +70,6 @@ describe("Conversation Integration", () => {
   afterEach(async () => {
     await pool.query("DELETE FROM messages");
     await pool.query("DELETE FROM conversations");
-  });
-
-  afterAll(async () => {
-    await pool.end();
   });
 
   it("fetches all user conversations", async () => {
@@ -257,3 +256,7 @@ describe("Conversation Integration", () => {
     expect(history[0].content).toBe("Test 6");
   });
 });
+function sleep(arg0: number) {
+  throw new Error("Function not implemented.");
+}
+

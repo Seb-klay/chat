@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 import { getPool } from "../../backend/database/utils/databaseUtils";
 
@@ -79,10 +79,6 @@ describe("User Utility API Integration", () => {
       [testUser.email],
     );
     await pool.query("DELETE FROM users WHERE email = $1", [testUser.email]);
-  });
-
-  afterAll(async () => {
-    await pool.end();
   });
 
   it("should insert a verification code into the database", async () => {
