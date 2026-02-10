@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { describe, it, expect, vi, beforeAll, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterEach, afterAll } from "vitest";
 import { getPool } from "../../backend/database/utils/databaseUtils";
 import { NextRequest } from "next/server";
 import * as createConversation from "../../api/conversation/route";
@@ -67,6 +67,10 @@ describe("Conversation Integration", () => {
   afterEach(async () => {
     await pool.query("DELETE FROM messages");
     await pool.query("DELETE FROM conversations");
+  });
+
+  afterAll(async () => {
+    await pool.end();
   });
 
   it("fetches all user conversations", async () => {

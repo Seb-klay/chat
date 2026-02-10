@@ -1,6 +1,6 @@
 // @vitest-environment node
 
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach, afterAll } from "vitest";
 import { getPool } from "../../backend/database/utils/databaseUtils";
 import { NextRequest } from "next/server";
 import * as authUserRoute from "../../api/authuser/route";
@@ -69,6 +69,10 @@ describe("User Integration Endpoints", () => {
       [testUser.email],
     );
     await pool.query("DELETE FROM users WHERE email = $1", [testUser.email]);
+  });
+
+  afterAll(async () => {
+    await pool.end();
   });
 
   it("verifies the seeded user exists via authuser endpoint", async () => {
