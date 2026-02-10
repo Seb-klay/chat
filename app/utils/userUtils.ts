@@ -16,10 +16,12 @@ export function encryptPassword(password: string) {
     return encrPassword;
 }
 
-export async function validatePassword(password: string, passwordDb: string) {
-    try{
-      return await compareSync(password, passwordDb); // true or false
-    } catch (err) {
-      throw new Error("Email or password could not be compared. ");
-    }
+export function validatePassword(password: string, passwordDb: string) {
+  if (!password || !passwordDb) return false;
+  
+  try{
+    return compareSync(password, passwordDb); // true or false
+  } catch (err) {
+    throw new Error("Email or password could not be compared. ");
+  }
 }

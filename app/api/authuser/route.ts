@@ -11,7 +11,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       "SELECT userid, userpassword, userrole FROM users WHERE email = $1",
       [email],
     );
-    if (!response)
+    if (!response || response.rowCount === 0)
       return NextResponse.json(
         { error: "The user could not be found. Try again please." },
         { status: 404 },

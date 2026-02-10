@@ -18,13 +18,15 @@ export default async function proxy(req: NextRequest) {
     (route) => path === route || path.startsWith(`${route}/`),
   );
 
-  if (path.startsWith("/api/authuser") || path.startsWith("/signup")) {
-    return NextResponse.next();
-  }
-
   const cookie = await cookies();
   const session = cookie.get("session")?.value;
   const sessionUser = await decrypt(session);
+
+  const isAction = req.method === 'POST' && req.headers.has('Next-Action');
+  // since middleware cannot redirect server actions directly, the corresponding header gets set
+  if (!sessionUser?.userId && isAction) {
+    return ;
+  }
 
   if (isProtectedRoute && !sessionUser?.userId) {
     return NextResponse.redirect(new URL("/login", req.nextUrl));
@@ -58,4 +60,8 @@ export default async function proxy(req: NextRequest) {
 
 export const config = {
   matcher: ["/((?!api|_next/static|_next/image|.*\\.png$).*)"],
+  missing: [
+    // Exclude Server Actions
+    { type: 'header', key: 'Next-Action' },
+  ],
 };

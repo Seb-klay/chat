@@ -47,6 +47,14 @@ export async function login(prevState: any, formData: FormData) {
 
     // check if user is in DB and return id, password and role
     const response = await getUserWithEmail(userToLogin);
+    if (!response?.ok) {
+      return {
+        errors: {
+          ...emptyLoginErrors,
+          email: ["No user could be found."],
+        },
+      };
+    }
     const userInDB: IUser = await response?.json();
 
     if (
