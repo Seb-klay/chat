@@ -72,10 +72,11 @@ jobs:
       - name: Start Database
         working-directory: ./app/backend/database/test
         # env:
-        #   POSTGRES_USER: "admin"
-        #   POSTGRES_PASSWORD: "mypassword"
-        #   POSTGRES_DB: "chat_db"
-        run: docker compose -f compose.test.yml up -d
+        run: |
+          export POSTGRES_USER=user_admin
+          export POSTGRES_PASSWORD=mypassword
+          export POSTGRES_DB=chat_db
+          docker compose -f compose.test.yml up -d
 
       - name: Run Integration tests
         run: npm run integration-test
