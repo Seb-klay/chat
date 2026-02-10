@@ -54,7 +54,7 @@ jobs:
           POSTGRES_USER="user_admin"
           POSTGRES_PASSWORD="mypassword"
           POSTGRES_DB="chat_db"
-          POSTGRES_HOST="localhost"
+          POSTGRES_HOST="127.0.0.1"
           POSTGRES_REG_USER="regular_user"
           POSTGRES_REG_PASSWORD="regular_user"
           SESSION_SECRET=JKLSFD8493UIF94085
