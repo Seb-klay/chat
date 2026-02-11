@@ -46,25 +46,27 @@ const testUser: IUser = {
 const testModel = { id: 1, model_name: "llama3.2:3b" };
 
 describe("Conversation Integration", () => {
-beforeAll(async () => {
-  let retries = 60;
-  while (retries > 0) {
-    try {
-      const seed = await pool.query(
-        "SELECT userid FROM users WHERE email = $1",
-        [testUser.email]
-      );
-      userID = seed.rows[0].userid;
-      decryptMock.mockResolvedValue({ userId: userID });
-      break; // Success! Exit the loop.
-    } catch (err) {
-      retries -= 1;
-      if (retries === 0) throw err; // Out of attempts
-      console.log(`DB not ready, retrying... (${retries} attempts left)`);
-      await new Promise(res => setTimeout(res, 1000));
+  beforeAll(async () => {
+    let attempts = 0;
+    const maxAttempts = 60;
+
+    while (attempts < maxAttempts) {
+      try {
+        const seed = await pool.query(
+          `SELECT userid FROM users WHERE email = $1`,
+          [testUser.email]
+        );
+        
+        userID = seed.rows[0].userid;
+        decryptMock.mockResolvedValue({ userId: userID });
+        break;
+      } catch (err) {
+        attempts++;
+        if (attempts >= maxAttempts) throw new Error("DB connection timed out");
+        await new Promise(res => setTimeout(res, 1000)); // Wait 3s before retry
+      }
     }
-  }
-});
+  });
 
   afterEach(async () => {
     await pool.query("DELETE FROM messages");

@@ -1,4 +1,4 @@
-import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor, act } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import Sidebar from "../../components/side-bar/appSidebar";
 import {
@@ -30,7 +30,7 @@ vi.mock("../../(auth)/login/actions.ts", () => {
 });
 
 // Mock Sub-components to isolate Sidebar logic
-vi.mock("../../components/side-bar/ConversationsUser", () => ({
+vi.mock("../../components/side-bar/conversationsUser", () => ({
   default: ({ conversation, onOption }: any) => (
     <div data-testid="conv-item">
       {conversation.title}
@@ -77,7 +77,9 @@ describe("Sidebar Component", () => {
 
   it("fetches and displays conversations on mount", async () => {
     render(<Sidebar />);
-    fireEvent.click(screen.getByTitle("Expand"));
+    await act(async () => {
+      fireEvent.click(screen.getByTitle("Expand"));
+    });
 
     await waitFor(() => {
       expect(getUserConversations).toHaveBeenCalled();
@@ -87,10 +89,14 @@ describe("Sidebar Component", () => {
 
   it("toggles collapse state when button is clicked", async () => {
     render(<Sidebar />);
-    fireEvent.click(screen.getByTitle("Expand"));
+    await act(async () => {
+      fireEvent.click(screen.getByTitle("Expand"));
+    });
 
     const toggleBtn = screen.getByLabelText(/Close sidebar/i);
-    fireEvent.click(toggleBtn);
+    await act(async () => {
+      fireEvent.click(toggleBtn);
+    });
 
     // !isCollapsed && <h2>Conversations</h2>
     expect(screen.queryByText("Conversations")).not.toBeInTheDocument();
@@ -98,7 +104,9 @@ describe("Sidebar Component", () => {
 
   it("adds a new conversation when 'chat-created' event is dispatched", async () => {
     render(<Sidebar />);
-    fireEvent.click(screen.getByTitle("Expand"));
+    await act(async () => {
+      fireEvent.click(screen.getByTitle("Expand"));
+    });
 
     const newChat = {
       convid: "2",
@@ -117,15 +125,23 @@ describe("Sidebar Component", () => {
   it("handles conversation deletion and redirects", async () => {
     (deleteConversation as any).mockResolvedValue({ ok: true });
     render(<Sidebar />);
-    fireEvent.click(screen.getByTitle("Expand"));
+    await act(async () => {
+      fireEvent.click(screen.getByTitle("Expand"));
+    });
 
     // Open confirmation (via the mocked ConversationsUser)
     await waitFor(() => screen.getByText("Test Chat 1"));
-    fireEvent.click(screen.getByText("Delete Trigger"));
+    
+    await act(async () => {
+      fireEvent.click(screen.getByText("Delete Trigger"));
+    });
 
     // Click confirm in the card
     const confirmBtn = screen.getByText("Confirm Delete");
-    fireEvent.click(confirmBtn);
+    
+    await act(async () => {
+      fireEvent.click(confirmBtn);
+    });
 
     await waitFor(() => {
       expect(deleteConversation).toHaveBeenCalledWith("1");
@@ -147,7 +163,9 @@ describe("Sidebar Component", () => {
     });
 
     render(<Sidebar />);
-    fireEvent.click(screen.getByTitle("Expand"));
+    await act(async () => {
+      fireEvent.click(screen.getByTitle("Expand"));
+    });
 
     await waitFor(() => {
       expect(screen.getByText("Last hour")).toBeInTheDocument();
@@ -175,7 +193,10 @@ describe("Sidebar Component", () => {
     });
 
     render(<Sidebar />);
-    fireEvent.click(screen.getByTitle("Expand"));
+    
+    await act(async () => {
+      fireEvent.click(screen.getByTitle("Expand"));
+    });
 
     // wait for the title to display
     await waitFor(() => {
@@ -183,11 +204,16 @@ describe("Sidebar Component", () => {
     });
 
     // Open the rename confirmation card
-    fireEvent.click(screen.getByText("Rename Trigger"));
+    
+    await act(async () => {
+      fireEvent.click(screen.getByText("Rename Trigger"));
+    });
 
     // Click the 'Confirm Rename' button in ConfirmationConvCard mock
     const renameConfirmBtn = screen.getByText("Confirm Rename");
-    fireEvent.click(renameConfirmBtn);
+    act(() => {
+      fireEvent.click(renameConfirmBtn);
+    });
 
     // Assertions
     await waitFor(() => {

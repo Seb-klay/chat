@@ -35,7 +35,7 @@ vi.mock("sonner", () => ({
 }));
 
 // mock chat input
-vi.mock("../../components/textInput/chatinput", () => ({
+vi.mock("../../components/textInput/chatInput", () => ({
   default: ({ onSend }: any) => (
     <div>
       {/* We give this button a specific test ID to find it easily */}
