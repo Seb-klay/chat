@@ -52,7 +52,7 @@ vi.mock("../../components/side-bar/conversationsUser", () => ({
   ),
 }));
 
-vi.mock("../../components/cards/ConfirmationConvCard", () => ({
+vi.mock("../../components/cards/confirmationConvCard", () => ({
   ConfirmationConvCard: ({ onDelete, onCancel, onRename, onError }: any) => (
     <div data-testid="confirmation-card">
       {onError && <div role="alert">{onError}</div>}
@@ -209,10 +209,8 @@ describe("Sidebar Component", () => {
       fireEvent.click(screen.getByText("Rename Trigger"));
     });
 
-    // Click the 'Confirm Rename' button in ConfirmationConvCard mock
-    const renameConfirmBtn = screen.getByText("Confirm Rename");
-    act(() => {
-      fireEvent.click(renameConfirmBtn);
+    await act(() => {
+      fireEvent.click(screen.getByText("Confirm Rename"));
     });
 
     // Assertions
