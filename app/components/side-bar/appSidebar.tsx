@@ -7,7 +7,7 @@ import {
   getUserConversations,
   updateTitleConversation,
 } from "@/app/service";
-import { redirect, useParams } from "next/navigation";
+import { redirect, useParams, usePathname } from "next/navigation";
 import ConversationsUser from "./conversationsUser";
 import { ConfirmationConvCard } from "../cards/confirmationConvCard";
 import { IConversation } from "@/app/(main)/conversation/[id]/page";
@@ -36,6 +36,7 @@ export default function ConversationSidebar() {
   const [conversations, setConversations] = useState<Conversation[]>([]); // list of conversation
   const params = useParams();
   const currentConversationId = params.id; // get id of current conversation
+  const pathname = usePathname();
   const [confirmationState, setConfirmationState] =
     useState<ConfirmationState | null>(null);
   const [onError, setOnError] = useState<string | null>(null); // for confirmation cards
@@ -179,20 +180,24 @@ export default function ConversationSidebar() {
         className="fixed top-4 left-4 z-50 p-2.5 rounded-lg shadow-lg hover:opacity-70 transition-all md:hidden"
         aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
       >
-        <div className="w-5 h-5 relative">
+        <div className="w-5 h-5 relative flex items-center justify-center">
           <span
-            className={`absolute left-0 top-1 h-0.5 w-full bg-current transform transition-all duration-300 ${
-              isCollapsed ? "" : "rotate-45 top-2"
+            className={`absolute h-0.5 w-full bg-current transform transition-all duration-300 ${
+              isCollapsed
+                ? "top-1 left-0"
+                : "rotate-45 top-1/2 left-0 -translate-y-1/2"
             }`}
           ></span>
           <span
-            className={`absolute left-0 top-2 h-0.5 w-full bg-current transition-all duration-300 ${
-              isCollapsed ? "" : "opacity-0"
+            className={`absolute h-0.5 w-full bg-current transition-all duration-300 ${
+              isCollapsed ? "top-2 left-0 opacity-100" : "opacity-0"
             }`}
           ></span>
           <span
-            className={`absolute left-0 top-3 h-0.5 w-full bg-current transform transition-all duration-300 ${
-              isCollapsed ? "" : "-rotate-45 top-2"
+            className={`absolute h-0.5 w-full bg-current transform transition-all duration-300 ${
+              isCollapsed
+                ? "top-3 left-0"
+                : "-rotate-45 top-1/2 left-0 -translate-y-1/2"
             }`}
           ></span>
         </div>
@@ -254,10 +259,26 @@ export default function ConversationSidebar() {
             {/* User Account */}
             <Link
               href="/account"
-              style={{ color: theme.colors.primary }}
+              onClick={() => {
+                // Only collapse on mobile screens
+                if (window.innerWidth < 768) { // md breakpoint
+                  setIsCollapsed(true);
+                }
+              }}
+              style={{
+                color: theme.colors.primary,
+                backgroundColor:
+                  pathname === "/account"
+                    ? theme.colors.tertiary_background
+                    : "transparent",
+              }}
               className={`
                 flex items-center p-2 rounded-lg hover:opacity-70
-                ${isCollapsed ? "justify-center" : "justify-start"}
+                ${
+                  isCollapsed
+                    ? "justify-center items-center hidden md:block md:mx-auto"
+                    : "justify-start"
+                }
               `}
               title={isCollapsed ? "Account" : ""}
             >
@@ -280,10 +301,26 @@ export default function ConversationSidebar() {
             {/* Parameters/Settings */}
             <Link
               href="/settings"
-              style={{ color: theme.colors.primary }}
+              onClick={() => {
+                // Only collapse on mobile screens
+                if (window.innerWidth < 768) { // md breakpoint
+                  setIsCollapsed(true);
+                }
+              }}
+              style={{
+                color: theme.colors.primary,
+                backgroundColor:
+                  pathname === "/settings"
+                    ? theme.colors.tertiary_background
+                    : "transparent",
+              }}
               className={`
                 flex items-center p-2 rounded-lg hover:opacity-70
-                ${isCollapsed ? "justify-center" : "justify-start"}
+                ${
+                  isCollapsed
+                    ? "justify-center items-center hidden md:block md:mx-auto"
+                    : "justify-start"
+                }
               `}
               title={isCollapsed ? "Settings" : ""}
             >

@@ -50,7 +50,7 @@ export function ConfirmationConvCard({
               onChange={(e) => setNewTitle(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder="New title"
-              className="w-full p-4 pr-36 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden overflow-y-scroll resize-none min-h-[30px] md:min-h-[60px]"
+              className="w-full p-4 pr-36 border border-gray-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden overflow-y-scroll resize-none min-h-7.5 md:min-h-15"
               rows={1}
               style={{ backgroundColor: theme.colors.tertiary_background, color: theme.colors.primary, height: "auto" }}
             />

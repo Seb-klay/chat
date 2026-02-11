@@ -60,15 +60,19 @@ export default function Analytics() {
     "tokens" | "duration" | "requests"
   >("tokens");
   const [dataAnalytics, setDataAnalytics] = useState<IAnalytics[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { theme } = useTheme();
 
   useEffect(() => {
     const loadAnalytics = async () => {
       try {
+        setIsLoading(true);
         const analytics = await getUserAnalytics();
         setDataAnalytics(analytics);
       } catch (err) {
         toast.error(String(err));
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -111,7 +115,10 @@ export default function Analytics() {
     ),
   );
 
-  if (dataAnalytics.length === 0) return <AnalyticsSkeleton />
+  // if loading state, display skeleton
+  if (isLoading) return <AnalyticsSkeleton />
+  // if no analytics to display, show message
+  if (dataAnalytics.length === 0) return <div className="flex p-6 md:p-12 justify-center items-center mx-auto">No Analytics to display yet.</div>
 
   return (
     <div>
