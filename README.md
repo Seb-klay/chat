@@ -122,7 +122,10 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Add user settings to the UI and DB
 - [x] Error handling and Toast notifications
 
+**AI Capabilities**:
+- [ ] Add tools functionalities for AI to use
+- [ ] More AI model integrations
+
 ### 🔧 In Progress / Upcoming
 - [ ] Handle logs using promtail and loki (grafana)
 - [ ] Implement backup solution for data
-- [ ] More AI model integrations

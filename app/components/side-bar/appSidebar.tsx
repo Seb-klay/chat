@@ -1,18 +1,22 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
 import {
   deleteConversation,
   getUserConversations,
   updateTitleConversation,
 } from "@/app/service";
-import { redirect, useParams, usePathname } from "next/navigation";
+import { redirect, useParams } from "next/navigation";
 import ConversationsUser from "./conversationsUser";
 import { ConfirmationConvCard } from "../cards/confirmationConvCard";
 import { IConversation } from "@/app/(main)/conversation/[id]/page";
 import { useTheme } from "../contexts/theme-provider";
 import { logout } from "@/app/(auth)/login/actions";
+import PagesSideBar from "./pageSideBar";
+import CollapseButton from "../buttons/collapseButton";
+import CollapseSmallButton from "../buttons/collapseSmartphoneButton";
+import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
+
 
 export interface Conversation {
   convid: string;
@@ -36,7 +40,6 @@ export default function ConversationSidebar() {
   const [conversations, setConversations] = useState<Conversation[]>([]); // list of conversation
   const params = useParams();
   const currentConversationId = params.id; // get id of current conversation
-  const pathname = usePathname();
   const [confirmationState, setConfirmationState] =
     useState<ConfirmationState | null>(null);
   const [onError, setOnError] = useState<string | null>(null); // for confirmation cards
@@ -171,37 +174,10 @@ export default function ConversationSidebar() {
   return (
     <>
       {/* Mobile Toggle Button */}
-      <button
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        style={{
-          backgroundColor: theme.colors.background_second,
-          color: theme.colors.primary,
-        }}
-        className="fixed top-4 left-4 z-50 p-2.5 rounded-lg shadow-lg hover:opacity-70 transition-all md:hidden"
-        aria-label={isCollapsed ? "Open sidebar" : "Close sidebar"}
-      >
-        <div className="w-5 h-5 relative flex items-center justify-center">
-          <span
-            className={`absolute h-0.5 w-full bg-current transform transition-all duration-300 ${
-              isCollapsed
-                ? "top-1 left-0"
-                : "rotate-45 top-1/2 left-0 -translate-y-1/2"
-            }`}
-          ></span>
-          <span
-            className={`absolute h-0.5 w-full bg-current transition-all duration-300 ${
-              isCollapsed ? "top-2 left-0 opacity-100" : "opacity-0"
-            }`}
-          ></span>
-          <span
-            className={`absolute h-0.5 w-full bg-current transform transition-all duration-300 ${
-              isCollapsed
-                ? "top-3 left-0"
-                : "-rotate-45 top-1/2 left-0 -translate-y-1/2"
-            }`}
-          ></span>
-        </div>
-      </button>
+      <CollapseSmallButton
+        isCollapsed={isCollapsed}
+        onCollapse={() => setIsCollapsed(!isCollapsed)}
+      />
 
       {/* Sidebar */}
       <div
@@ -231,150 +207,17 @@ export default function ConversationSidebar() {
             )}
 
             {/* Collapse button - top right */}
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              className={`p-2 rounded hover:opacity-70 hidden md:block ${
-                isCollapsed ? "justify-center" : "justify-end"
-              }`}
-              title={isCollapsed ? "Expand" : "Collapse"}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
+            <CollapseButton
+              isCollapsed={isCollapsed}
+              onCollapse={() => setIsCollapsed(!isCollapsed)}
+            />
           </div>
 
           {/* Essential Buttons - Always visible, icon-only when collapsed */}
-          <div className="flex flex-col space-y-2">
-            {/* User Account */}
-            <Link
-              href="/account"
-              onClick={() => {
-                // Only collapse on mobile screens
-                if (window.innerWidth < 768) { // md breakpoint
-                  setIsCollapsed(true);
-                }
-              }}
-              style={{
-                color: theme.colors.primary,
-                backgroundColor:
-                  pathname === "/account"
-                    ? theme.colors.tertiary_background
-                    : "transparent",
-              }}
-              className={`
-                flex items-center p-2 rounded-lg hover:opacity-70
-                ${
-                  isCollapsed
-                    ? "justify-center items-center hidden md:block md:mx-auto"
-                    : "justify-start"
-                }
-              `}
-              title={isCollapsed ? "Account" : ""}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                />
-              </svg>
-              {!isCollapsed && <span className="ml-3">Account</span>}
-            </Link>
-
-            {/* Parameters/Settings */}
-            <Link
-              href="/settings"
-              onClick={() => {
-                // Only collapse on mobile screens
-                if (window.innerWidth < 768) { // md breakpoint
-                  setIsCollapsed(true);
-                }
-              }}
-              style={{
-                color: theme.colors.primary,
-                backgroundColor:
-                  pathname === "/settings"
-                    ? theme.colors.tertiary_background
-                    : "transparent",
-              }}
-              className={`
-                flex items-center p-2 rounded-lg hover:opacity-70
-                ${
-                  isCollapsed
-                    ? "justify-center items-center hidden md:block md:mx-auto"
-                    : "justify-start"
-                }
-              `}
-              title={isCollapsed ? "Settings" : ""}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-                />
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
-                />
-              </svg>
-              {!isCollapsed && <span className="ml-3">Settings</span>}
-            </Link>
-
-            {/* Create New Conversation */}
-            <Link
-              href="/"
-              className={`
-                flex items-center p-2 rounded-lg duration-500 ease-in-out bg-linear-to-br from-indigo-500 to-indigo-800 hover:to-violet-900 text-gray-100
-                ${
-                  isCollapsed
-                    ? "justify-center items-center hidden md:block md:mx-auto"
-                    : "justify-start"
-                }
-              `}
-              title={isCollapsed ? "New Chat" : ""}
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M12 4v16m8-8H4"
-                />
-              </svg>
-              {!isCollapsed && <span className="ml-3">New Chat</span>}
-            </Link>
-          </div>
+          <PagesSideBar
+            isCollapsed={isCollapsed}
+            onCollapse={() => setIsCollapsed(true)}
+          />
         </div>
 
         {/* Conversations List */}
@@ -469,19 +312,7 @@ export default function ConversationSidebar() {
             ${isCollapsed ? "justify-center text-center mx-auto hidden md:block" : "justify-start"}
           `}
           >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
-              />
-            </svg>
+            <ArrowRightStartOnRectangleIcon className="w-5 h-5" />
             {!isCollapsed && <span className="ml-3">Logout</span>}
           </button>
         </div>
