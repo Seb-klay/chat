@@ -27,7 +27,9 @@ export default function ChooseAiModel({ onModelSelect }: ChooseAiModelProps) {
 
   return (
     <Menu as="div" className="relative inline-block">
-      <MenuButton style={{ backgroundColor: theme.colors.background_second, color: theme.colors.primary}} className="inline-flex w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold inset-ring-1 inset-ring-white/5 hover:bg-white/20">
+      <MenuButton 
+      style={{ backgroundColor: theme.colors.background_second, color: theme.colors.primary}} 
+      className="inline-flex w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold inset-ring-1 inset-ring-white/5 hover:bg-white/20">
         <CpuChipIcon className="w-5 h-5" />
         <ChevronDownIcon
           aria-hidden="true"
@@ -49,7 +51,7 @@ export default function ChooseAiModel({ onModelSelect }: ChooseAiModelProps) {
               <MenuItem key={m.model_name}>
                 <button
                   onClick={() => handleModelSelect(m)}
-                  className="group flex w-full items-center justify-between rounded-md px-3 py-2 text-sm data-[focus]:bg-gray-700 data-[focus]:text-gray-100"
+                  className="group flex w-full items-center justify-between rounded-md px-3 py-2 text-sm data-focus:bg-gray-700 data-focus:text-gray-100"
                 >
                   <div className="text-left">
                     <div className="font-medium">{modelName}</div>

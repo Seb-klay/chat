@@ -50,7 +50,7 @@ docker compose -f compose.llama-3.yaml up
 ```
 </details>
 <details>
-<summary>Run and deploy gemma-3 model (1 billion params)</summary>
+<summary>Run and deploy gemma-3 model (4 billion params)</summary>
 
 ```bash
 docker compose -f compose.gemma-3.yaml up

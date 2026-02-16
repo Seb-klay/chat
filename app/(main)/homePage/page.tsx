@@ -47,7 +47,7 @@ export default function HomePage() {
       {/* Notifications */}
       <Toaster richColors position="top-center" />
       {/* Header with icon and text */}
-      <div className="mb-8 text-center">
+      <div className="mb-12 text-center">
         {/* Icon */}
         <div className="w-12 h-12 bg-linear-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
           <svg

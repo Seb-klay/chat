@@ -15,7 +15,7 @@ services:
     entrypoint: ["/bin/bash", "-c", "\
       ollama serve & \
       sleep 5 && \
-      ollama pull gemma3:1b && \
+      ollama pull gemma3:4b && \
       wait"]
 
 # docker compose -f compose.gemma-3.yaml up

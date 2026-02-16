@@ -21,7 +21,7 @@ export const MODELS: Record<number, {
   },
   3: {
     id: 3,
-    model_name: "gemma3:1b",
+    model_name: "gemma3:4b",
     address: process.env.GEMMA3_URL!,
   },
 };
