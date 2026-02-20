@@ -4,6 +4,7 @@ import { Pool } from 'pg'
 
 type Config = {
   host?: string,
+  port?: number,
   user?: string,
   password?: string,
   database?: string,
@@ -18,6 +19,7 @@ type Config = {
 // Configs
 const configs : Config = {
   host: process.env.POSTGRES_HOST,
+  port: Number(process.env.POSTGRES_PORT),
   user: process.env.POSTGRES_REG_USER,
   password: process.env.POSTGRES_REG_PASSWORD,
   database: process.env.POSTGRES_DB,

@@ -35,8 +35,26 @@ nvm use
 npm install
 ```
 
+> [!IMPORTANT]
+> File reader is not available on mac with intel chip so you can run the Dockerfile instead and run the app on a container :
+
+```bash
+# create network to communicate with the other services
+docker network create chat-network
+docker network connect chat-network chat_db # first have to import db (explained in Chapter 3)
+docker network connect chat-network chat-docker
+# create image
+docker build -t chat-docker .
+docker run -it --rm -p 3000:3000  --name chat-docker --network=chat-network --env-file .env.docker chat-docker
+```
+
 2. **AI set up**
-Then, open Docker Desktop and run the containers :
+Then, open Docker Desktop, download the image and run the containers :
+
+Download the ollama image :
+```bash
+docker pull ollama/ollama:latest
+```
 
 Navigate to the folder ai-setup :
 ```bash
