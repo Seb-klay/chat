@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+  qwen3-vl:
+    image: ollama/ollama
+    container_name: qwen3-vl
+    restart: unless-stopped
+    environment:
+      - OLLAMA_KEEP_ALIVE=-1
+      #- OLLAMA_NUM_PARALLEL=4 for several request at the same time
+    ports:
+      - 11436:11434  # Map host 11436 to container 11434
+    volumes:
+      - ./ollama_data:/root/.ollama
+    entrypoint: ["/bin/bash", "-c", "\
+      ollama serve & \
+      sleep 5 && \
+      ollama pull qwen3-vl:2b && \
+      wait"]
+
+# docker compose -f compose.qwen3-vl.yaml up

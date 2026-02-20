@@ -7,6 +7,7 @@ import { IModelList } from "../../utils/listModels";
 import { useState } from "react";
 import { useTheme } from "../../components/contexts/theme-provider";
 import { Toaster, toast } from "sonner";
+import { set } from 'idb-keyval';
 
 export default function HomePage() {
   const router = useRouter();
@@ -16,10 +17,16 @@ export default function HomePage() {
   const createAndRedirect = async (
     userInput: string,
     selectedModel: IModelList,
+    files?: File[],
   ) => {
     if (!userInput.trim()) return;
     setOnAiThought(true);
     try {
+      // init local storage to transition to new conversation window
+      if (files && files.length > 0) {
+        await set("local_files", files);
+      }
+
       // Create new conversation with input as title and default model
       const response = await createConversation(userInput, selectedModel);
       if (!response?.ok)

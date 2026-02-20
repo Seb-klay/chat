@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+  moondream-2:
+    image: ollama/ollama
+    container_name: moondream-2
+    restart: unless-stopped
+    environment:
+      - OLLAMA_KEEP_ALIVE=-1
+      #- OLLAMA_NUM_PARALLEL=4 for several request at the same time
+    ports:
+      - 11438:11434  # Map host 11438 to container 11434
+    volumes:
+      - ./ollama_data:/root/.ollama
+    entrypoint: ["/bin/bash", "-c", "\
+      ollama serve & \
+      sleep 5 && \
+      ollama pull moondream:1.8b && \
+      wait"]
+
+# docker compose -f compose.moondream-2.yaml up

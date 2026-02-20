@@ -2,27 +2,54 @@
 
 import { NextRequest, NextResponse } from "next/server";
 import { MODELS } from "../../utils/listModels";
+import { IMessage } from "@/app/utils/chatUtils";
+import { extractTextFromFiles, IExtractResult } from "@/app/utils/pdf-parser";
+import { preparedFiles } from "@/app/(main)/conversation/[id]/page";
 
 export async function POST(request: NextRequest) {
   try {
     const { messages, isStream } = await request.json();
     // get AI URL from list
-    const lastMessage = messages[messages.length - 1];
+    const lastMessage: IMessage = messages[messages.length - 1];
     const model =
       typeof lastMessage.model === "string"
         ? JSON.parse(lastMessage.model)
         : lastMessage.model;
-    const AI_MODEL_URL: string = MODELS[model.id].address;
+    const AI_MODEL_URL: string | undefined = MODELS[model.id].address;
+    
+    // prepare files for model
+    let result: IExtractResult | null = null;
+    let filesText: string | undefined = undefined;
+    let filesImages: string[] | null = null;
+    const files = lastMessage.files;
+
+    if (files && files?.length > 0) {
+      //const preparedFiles = await prepareFilesForServer(files);
+      const pdfResponse = await extractTextFromFiles(files);
+      
+      if (pdfResponse) {
+        result = pdfResponse;
+        filesText = result?.text?.map(file => 
+          Buffer.from(file.data, 'base64').toString('utf-8')
+        ).join('\n\n');
+        filesImages = result.images;
+      } else {
+        throw new Error("Error while parsing files.")
+      }
+    }
+
     // send request to AI
     const response = await fetch(AI_MODEL_URL + "/api/chat", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         model: model.model_name,
-        messages: messages.map((m: any) => ({
+        messages: messages.map((m: IMessage) => ({
           role: m.role,
-          content: m.content,
+          content: m.content + "\n\n" + filesText,
+          images: filesImages ?? [],
         })),
+        think: false,
         stream: isStream,
       }),
     });

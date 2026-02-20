@@ -1,6 +1,5 @@
-import { IConversation } from "../(main)/conversation/[id]/page";
+import { IConversation, preparedFiles } from "../(main)/conversation/[id]/page";
 import { summaryConversation, updateTitleConversation } from "../service/index";
-import { useRouter } from 'next/router'
 
 type role = "user" | "assistant" | "system";
 
@@ -10,6 +9,8 @@ export interface IMessage {
     id: number;
   };
   content: string;
+  files: preparedFiles[] | undefined;
+  images: string[] | null;
 }
 
 export interface IPayload {
@@ -26,6 +27,7 @@ export interface IAnswer {
     // for api/chat
     role: role;
     content: string;
+    thinking?: string;
   };
   done?: boolean;
   done_reason?: string;
@@ -36,6 +38,7 @@ export interface IAnswer {
   prompt_eval_duration?: number; // How long it took the AI to "read" and understand your prompt before it started writing.
   eval_count?: number; // The AI's response ("Discussing love is my current desire.") was 9 tokens long.
   eval_duration?: number;
+  error?: string;
 }
 // {"model":"tinyllama","created_at":"2025-10-16T17:56:49.249317848Z","response":"","done":true,"done_reason":"stop","context":[529,29989]
 
@@ -85,3 +88,19 @@ export const summaryConversationAndUpdate = async (
     throw new Error("Could not summarize conversation title : " + err);
   }
 };
+
+  export async function prepareFilesForServer(
+    files: File[],
+  ): Promise<preparedFiles[]> {
+    return await Promise.all(
+      Array.from(files).map(async (file) => {
+        const buffer = await file.arrayBuffer();
+        return {
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          data: Buffer.from(buffer).toString("base64"),
+        };
+      }),
+    );
+  }

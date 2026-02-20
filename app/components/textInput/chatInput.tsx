@@ -11,7 +11,7 @@ type ChatInputProps = {
   onThought: boolean;
   onChatbotWriting: boolean;
   onAbort?: () => void;
-  onSend: (message: string, model: IModelList) => void;
+  onSend: (message: string, model: IModelList, files: File[]) => void;
 };
 
 export default function ChatInput({
@@ -52,13 +52,15 @@ export default function ChatInput({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onSend(input, model);
+      onSend(input, model, selectedFiles);
+      setSelectedFiles([]);
       setInput("");
     }
   };
 
   const handleSend = () => {
-    onSend(input, model);
+    onSend(input, model, selectedFiles);
+    setSelectedFiles([]);
     setInput("");
   };
 

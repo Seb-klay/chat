@@ -35,7 +35,7 @@ export const sendChatMessage = async (
         `Response ${responseChat.status} occurred while chatting with AI. `,
       );
     // Pass the stream to the handler
-    await handleStream(responseChat, payload, abortController, callbacks);
+    await handleStream(responseChat, payload, callbacks);
   } catch (error: any) {
     callbacks.onError(error);
   }
@@ -44,7 +44,6 @@ export const sendChatMessage = async (
 const handleStream = async (
   response: Response,
   payload: IPayload,
-  abortController: AbortController,
   { onData, onWrite, onCompleted, onError }: StreamCallbacks,
 ) => {
   // AI stops thinking and starts writing message
@@ -82,6 +81,18 @@ const handleStream = async (
         const trimmed = line.trim();
         if (!trimmed) continue;
         data = JSON.parse(trimmed);
+
+        if (data.error) {
+          onError(data.error);
+          return;
+        }
+
+        // handles thinking models
+        if (data.message?.thinking) {
+          aiResponse += data.message?.thinking;
+          let content = data.message?.thinking;
+          onData(content);
+        }
 
         if (data.message?.content) {
           aiResponse += data.message?.content;
@@ -122,6 +133,8 @@ const storeMessageAndAnalytics = async (
       role: data.message?.role || "assistant",
       model: payload.messages.at(-1)!.model,
       content: aiResponse,
+      files: undefined,
+      images: null
     };
     // create payload
     var payloadFromAI: IPayload = {

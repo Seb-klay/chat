@@ -6,6 +6,7 @@ import {
   IMessage,
   IPayload,
   summaryConversationAndUpdate,
+  prepareFilesForServer
 } from "../../../utils/chatUtils";
 import {
   getConversationHistory,
@@ -18,14 +19,22 @@ import DialogsSkeleton from "../../../components/dialogs/dialogsSkeleton";
 import { sendChatMessage } from "@/app/service/aiService";
 import { useTheme } from "@/app/components/contexts/theme-provider";
 import { Toaster, toast } from "sonner";
+import { get, del } from "idb-keyval";
 
-export type IConversation = {
+export interface IConversation {
   convid: string;
   title: string;
   userid: string;
   createdat: string;
   updatedat: string;
   defaultmodel: IModelList;
+}
+
+export type preparedFiles = {
+  name: string;
+  type: string;
+  size: number;
+  data: string;
 };
 
 export default function ConversationPage() {
@@ -79,9 +88,21 @@ export default function ConversationPage() {
           toast.warning(
             `Response ${response?.status} occurred while loading conversation. `,
           );
+
+        // checks if there are files in IndexedDB
+        const files: File[] | undefined = await get("local_files");
         const newConversation: IConversation[] = await response?.json();
-        sendMessage(newConversation[0].title, newConversation[0].defaultmodel);
-        setLoadingConversation(false); // show conversation to user
+        // show conversation to user
+        setLoadingConversation(false);
+        
+        await sendMessage(
+          newConversation[0].title,
+          newConversation[0].defaultmodel,
+          files ?? [],
+        );
+        // clean up storage after use
+        await del("local_files");
+
         // rename conversation
         await summaryConversationAndUpdate(newConversation[0], {
           onError: (err) => {
@@ -97,6 +118,8 @@ export default function ConversationPage() {
             role: chat.role,
             model: chat.model,
             content: chat.content,
+            files: undefined,
+            images: null
           };
           messageHistory.push(newMessage);
         }
@@ -116,26 +139,44 @@ export default function ConversationPage() {
     }
   };
 
-  const sendMessage = async (userInput: string, selectedModel: IModelList) => {
+  const sendMessage = async (
+    userInput: string,
+    selectedModel: IModelList,
+    files?: File[],
+  ) => {
     const messageText = userInput;
-    const messageFromUser: IMessage = {
-      role: "user",
-      model: selectedModel,
-      content: messageText,
-    };
-    const assistantPlaceholder: IMessage = {
-      role: "assistant", // This ensures it uses the "Bot" styling/side
-      model: selectedModel,
-      content: "",
-    };
-    // store USER message in history
-    setMessages((prev) => [...prev, messageFromUser, assistantPlaceholder]);
+    // TODO: handle images in files
+    let filesImages: string[] | null = null;
+   try {
+      let preparedFiles: preparedFiles[] = [{
+        name: "",
+        type: "",
+        size: 0,
+        data: "",
+      }] ;
+      if (files && files?.length > 0)
+        preparedFiles = await prepareFilesForServer(files);
+      const messageFromUser: IMessage = {
+        role: "user",
+        model: selectedModel,
+        content: messageText,
+        files: preparedFiles,
+        images: filesImages
+      };
+      const assistantPlaceholder: IMessage = {
+        role: "assistant", // This ensures it uses the "Bot" styling/side
+        model: selectedModel,
+        content: "",
+        files: undefined,
+        images: null
+      };
+      // store USER message in history
+      setMessages((prev) => [...prev, messageFromUser, assistantPlaceholder]);
 
-    // create the controller when the user wants to abort the message generation
-    const controller = new AbortController();
-    abortControllerRef.current = controller;
+      // create the controller when the user wants to abort the message generation
+      const controller = new AbortController();
+      abortControllerRef.current = controller;
 
-    try {
       // create payload
       var payloadFromUser: IPayload = {
         messages: [...messages, messageFromUser],
