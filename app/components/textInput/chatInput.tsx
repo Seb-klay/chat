@@ -6,6 +6,7 @@ import { AbortButton } from "../buttons/abortButton";
 import { useTheme } from "../contexts/theme-provider";
 import { useModel } from "../contexts/model-provider";
 import AiTools from "../dropdowns/aiTools";
+import { formatFileSize, FileIcon } from "@/app/utils/fileUtils";
 
 type ChatInputProps = {
   onThought: boolean;
@@ -68,13 +69,13 @@ export default function ChatInput({
     setSelectedFiles((prevFiles) => [...prevFiles, ...files]);
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 B";
-    const k = 1024;
-    const sizes = ["B", "KB", "MB", "GB"];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-  };
+  // const formatFileSize = (bytes: number) => {
+  //   if (bytes === 0) return "0 B";
+  //   const k = 1024;
+  //   const sizes = ["B", "KB", "MB", "GB"];
+  //   const i = Math.floor(Math.log(bytes) / Math.log(k));
+  //   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+  // };
 
   return (
     <div className="w-full mx-auto bottom-0">
@@ -114,19 +115,9 @@ export default function ChatInput({
                 >
                   {/* File icon/logo */}
                   <div className="text-2xl mb-1">
-                    {isUnsupported
-                      ? "⛔"
-                      : file.type?.startsWith("image/")
-                        ? "🖼️"
-                        : file.type?.startsWith("text/")
-                          ? "📄"
-                          : file.type?.startsWith("application/pdf")
-                            ? "📕"
-                            : file.type?.startsWith("video/")
-                              ? "🎬"
-                              : file.type?.startsWith("audio/")
-                                ? "🎵"
-                                : "📎"}
+                    <FileIcon 
+                      fileType={file.type} 
+                    />
                   </div>
 
                   {/* File name */}

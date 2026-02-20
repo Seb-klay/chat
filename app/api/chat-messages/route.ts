@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { MODELS } from "../../utils/listModels";
 import { IMessage } from "@/app/utils/chatUtils";
 import { extractTextFromFiles, IExtractResult } from "@/app/utils/pdf-parser";
-import { preparedFiles } from "@/app/(main)/conversation/[id]/page";
 
 export async function POST(request: NextRequest) {
   try {

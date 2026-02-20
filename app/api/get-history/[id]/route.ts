@@ -27,10 +27,28 @@ export async function GET(
       );
     // Get list of messages
     const response = await pool.query(
-      `SELECT rolesender as role, model, textmessage as content
-       FROM messages 
-       WHERE convid = $1
-       ORDER BY createdat ASC`,
+      `SELECT 
+        m.rolesender as role, 
+        m.model as model, 
+        m.content as content,
+        m.createdat as createdat,
+        COALESCE(
+          json_agg(
+            json_build_object(
+              'id', f.fileid,
+              'messid', f.messid,
+              'name', f.name,
+              'type', f.type,
+              'size', f.size
+            )
+          ) FILTER (WHERE f.messid IS NOT NULL),
+          '[]'::json
+        ) as files
+      FROM messages m 
+      LEFT JOIN files f ON m.messid = f.messid
+      WHERE m.convid = $1
+      GROUP BY m.messid, m.rolesender, m.model, m.content, m.createdat
+      ORDER BY m.createdat ASC`,
       [id],
     );
     if (!response)

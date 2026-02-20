@@ -26,11 +26,23 @@ CREATE TABLE Messages
   messID UUID PRIMARY KEY DEFAULT uuidv7(),
   roleSender VARCHAR(50),
   model VARCHAR(50),
-  textMessage TEXT,
+  content TEXT,
+  thinking TEXT,
   convID UUID,
   createdAt TIMESTAMP NOT NULL,
   CONSTRAINT FK_convMess FOREIGN KEY (convID)
     REFERENCES Conversations(convID)
+);
+
+CREATE TABLE Files
+(
+  fileID UUID PRIMARY KEY DEFAULT uuidv7(),
+  name VARCHAR(50),
+  type VARCHAR(50),
+  size INTEGER,
+  messID UUID,
+  CONSTRAINT FK_messFile FOREIGN KEY (messID)
+    REFERENCES Messages(messID)
 );
 
 CREATE TABLE Email_verification_codes (

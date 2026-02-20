@@ -31,6 +31,8 @@ export interface IConversation {
 }
 
 export type preparedFiles = {
+  id?: string;
+  messid?: string;
   name: string;
   type: string;
   size: number;
@@ -94,7 +96,7 @@ export default function ConversationPage() {
         const newConversation: IConversation[] = await response?.json();
         // show conversation to user
         setLoadingConversation(false);
-        
+
         await sendMessage(
           newConversation[0].title,
           newConversation[0].defaultmodel,
@@ -118,7 +120,7 @@ export default function ConversationPage() {
             role: chat.role,
             model: chat.model,
             content: chat.content,
-            files: undefined,
+            files: chat.files,
             images: null
           };
           messageHistory.push(newMessage);

@@ -1,6 +1,6 @@
 // define functions for database connection, transactions and close.
 
-import { Pool } from 'pg'
+import { Pool, Client } from 'pg'
 
 type Config = {
   host?: string,
@@ -33,6 +33,7 @@ const configs : Config = {
 
 // Create pool instance to handle all client instances of the app
 let pool: Pool | undefined;
+let client: Client | undefined;
 
 export const getPool = (): Pool => {
   if (!pool) {
@@ -46,9 +47,29 @@ export const getPool = (): Pool => {
   return pool;
 };
 
+export const getClient = async (): Promise<Client> => {
+  if (!client) {
+    client = new Client(configs);
+    await client.connect();
+
+    client.on('error', (err) => {
+      process.exit(1);
+    });
+  }
+
+  return client;
+};
+
 // Shut down pool when app shuts down
 export const shutDownPool = async () => {
     if (pool) {
         await pool.end();
     }
 }
+
+export const closeClient = async () => {
+  if (client) {
+    await client.end();
+    client = undefined;
+  }
+};
