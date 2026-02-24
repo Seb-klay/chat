@@ -35,8 +35,7 @@ nvm use
 npm install
 ```
 
-> [!IMPORTANT]
-> File reader is not available on mac with intel chip so you can run the Dockerfile instead and run the app on a container :
+If you want to run it on docker, use :
 
 ```bash
 # create network to communicate with the other services
@@ -94,7 +93,18 @@ cd app/backend/database/prod
 docker-compose --env-file ../../../../.env -f compose.prod.yml up
 ```
 
-4. **Start up the interface**
+4. **Start up the file database (AppWrite)**
+Run the Postgres database on docker container :
+
+```bash
+docker run -it --rm \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v "$(pwd)/app/backend/file-database/appwrite":/usr/src/code/appwrite:rw \
+    --env-file ../../../../.env
+    appwrite/appwrite:1.8.1
+```
+
+5. **Start up the interface**
 Finally, run the development server in terminal:
 
 ```bash
@@ -141,6 +151,7 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Error handling and Toast notifications
 
 **AI Capabilities**:
+- [ ] Store files directly in app
 - [ ] Add tools functionalities for AI to use
 - [ ] More AI model integrations
 

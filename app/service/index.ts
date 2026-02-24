@@ -1,4 +1,5 @@
 import { IAnalytics } from "../(main)/account/analytics";
+import { preparedFiles } from "../(main)/conversation/[id]/page";
 import { IAnswer, IPayload } from "../utils/chatUtils";
 import { IModelList } from "../utils/listModels";
 import { IUser } from "../utils/userUtils";
@@ -16,9 +17,9 @@ export const createConversation = async (
       defaultModel: defaultModel,
     }),
     credentials: "include",
-    cache: 'no-store',
+    cache: "no-store",
     keepalive: false,
-    mode: 'cors',
+    mode: "cors",
   }).catch((err) => {
     throw new Error(err);
   });
@@ -39,8 +40,8 @@ export const deleteConversation = async (conversationID: string) => {
 export const getUserConversations = async () => {
   return await fetch(`${URL}/api/get-user-conversation`, {
     method: "GET",
-    headers: { 
-      "Content-Type": "application/json"
+    headers: {
+      "Content-Type": "application/json",
     },
   }).catch((err) => {
     throw new Error(err);
@@ -106,9 +107,7 @@ export const storeMessage = async (
   });
 };
 
-export const getConversationHistory = async (
-  conversationID: string,
-) => {
+export const getConversationHistory = async (conversationID: string) => {
   return await fetch(`${URL}/api/get-history/${conversationID}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
@@ -163,7 +162,7 @@ export const updatePasswordUser = async (
   return await fetch(`${URL}/api/update-password`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({newPassword}),
+    body: JSON.stringify({ newPassword }),
   }).catch((err) => {
     throw new Error(err);
   });
@@ -186,6 +185,40 @@ export const updateUserSettings = async (
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ newTheme: newTheme, newModel: newModel }),
+  }).catch((err) => {
+    throw new Error(err);
+  });
+};
+
+export const storeFiles = async (
+  files: preparedFiles[] | undefined,
+): Promise<Response | null> => {
+    return await fetch(`${URL}/api/store-files`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ files: files }),
+  }).catch((err) => {
+    throw new Error(err);
+  });
+};
+
+// export const getFileMetadata = async (
+//   fileID: string,
+// ): Promise<Response | null> => {
+//     return await fetch(`${URL}/api/get-file-metadata/${fileID}`, {
+//     method: "GET",
+//     headers: { "Content-Type": "application/json" },
+//   }).catch((err) => {
+//     throw new Error(err);
+//   });
+// };
+
+export const downloadFile = async (
+  fileID: string,
+): Promise<Response | null> => {
+    return await fetch(`${URL}/api/download-file/${fileID}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
   }).catch((err) => {
     throw new Error(err);
   });
@@ -245,9 +278,9 @@ export const addUserAnalytics = async (
 export const getUserAnalytics = async (): Promise<IAnalytics[]> => {
   const response = await fetch(`${URL}/api/get-user-analytics`, {
     method: "GET",
-    headers: { 
-      "Content-Type": "application/json"
-     },
+    headers: {
+      "Content-Type": "application/json",
+    },
   }).catch((err) => {
     throw new Error(err);
   });

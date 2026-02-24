@@ -1,6 +1,6 @@
 "use client";
 
-import { addUserAnalytics, storeMessage } from ".";
+import { addUserAnalytics, storeFiles, storeMessage } from ".";
 import { IAnswer, IMessage, IPayload } from "../utils/chatUtils";
 
 type StreamCallbacks = {
@@ -22,6 +22,20 @@ export const sendChatMessage = async (
       throw new Error(
         `Response ${responseStore?.status} occurred while storing the message of the user. `,
       );
+
+    const { storedFiles } = await responseStore.json();
+    const files = payload.messages.at(-1)?.files
+    if (files){
+      const filesWithIds = files.map((file, index) => ({
+        id: storedFiles[index].fileid,
+        ...file
+      }));
+      const responseFiles = await storeFiles(filesWithIds);
+      if (!responseFiles)
+        throw new Error(
+          `Response ${responseStore?.status} occurred while storing the message of the user. `,
+        );
+    }
 
     // send user input to AI model
     const responseChat = await fetch(`/api/chat-messages`, {

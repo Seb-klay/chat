@@ -1,4 +1,5 @@
 import { DocumentIcon, PhotoIcon, DocumentTextIcon } from '@heroicons/react/24/outline';
+import { downloadFile } from '../service';
 
 const getIcon = ({ fileType }: any) => {
   if (fileType.includes('image')) {
@@ -41,23 +42,39 @@ export const FileIcon = ({ fileType }: any) => {
   );
 };
 
-
 // Handle file download
 export const handleFileDownload = async (fileId: string | undefined, fileName: string) => {
   try {
-    // Implement your file download logic here
-    // This could be an API call to get the file
-    const response = await fetch(`/api/files/${fileId}`);
-    const blob = await response.blob();
+    if (!fileId) {
+      throw new Error(`Could not download file named ${fileName}. `);
+    }
+
+    // Appwrite returns ArrayBuffer
+    const response = await downloadFile(fileId);
+    if (!response) {
+      throw new Error("No file returned from server. ");
+    }
+
+    const arrayBuffer = await response.arrayBuffer();
+    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
+    console.log(blob)
+
+    // Create object URL
     const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    document.body.appendChild(a);
-    a.click();
+
+    // Create temporary anchor
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+
+    // Trigger download
+    link.click();
+
+    // Cleanup
+    document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-    document.body.removeChild(a);
   } catch (error) {
-    throw new Error(String('Error downloading file:' + error))
+    throw new Error(String(error))
   }
 };

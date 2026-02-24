@@ -1,3 +1,4 @@
+import { preparedFiles } from "@/app/(main)/conversation/[id]/page";
 import {
   closeClient,
   getClient,
@@ -28,15 +29,18 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { status: 400 },
       );
 
+    let storedFiles: preparedFiles[] = []
     if (files && files.length > 0) {
       const messageId = messagesResponse.rows[0].messid;
 
       for (const file of files) {
         const fileResponse = await client.query(
           `INSERT INTO files (name, type, size, messid) 
-          VALUES ($1, $2, $3, $4)`,
+          VALUES ($1, $2, $3, $4)
+          RETURNING *`,
           [file.name, file.type, file.size, messageId],
         );
+        storedFiles.push(fileResponse.rows[0])
 
         if (!fileResponse)
           return NextResponse.json(
@@ -49,7 +53,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     await client.query("COMMIT");
 
     return NextResponse.json(
-      { message: "Message stored successfully. " },
+      { storedFiles: storedFiles },
       { status: 200 },
     );
   } catch (err) {
