@@ -39,7 +39,8 @@ export async function GET(
               'messid', f.messid,
               'name', f.name,
               'type', f.type,
-              'size', f.size
+              'size', f.size,
+              'isdeleted', f.isdeleted,
             )
           ) FILTER (WHERE f.messid IS NOT NULL),
           '[]'::json

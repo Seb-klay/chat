@@ -193,7 +193,7 @@ export const updateUserSettings = async (
 export const storeFiles = async (
   files: preparedFiles[] | undefined,
 ): Promise<Response | null> => {
-    return await fetch(`${URL}/api/store-files`, {
+    return await fetch(`${URL}/api/files/store-files`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ files: files }),
@@ -202,23 +202,46 @@ export const storeFiles = async (
   });
 };
 
-// export const getFileMetadata = async (
-//   fileID: string,
-// ): Promise<Response | null> => {
-//     return await fetch(`${URL}/api/get-file-metadata/${fileID}`, {
-//     method: "GET",
-//     headers: { "Content-Type": "application/json" },
-//   }).catch((err) => {
-//     throw new Error(err);
-//   });
-// };
+export const getFilesMetadata = async (
+): Promise<Response | null> => {
+    return await fetch(`${URL}/api/files/get-files-metadata`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  }).catch((err) => {
+    throw new Error(err);
+  });
+};
 
 export const downloadFile = async (
   fileID: string,
 ): Promise<Response | null> => {
-    return await fetch(`${URL}/api/download-file/${fileID}`, {
+    return await fetch(`${URL}/api/files/download-file/${fileID}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
+  }).catch((err) => {
+    throw new Error(err);
+  });
+};
+
+export const downloadFileWithPath = async (
+  filePath: string,
+): Promise<Response | null> => {
+    return await fetch(`${URL}/api/files/download-file-with-path`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ filePath: filePath }),
+  }).catch((err) => {
+    throw new Error(err);
+  });
+};
+
+export const deleteFiles = async (
+  filesPath: string[],
+): Promise<Response | null> => {
+    return await fetch(`${URL}/api/files/delete-files`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ filesPath: filesPath }),
   }).catch((err) => {
     throw new Error(err);
   });

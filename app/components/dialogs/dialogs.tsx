@@ -54,9 +54,9 @@ const Dialogs: React.FC<DialogProps> = ({ messages }) => {
                       </div>
 
                       {/* Optional: Download button */}
-                      {file?.id && (
+                      {file?.id && !file.isdeleted && (
                         <button
-                          onClick={() => handleFileDownload(file?.id, file.name)}
+                          onClick={() => handleFileDownload({fileName: file.name, fileId: file?.id})}
                           className="p-1 hover:bg-gray-200 dark:hover:bg-gray-700 rounded"
                           title="Download file"
                         >

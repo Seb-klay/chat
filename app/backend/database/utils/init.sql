@@ -40,9 +40,17 @@ CREATE TABLE Files
   name VARCHAR(50),
   type VARCHAR(50),
   size INTEGER,
+  path VARCHAR(50) NOT NULL DEFAULT '/Documents',
+  createdAt TIMESTAMP NOT NULL,
+  updatedAt TIMESTAMP,
+  isDirectory BOOLEAN,
+  isDeleted BOOLEAN NOT NULL DEFAULT false,
   messID UUID,
+  userID UUID,
   CONSTRAINT FK_messFile FOREIGN KEY (messID)
-    REFERENCES Messages(messID)
+    REFERENCES Messages(messID),
+  CONSTRAINT FK_userFile FOREIGN KEY (userID)
+    REFERENCES Users(userID)
 );
 
 CREATE TABLE Email_verification_codes (

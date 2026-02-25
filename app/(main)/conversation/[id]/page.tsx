@@ -36,6 +36,11 @@ export type preparedFiles = {
   name: string;
   type: string;
   size: number;
+  path?: string;
+  isdirectory?: string;
+  createdat?: string;
+  updatedat?: string;
+  isdeleted?: boolean;
   data: string;
 };
 
@@ -154,10 +159,17 @@ export default function ConversationPage() {
         name: "",
         type: "",
         size: 0,
+        path: "",
         data: "",
       }] ;
-      if (files && files?.length > 0)
-        preparedFiles = await prepareFilesForServer(files);
+      if (files && files?.length > 0) {
+        const serverFiles = await prepareFilesForServer(files);
+
+        preparedFiles = serverFiles.map((file) => ({
+          ...file,
+          path: `/Documents/${file.name}`,
+        }));
+      }
       const messageFromUser: IMessage = {
         role: "user",
         model: selectedModel,

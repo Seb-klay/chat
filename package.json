@@ -15,6 +15,7 @@
     "@headlessui/react": "^2.2.9",
     "@heroicons/react": "^2.2.0",
     "@kreuzberg/node": "^4.3.6",
+    "@svar-ui/react-filemanager": "^2.4.4",
     "@tailwindplus/elements": "^1.0.18",
     "@types/nodemailer": "^7.0.4",
     "bcrypt-ts": "^8.0.0",
