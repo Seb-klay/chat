@@ -7,12 +7,10 @@ import { NextRequest, NextResponse } from "next/server";
 import { Storage } from "node-appwrite";
 const BUCKET_ID = process.env.APPWRITE_BUCKET_ID!;
 
-export async function DELETE(
-  request: NextRequest,
-) {
+export async function DELETE(request: NextRequest) {
   try {
-    const { filesPath } = await request.json();
-    if (!filesPath)
+    const { files } = await request.json();
+    if (!files)
       return NextResponse.json(
         { error: "No file were given to delete. " },
         { status: 404 },
@@ -32,17 +30,18 @@ export async function DELETE(
 
     const pool = getPool();
 
-    for (const path of filesPath) {
+    for (const file of files) {
       // get files metadata in main DB
       const responseMeta = await pool.query(
         `SELECT
-            fileid, name, type
+            fileid, name, type, isdirectory
           FROM Files
           WHERE userID = $1
-          AND path = $2`,
-        [userID, path],
+          AND path = $2
+          AND name = $3`,
+        [userID, file.path, file.name],
       );
-      if (!responseMeta)
+      if (responseMeta.rowCount === 0)
         return NextResponse.json(
           { error: "File metadata could not be loaded. " },
           { status: 400 },
@@ -50,22 +49,25 @@ export async function DELETE(
 
       const fileID = responseMeta.rows[0].fileid;
 
-      const deletedFile = await storage.deleteFile({
-        bucketId: BUCKET_ID,
-        fileId: fileID,
-      });
-      if (!deletedFile)
-        return NextResponse.json(
-          { error: "File could not be deleted. " },
-          { status: 404 },
-        );
+      if (!responseMeta.rows[0].isdirectory) {
+        const deletedFile = await storage.deleteFile({
+          bucketId: BUCKET_ID,
+          fileId: fileID,
+        });
+        if (!deletedFile)
+          return NextResponse.json(
+            { error: "File could not be deleted. " },
+            { status: 404 },
+          );
+      }
 
       const response = await pool.query(
         `UPDATE Files
-            SET isDeleted = TRUE
-            WHERE userID = $1
-            AND fileID = $2`,
-        [userID, fileID],
+            SET isDeleted = TRUE,
+            updatedat = $1
+            WHERE userID = $2
+            AND fileID = $3`,
+        [new Date(Date.now()), userID, fileID],
       );
       if (!response)
         return NextResponse.json(

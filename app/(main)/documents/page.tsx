@@ -24,24 +24,14 @@ export default function Documents() {
       const data = await response?.json();
 
       const formattedFiles = data.files.map((file: preparedFiles) => {
-        // Extract filename from path if name is empty
-        const pathParts = file.path?.split("/").filter(Boolean);
-        const fileNameFromPath = pathParts
-          ? pathParts[pathParts.length - 1]
-          : "";
-
-        // Determine file name
-        const fileName =
-          file.name && file.name.trim() !== "" ? file.name : fileNameFromPath;
-
-        // Remove extension for folder names
-        const displayName = file.isdirectory
-          ? fileName.replace(/\.[^/.]+$/, "") // Remove extension for folders
-          : fileName;
+        const buildId = (file: preparedFiles) => {
+          const par = file.path && file.path !== "/" ? file.path : "";
+          return `${par}/${file.name}`;
+        }
 
         return {
-          id: file.path,
-          name: displayName || "untitled",
+          id: buildId(file),
+          name: file.name,
           type: file.isdirectory ? "folder" : "file",
           size: file.size ?? 0,
           date: file.createdat ? new Date(file.createdat) : new Date(),
@@ -54,6 +44,7 @@ export default function Documents() {
     }
   };
 
+  // this mode is deactivated by readonly because files data cannot be loaded from the file manager
   const init = (api: any) => {
     api.on("download-file", async (ev: { id: string }) => {
       try {
@@ -74,11 +65,13 @@ export default function Documents() {
       }
     });
 
-    // api.on("open-file", (ev) => {
-    //   window.open(getLink(ev.id), "_blank");
+    // api.on("create-file", async ({ parent, file }: { parent: string, file: File }) => {
+    //   try {
+    //     await handleCreateFile({parent: parent, file: file});
+    //   } catch (error) {
+    //     console.log(error)
+    //   }
     // });
-
-    // api.on("request-data", ({ id }) => loadData(id, api));
   };
 
   return (
@@ -91,11 +84,11 @@ export default function Documents() {
     >
       {mode === "dark" ? (
         <WillowDark>
-          <Filemanager data={files} />
+          <Filemanager init={init} data={files} mode={"table"} readonly={true} />
         </WillowDark>
       ) : (
         <Willow>
-          <Filemanager init={init} data={files} />
+          <Filemanager init={init} data={files} mode={"table"} readonly={true} />
         </Willow>
       )}
     </div>

@@ -34,14 +34,14 @@ export type preparedFiles = {
   id?: string;
   messid?: string;
   name: string;
-  type: string;
+  type: string | null;
   size: number;
   path?: string;
-  isdirectory?: string;
+  isdirectory?: boolean;
   createdat?: string;
   updatedat?: string;
   isdeleted?: boolean;
-  data: string;
+  data?: string;
 };
 
 export default function ConversationPage() {
@@ -150,6 +150,7 @@ export default function ConversationPage() {
     userInput: string,
     selectedModel: IModelList,
     files?: File[],
+    folderName?: string,
   ) => {
     const messageText = userInput;
     // TODO: handle images in files
@@ -159,15 +160,16 @@ export default function ConversationPage() {
         name: "",
         type: "",
         size: 0,
-        path: "",
+        path: "/",
         data: "",
+        isdirectory: false,
       }] ;
       if (files && files?.length > 0) {
         const serverFiles = await prepareFilesForServer(files);
 
         preparedFiles = serverFiles.map((file) => ({
           ...file,
-          path: `/Documents/${file.name}`,
+          path: `/${folderName}/${file.name}`,
         }));
       }
       const messageFromUser: IMessage = {

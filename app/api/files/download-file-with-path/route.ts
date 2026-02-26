@@ -29,13 +29,18 @@ export async function POST(
     const pool = getPool();
 
     // get files metadata in main DB
+    const [parent, fileName] = [
+      filePath.slice(0, filePath.lastIndexOf("/")),
+      filePath.slice(filePath.lastIndexOf("/") + 1)
+    ];
     const response = await pool.query(
       `SELECT
-          fileid, name, type
+          fileid, name, type, isdirectory
         FROM Files
         WHERE userID = $1
-        AND path = $2`,
-      [userID, filePath],
+        AND path = $2
+        AND name = $3`,
+      [userID, parent || '/', fileName],
     );
     if (!response)
       return NextResponse.json(
@@ -43,8 +48,13 @@ export async function POST(
         { status: 400 },
       );
 
+    if (response.rows[0].isdirectory) 
+      return NextResponse.json(
+        { error: "Cannot download a folder. " },
+        { status: 400 },
+      );
+
     const fileID = response.rows[0].fileid;
-    const fileName = response.rows[0].name;
     const mimeType = response.rows[0].type;
 
     const file = await storage.getFileDownload({

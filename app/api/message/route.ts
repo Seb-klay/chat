@@ -49,7 +49,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           `INSERT INTO files (name, type, size, path, createdAt, isDirectory, messid, userid) 
           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
           RETURNING *`,
-          [file.name, file.type, file.size, file.path || "/Documents", new Date(Date.now()), file.isdirectory || false, messageId, userID],
+          [file.name, file.type, file.size, file.path || "/", new Date(Date.now()), file.isdirectory || false, messageId, userID],
         );
         storedFiles.push(fileResponse.rows[0]);
 
@@ -66,6 +66,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ storedFiles: storedFiles }, { status: 200 });
   } catch (err) {
     await client?.query("ROLLBACK");
+    console.log(err)
     return NextResponse.json(err, { status: 500 });
   } finally {
     if (client) await closeClient();

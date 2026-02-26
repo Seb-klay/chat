@@ -12,7 +12,7 @@ type ChatInputProps = {
   onThought: boolean;
   onChatbotWriting: boolean;
   onAbort?: () => void;
-  onSend: (message: string, model: IModelList, files: File[]) => void;
+  onSend: (message: string, model: IModelList, files: File[], folderName?: string) => void;
 };
 
 export default function ChatInput({
@@ -22,6 +22,7 @@ export default function ChatInput({
   onSend,
 }: ChatInputProps) {
   const [input, setInput] = useState("");
+  const [nameFolder, setNameFolder] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { selectedModel } = useModel();
   const [model, setModel] = useState<IModelList>(selectedModel);
@@ -53,29 +54,22 @@ export default function ChatInput({
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onSend(input, model, selectedFiles);
+      onSend(input, model, selectedFiles, nameFolder);
       setSelectedFiles([]);
       setInput("");
     }
   };
 
   const handleSend = () => {
-    onSend(input, model, selectedFiles);
+    onSend(input, model, selectedFiles, nameFolder);
     setSelectedFiles([]);
     setInput("");
   };
 
-  const handleFileSelect = (files: File[]) => {
+  const handleFileSelect = (files: File[], folderName?: string) => {
     setSelectedFiles((prevFiles) => [...prevFiles, ...files]);
+    if (folderName) setNameFolder(folderName);
   };
-
-  // const formatFileSize = (bytes: number) => {
-  //   if (bytes === 0) return "0 B";
-  //   const k = 1024;
-  //   const sizes = ["B", "KB", "MB", "GB"];
-  //   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  //   return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
-  // };
 
   return (
     <div className="w-full mx-auto bottom-0">

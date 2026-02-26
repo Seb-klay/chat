@@ -1,6 +1,7 @@
 import { IAnalytics } from "../(main)/account/analytics";
 import { preparedFiles } from "../(main)/conversation/[id]/page";
 import { IAnswer, IPayload } from "../utils/chatUtils";
+import { PathItem } from "../utils/fileUtils";
 import { IModelList } from "../utils/listModels";
 import { IUser } from "../utils/userUtils";
 const URL: string = process.env.FULL_URL || "";
@@ -193,7 +194,7 @@ export const updateUserSettings = async (
 export const storeFiles = async (
   files: preparedFiles[] | undefined,
 ): Promise<Response | null> => {
-    return await fetch(`${URL}/api/files/store-files`, {
+  return await fetch(`${URL}/api/files/store-files`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ files: files }),
@@ -202,9 +203,8 @@ export const storeFiles = async (
   });
 };
 
-export const getFilesMetadata = async (
-): Promise<Response | null> => {
-    return await fetch(`${URL}/api/files/get-files-metadata`, {
+export const getFilesMetadata = async (): Promise<Response | null> => {
+  return await fetch(`${URL}/api/files/get-files-metadata`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   }).catch((err) => {
@@ -215,7 +215,7 @@ export const getFilesMetadata = async (
 export const downloadFile = async (
   fileID: string,
 ): Promise<Response | null> => {
-    return await fetch(`${URL}/api/files/download-file/${fileID}`, {
+  return await fetch(`${URL}/api/files/download-file/${fileID}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   }).catch((err) => {
@@ -226,7 +226,7 @@ export const downloadFile = async (
 export const downloadFileWithPath = async (
   filePath: string,
 ): Promise<Response | null> => {
-    return await fetch(`${URL}/api/files/download-file-with-path`, {
+  return await fetch(`${URL}/api/files/download-file-with-path`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ filePath: filePath }),
@@ -236,15 +236,36 @@ export const downloadFileWithPath = async (
 };
 
 export const deleteFiles = async (
-  filesPath: string[],
+  files: PathItem[],
 ): Promise<Response | null> => {
-    return await fetch(`${URL}/api/files/delete-files`, {
+  return await fetch(`${URL}/api/files/delete-files`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ filesPath: filesPath }),
+    body: JSON.stringify({ files: files }),
   }).catch((err) => {
     throw new Error(err);
   });
+};
+
+// Create files and folders
+export const createFiles = async (
+  files: preparedFiles[],
+): Promise<Response | null> => {
+  try {
+    const responseMetadata = await fetch(`${URL}/api/files/create-files`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ files: files }),
+    });
+    const data = await responseMetadata.json();
+    const filesWithIds = files.map((file, index) => ({
+      id: data.storedFiles[index],
+      ...file,
+    }));
+    return await storeFiles(filesWithIds);
+  } catch (err: any) {
+    throw new Error(err);
+  }
 };
 
 export const validateUser = async (

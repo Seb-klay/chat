@@ -4,22 +4,29 @@ import {
   PlusIcon,
 } from "@heroicons/react/16/solid";
 import { useTheme } from "../contexts/theme-provider";
-import { ChangeEvent, useRef } from "react";
+import { useRef, useState } from "react";
+import FileUploadCard from "../cards/fileUploadCard";
 
 interface AiToolsProps {
-  onFile: (files: File[]) => void;
+  onFile: (files: File[], folderName?: string) => void;
 }
 
 export default function AiTools({ onFile }: AiToolsProps) {
   const { theme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [onFolderCreation, setOnFolderCreation] = useState<boolean>(false);
 
-  const handleFileSelect = (files: File[]) => {
+  const handleFileSelect = (files: File[], folderName?: string) => {
     // Handle your files here
     if (files) {
       // Convert FileList to array
       const fileArray = Array.from(files);
-      onFile(fileArray); // Call with array of files
+      if (folderName) {
+        onFile(fileArray, folderName)
+      } else {
+        onFile(fileArray);
+      }
+    
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -70,9 +77,10 @@ export default function AiTools({ onFile }: AiToolsProps) {
           {/* Add more menu items here */}
           <MenuItem>
             <button
+            onClick={() => setOnFolderCreation(true)}
             className={`
                 w-full flex items-center gap-3 px-3 py-2.5
-                text-sm font-medium rounded-lg transition-all duration-200
+                text-sm font-medium rounded-lg hover:bg-white/10 transition-all duration-200 cursor-pointer
             `}
             style={{ color: theme.colors.primary }}
             >
@@ -100,6 +108,15 @@ export default function AiTools({ onFile }: AiToolsProps) {
           }
         }}
       />
+
+
+      {onFolderCreation && (
+      <FileUploadCard
+        isOpen={onFolderCreation}
+        onClose={() => setOnFolderCreation(false)}
+        onSubmit={handleFileSelect}
+      />
+      )}
     </Menu>
   );
 }

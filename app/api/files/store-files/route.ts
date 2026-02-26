@@ -2,7 +2,7 @@ import { preparedFiles } from "@/app/(main)/conversation/[id]/page";
 import { getAppwriteClient } from "@/app/backend/file-database/appwriteUtils";
 import { NextRequest, NextResponse } from "next/server";
 import { Client, Storage } from "node-appwrite";
- import { InputFile } from 'node-appwrite/file';
+import { InputFile } from 'node-appwrite/file';
 const BUCKET_ID = process.env.APPWRITE_BUCKET_ID!;
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -13,7 +13,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const storage = new Storage(appWrite);
 
     const uploadPromises = files.map(async (file: preparedFiles) => {
+      if (file.isdirectory) return;
       if (!file.id) return NextResponse.json({ error: "No file could be found. " }, { status: 404 });
+      if (!file.data) return NextResponse.json({ error: "The file has no data to store. " }, { status: 400 });
 
       const fileBuffer = Buffer.from(file.data, "base64");
       

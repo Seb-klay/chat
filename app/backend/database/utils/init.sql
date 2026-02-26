@@ -37,10 +37,10 @@ CREATE TABLE Messages
 CREATE TABLE Files
 (
   fileID UUID PRIMARY KEY DEFAULT uuidv7(),
-  name VARCHAR(50),
+  name VARCHAR(255) NOT NULL,
   type VARCHAR(50),
   size INTEGER,
-  path VARCHAR(50) NOT NULL DEFAULT '/Documents',
+  path VARCHAR(255) NOT NULL DEFAULT '/',
   createdAt TIMESTAMP NOT NULL,
   updatedAt TIMESTAMP,
   isDirectory BOOLEAN,
