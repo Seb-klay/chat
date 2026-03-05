@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       typeof lastMessage.model === "string"
         ? JSON.parse(lastMessage.model)
         : lastMessage.model;
-    const AI_MODEL_URL: string | undefined = MODELS[model.id].address;
+    const AI_MODEL_URL: string | undefined = process.env.LLM_URL;
     
     // prepare files for model
     let result: IExtractResult | null = null;
@@ -28,8 +28,10 @@ export async function POST(request: NextRequest) {
       
       if (pdfResponse) {
         result = pdfResponse;
-        filesText = result?.text?.map(file => 
-          Buffer.from(file.data, 'base64').toString('utf-8')
+        filesText = result?.text?.map(file => {
+          if (file.data)
+            Buffer.from(file.data, 'base64').toString('utf-8')
+        }
         ).join('\n\n');
         filesImages = result.images;
       } else {
@@ -65,6 +67,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (err) {
+    console.log(err)
     return NextResponse.json(err, { status: 500 });
   }
 }

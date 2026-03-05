@@ -6,7 +6,7 @@ import {
   IMessage,
   IPayload,
   summaryConversationAndUpdate,
-  prepareFilesForServer
+  prepareFilesForServer,
 } from "../../../utils/chatUtils";
 import {
   getConversationHistory,
@@ -126,7 +126,7 @@ export default function ConversationPage() {
             model: chat.model,
             content: chat.content,
             files: chat.files,
-            images: null
+            images: null,
           };
           messageHistory.push(newMessage);
         }
@@ -155,36 +155,39 @@ export default function ConversationPage() {
     const messageText = userInput;
     // TODO: handle images in files
     let filesImages: string[] | null = null;
-   try {
-      let preparedFiles: preparedFiles[] = [{
-        name: "",
-        type: "",
-        size: 0,
-        path: "/",
-        data: "",
-        isdirectory: false,
-      }] ;
-      if (files && files?.length > 0) {
-        const serverFiles = await prepareFilesForServer(files);
+    try {
+      let preparedFiles: preparedFiles[] = [];
+      if (files) {
+        preparedFiles.push({
+          name: "",
+          type: "",
+          size: 0,
+          path: "/",
+          data: "",
+          isdirectory: false,
+        });
+        const serverFiles = await prepareFilesForServer(files!);
 
+        // add path to each file
         preparedFiles = serverFiles.map((file) => ({
           ...file,
           path: `/${folderName}/${file.name}`,
         }));
       }
+
       const messageFromUser: IMessage = {
         role: "user",
         model: selectedModel,
         content: messageText,
         files: preparedFiles,
-        images: filesImages
+        images: filesImages,
       };
       const assistantPlaceholder: IMessage = {
         role: "assistant", // This ensures it uses the "Bot" styling/side
         model: selectedModel,
         content: "",
         files: undefined,
-        images: null
+        images: null,
       };
       // store USER message in history
       setMessages((prev) => [...prev, messageFromUser, assistantPlaceholder]);

@@ -66,7 +66,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ storedFiles: storedFiles }, { status: 200 });
   } catch (err) {
     await client?.query("ROLLBACK");
-    console.log(err)
     return NextResponse.json(err, { status: 500 });
   } finally {
     if (client) await closeClient();

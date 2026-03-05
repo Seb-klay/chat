@@ -25,7 +25,7 @@ export const sendChatMessage = async (
 
     const { storedFiles } = await responseStore.json();
     const files = payload.messages.at(-1)?.files
-    if (files){
+    if (files && files.length > 0){
       const filesWithIds = files.map((file, index) => ({
         id: storedFiles[index].fileid,
         ...file
