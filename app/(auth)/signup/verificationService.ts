@@ -72,7 +72,11 @@ import { isAccountUsed, validateUser, verifySignupCode } from '../../service';
     try {
       const result = await isAccountUsed(email);
       const isVerified = await result?.json();
-      return isVerified[0]
+      if (isVerified.length === 0) {
+        return false;
+      }
+
+      return isVerified[0].verified;
     } catch (error) {
       throw new Error(String(error));
     }

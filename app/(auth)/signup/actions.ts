@@ -67,7 +67,8 @@ export async function signup(prevState: any, formData: FormData) {
     const { email, password } = result.data;
 
     // check if email already exists
-    if (await isEmailVerified(email)) {
+    const isVerified = await isEmailVerified(email);
+    if (isVerified) {
       return {
         success: true,
         temporaryData: undefined,

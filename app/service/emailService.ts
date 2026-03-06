@@ -1,6 +1,7 @@
 // lib/email-service.ts
-import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { NextResponse } from "next/server";
+import nodemailer from "nodemailer";
+import { SentMessageInfo, Options } from "nodemailer/lib/smtp-transport";
 
 export interface EmailOptions {
   to: string;
@@ -8,25 +9,51 @@ export interface EmailOptions {
   html: string;
 }
 
+// for testing purposes !
+//private transporter!: nodemailer.Transporter;
+// const testAccount = await nodemailer.createTestAccount();
+// const testAccountConfigs = {
+//   host: testAccount.smtp.host,
+//   port: testAccount.smtp.port,
+//   secure: testAccount.smtp.secure,
+//   auth: {
+//     user: testAccount.user,
+//     pass: testAccount.pass,
+//   },
+// };
+
+// configs for production
+const accountConfigs = {
+  host: process.env.EMAIL_HOST!,
+  port: parseInt(process.env.EMAIL_PORT || "465"),
+  secure: true,
+  pool: true,
+  maxConnections: 5, // Maximum number of simultaneous connections (default: 5)
+  maxMessages: 100, // Messages per connection before reconnecting (default: 100)
+  auth: {
+    user: process.env.EMAIL_USER!,
+    pass: process.env.EMAIL_PASSWORD!,
+  },
+};
+
+let transporter: nodemailer.Transporter<SentMessageInfo, Options> | null = null;
 export class EmailService {
-    private transporter!: nodemailer.Transporter;
+  async init() {
+    try {
+      // for testing : this.transporter = nodemailer.createTransport(testAccountConfigs)
+      transporter = nodemailer.createTransport(accountConfigs);
 
-    async init() {
-    // for testing purposes !
-    const testAccount = await nodemailer.createTestAccount();
-
-    this.transporter = nodemailer.createTransport({
-      host: testAccount.smtp.host, //process.env.EMAIL_HOST,
-      port: testAccount.smtp.port, //parseInt(process.env.EMAIL_PORT || '587'),
-      secure: testAccount.smtp.secure, // process.env.EMAIL_SECURE === 'true'
-      auth: {
-        user: testAccount.user, // process.env.EMAIL_USER,
-        pass: testAccount.pass, // process.env.EMAIL_PASSWORD,
-      },
-    });
+      // Verify the connection
+      await transporter.verify();
+    } catch (error) {
+      return NextResponse.json({ message: `Transporter initialization failed: ${error}` }, { status: 500 });
+    }
   }
 
-  async sendVerificationCode(email: string, code: string): Promise<NextResponse | undefined> {
+  async sendVerificationCode(
+    email: string,
+    code: string,
+  ): Promise<NextResponse | undefined> {
     const html = `
       <!DOCTYPE html>
       <html>
@@ -64,16 +91,17 @@ export class EmailService {
       </html>
     `;
 
-    const sent = await this.transporter.sendMail({
-      from: `"Seb from Chat" <${'test@expandNextJsTemplate.com'}>`,
+    if (!transporter) {
+      return NextResponse.json({ status: 500 });
+    }
+    const sent = await transporter.sendMail({
+      from: `"Seb from Chat" <${"test@expandNextJsTemplate.com"}>`,
       to: email,
-      subject: 'Verify Your Email - Welcome aboard !',
+      subject: "Verify Your Email - Welcome aboard !",
       html,
     });
 
-    if (sent)
-
-    return NextResponse.json({status: 200});
+    if (sent) return NextResponse.json({ status: 200 });
   }
 }
 
