@@ -25,6 +25,11 @@ export default defineConfig(({ mode }) => {
       env: loadEnv(mode, process.cwd(), ""),
       setupFiles: "./vitest.setup.ts",
     },
+    build: {
+      rollupOptions: {
+        external: ["react", "react-dom"],
+      },
+    },
     resolve: {
       alias: {
         "server-only": path.resolve(__dirname, "test/__test__/integration/server-only.ts"),

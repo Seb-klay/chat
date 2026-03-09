@@ -1,9 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "../globals.css";
-import ClientLayout from "../clientLayout";
 import { ThemeProvider } from "../components/contexts/theme-provider";
 import { ModelProvider } from "../components/contexts/model-provider";
+import AppSidebar from "../components/side-bar/appSidebar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -42,9 +42,12 @@ export default function RootLayout({
           {/* used to update AI model */}
           <ModelProvider>
             {/* used to hide side bar if user not authenticated */}
-            <ClientLayout>
-              <main className="w-full">{children}</main>
-            </ClientLayout>
+            <div className="flex min-h-dvh">
+              <AppSidebar />
+                <main className="w-full flex-1 overflow-auto">
+                  {children}
+                  </main>
+            </div>
           </ModelProvider>
         </ThemeProvider>
       </body>
