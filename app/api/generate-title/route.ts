@@ -8,7 +8,7 @@ export async function POST(request: NextRequest) {
     const { titleToSummarize, model } = await request.json();
     const aiModel = JSON.parse(model);
     // get AI URL from list
-    const AI_MODEL_URL: string = MODELS[aiModel.id].address;
+    const AI_MODEL_URL: string | undefined = process.env.LLM_URL;
     // send prompt to AI
     const response = await fetch(AI_MODEL_URL + "/api/generate", {
       method: "POST",

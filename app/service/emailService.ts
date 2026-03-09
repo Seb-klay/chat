@@ -83,7 +83,7 @@ export class EmailService {
             
             <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee;">
               <p style="font-size: 12px; color: #999;">
-                Need help? Contact our support team at support@yourapp.com
+                Need help? Contact our support team at ${process.env.EMAIL_USER}
               </p>
             </div>
           </div>

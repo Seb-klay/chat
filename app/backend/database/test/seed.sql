@@ -1,3 +1,10 @@
+-- Create ONE database user for your entire application
+CREATE USER regular_user
+WITH PASSWORD 'regular_user';
+GRANT CONNECT ON DATABASE chat_db TO regular_user;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO regular_user;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO regular_user;
+
 WITH inserted_users AS (
   INSERT INTO users (email, userpassword)
   VALUES 

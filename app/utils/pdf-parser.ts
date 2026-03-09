@@ -36,6 +36,8 @@ export async function extractTextFromFiles(files: preparedFiles[]) {
 
     for (const file of files) {
       // Check if it's a PDF file
+      if (!file.data)
+        return result;
       const pdfText = await file.data;
       if (
         file.type === "application/pdf" ||
@@ -55,7 +57,7 @@ export async function extractTextFromFiles(files: preparedFiles[]) {
         textResults.push(newFile);
       }
       //Handle text files
-      else if (file.type.startsWith("text/") || file.name.endsWith(".txt")) {
+      else if (file.type && file.type.startsWith("text/") || file.name.endsWith(".txt")) {
         const text = Buffer.from(pdfText, "base64").toString("utf-8");
         textResults.push({
           ...file,
@@ -63,7 +65,7 @@ export async function extractTextFromFiles(files: preparedFiles[]) {
         });
       }
       // Handle images
-      else if (file.type.startsWith("image/")) {
+      else if (file.type && file.type.startsWith("image/")) {
         //images.push(file.);
       }
     }
