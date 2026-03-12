@@ -13,6 +13,7 @@ type ChatInputProps = {
   onChatbotWriting: boolean;
   onAbort?: () => void;
   onSend: (message: string, model: IModelList, files: File[], folderName?: string) => void;
+  onError: (error: string) => void;
 };
 
 export default function ChatInput({
@@ -20,6 +21,7 @@ export default function ChatInput({
   onChatbotWriting,
   onAbort,
   onSend,
+  onError,
 }: ChatInputProps) {
   const [input, setInput] = useState("");
   const [nameFolder, setNameFolder] = useState("");
@@ -70,6 +72,10 @@ export default function ChatInput({
     setSelectedFiles((prevFiles) => [...prevFiles, ...files]);
     if (folderName) setNameFolder(folderName);
   };
+
+  const handleError = (error: string) => {
+    onError(error);
+  }
 
   return (
     <div className="w-full mx-auto bottom-0">
@@ -151,7 +157,7 @@ export default function ChatInput({
       {/* Main Input Container */}
       <div className="relative">
         <div className="absolute left-2 bottom-2.5 flex items-center gap-2 mb-2 ml-2">
-          <AiTools onFile={handleFileSelect} />
+          <AiTools onFile={handleFileSelect} onError={handleError} />
         </div>
 
         <textarea

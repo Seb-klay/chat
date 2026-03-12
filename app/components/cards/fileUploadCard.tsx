@@ -8,19 +8,20 @@ import {
   DocumentIcon,
 } from "@heroicons/react/24/outline";
 import { preparedFiles } from "@/app/(main)/conversation/[id]/page";
-import { prepareFilesForServer } from "@/app/utils/chatUtils";
 import { createFiles } from "@/app/service";
 
 interface FileUploadCardProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (files: File[], folderName: string) => void;
+  onError: (error: string) => void;
 }
 
 export default function FileUploadCard({
   isOpen,
   onClose,
   onSubmit,
+  onError,
 }: FileUploadCardProps) {
   const [folderName, setFolderName] = useState("");
   const [files, setFiles] = useState<Set<File>>(new Set());
@@ -138,7 +139,7 @@ export default function FileUploadCard({
         // send back the data
         onSubmit(Array.from(files), folderName);
     } catch (error) {
-        console.log(error)
+        onError(String(error))
     } finally {
         onClose();
     }
@@ -149,14 +150,14 @@ export default function FileUploadCard({
   return (
     <>
       {/* Background overlay with half black and z-index 50 */}
-      <div className="fixed inset-0 bg-black/50 z-50" onClick={onClose} />
+      <div className="fixed inset-0 z-50" onClick={onClose} />
 
       {/* Card in the middle of the screen */}
       <div className="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-50 w-full max-w-md">
         <div className="bg-white rounded-lg shadow-xl p-6 mx-4">
           {/* Header */}
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Upload Files</h2>
+            <h2 className="text-xl text-gray-700 font-semibold">Upload Files</h2>
             <button
               onClick={onClose}
               className="p-1 hover:bg-gray-100 rounded-full transition-colors"
@@ -182,7 +183,7 @@ export default function FileUploadCard({
                 id="folderName"
                 value={folderName}
                 onChange={(e) => setFolderName(e.target.value)}
-                className="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-3 py-2 border text-gray-700 border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="Enter folder name"
                 required
               />

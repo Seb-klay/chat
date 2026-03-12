@@ -23,20 +23,6 @@ export const sendChatMessage = async (
         `Response ${responseStore?.status} occurred while storing the message of the user. `,
       );
 
-    const { storedFiles } = await responseStore.json();
-    const files = payload.messages.at(-1)?.files
-    if (files && files.length > 0){
-      const filesWithIds = files.map((file, index) => ({
-        id: storedFiles[index].fileid,
-        ...file
-      }));
-      const responseFiles = await storeFiles(filesWithIds);
-      if (!responseFiles)
-        throw new Error(
-          `Response ${responseStore?.status} occurred while storing the message of the user. `,
-        );
-    }
-
     // send user input to AI model
     const responseChat = await fetch(`/api/chat-messages`, {
       method: "POST",

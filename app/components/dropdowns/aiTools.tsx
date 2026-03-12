@@ -9,9 +9,10 @@ import FileUploadCard from "../cards/fileUploadCard";
 
 interface AiToolsProps {
   onFile: (files: File[], folderName?: string) => void;
+  onError: (error: string) => void;
 }
 
-export default function AiTools({ onFile }: AiToolsProps) {
+export default function AiTools({ onFile, onError }: AiToolsProps) {
   const { theme } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [onFolderCreation, setOnFolderCreation] = useState<boolean>(false);
@@ -38,6 +39,10 @@ export default function AiTools({ onFile }: AiToolsProps) {
   const handleBrowseClick = () => {
     // Programmatically trigger the hidden file input
     fileInputRef.current?.click();
+  };
+
+  const handleError = (error: string) => {
+    onError(error);
   };
 
   return (
@@ -115,6 +120,7 @@ export default function AiTools({ onFile }: AiToolsProps) {
         isOpen={onFolderCreation}
         onClose={() => setOnFolderCreation(false)}
         onSubmit={handleFileSelect}
+        onError={handleError}
       />
       )}
     </Menu>

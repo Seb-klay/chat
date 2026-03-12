@@ -96,16 +96,38 @@ export const summaryConversation = async (
 export const storeMessage = async (
   payload: IPayload | null,
 ): Promise<Response | null> => {
-  return await fetch(`${URL}/api/message`, {
+  try {
+    // store message in DB
+    const responseMessage = await fetch(`${URL}/api/message`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       message: payload?.messages,
       conversationId: payload?.conversationID,
     }),
-  }).catch((err) => {
-    throw new Error(err);
   });
+  // store files Meta data (if any)
+    const files = payload?.messages.at(-1)?.files;
+    let filesWithIds: preparedFiles[] = [];
+    if (files && files.length > 0){
+      const { messID } = await responseMessage.json();
+
+      const responseFiles = await createFiles(files!, messID);
+      const storedFiles = await responseFiles?.json();
+
+      filesWithIds = files?.map((file, index) => ({
+        id: storedFiles[index],
+        ...file,
+      }));
+
+      // store files in Appwrite object storage
+      return await storeFiles(filesWithIds);
+    }
+    
+    return responseMessage;
+  } catch (err: any) {
+    throw new Error(err);
+  }
 };
 
 export const getConversationHistory = async (conversationID: string) => {
@@ -250,18 +272,21 @@ export const deleteFiles = async (
 // Create files and folders
 export const createFiles = async (
   files: preparedFiles[],
+  messID?: string,
 ): Promise<Response | null> => {
   try {
+    // store files metaData in DB
     const responseMetadata = await fetch(`${URL}/api/files/create-files`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ files: files }),
+      body: JSON.stringify({ files: files, MessID: messID }),
     });
     const data = await responseMetadata.json();
     const filesWithIds = files.map((file, index) => ({
       id: data.storedFiles[index],
       ...file,
     }));
+    // store files in Appwrite object storage
     return await storeFiles(filesWithIds);
   } catch (err: any) {
     throw new Error(err);

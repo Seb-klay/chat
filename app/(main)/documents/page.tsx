@@ -9,6 +9,7 @@ import {
 import { preparedFiles } from "../conversation/[id]/page";
 import { useTheme } from "../../components/contexts/theme-provider";
 import { handleFileDelete, handleFileDownload } from "@/app/utils/fileUtils";
+import { Toaster, toast } from "sonner";
 
 export default function Documents() {
   const [files, setFiles] = useState([]);
@@ -25,8 +26,7 @@ export default function Documents() {
 
       const formattedFiles = data.files.map((file: preparedFiles) => {
         const buildId = (file: preparedFiles) => {
-          const par = file.path && file.path !== "/" ? file.path : "";
-          return `${par}/${file.name}`;
+          return file.path && file.path === "/" ? `/${file.name}` : file.path;
         }
 
         return {
@@ -39,8 +39,8 @@ export default function Documents() {
       });
 
       setFiles(formattedFiles);
-    } catch (err) {
-      console.log(err);
+    } catch (error) {
+      toast.error(String(error));
     }
   };
 
@@ -52,7 +52,7 @@ export default function Documents() {
         const fileName = filePath.split("/").pop() || "New File";
         await handleFileDownload({fileName: fileName, filePath: filePath}); // id is the file path with React-file-manager
       } catch (error) {
-        console.log(error)
+        toast.error(String(error));
       }
 
     });
@@ -61,7 +61,7 @@ export default function Documents() {
       try {
         await handleFileDelete({filesPath: ids});
       } catch (error) {
-        console.log(error)
+        toast.error(String(error));
       }
     });
 
@@ -69,7 +69,7 @@ export default function Documents() {
     //   try {
     //     await handleCreateFile({parent: parent, file: file});
     //   } catch (error) {
-    //     console.log(error)
+    //     ...
     //   }
     // });
   };
@@ -91,6 +91,7 @@ export default function Documents() {
           <Filemanager init={init} data={files} mode={"table"} readonly={true} />
         </Willow>
       )}
+      <Toaster richColors position="top-center" />
     </div>
   );
 }

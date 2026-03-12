@@ -146,6 +146,12 @@ export default function ConversationPage() {
     }
   };
 
+  const handleError = (error: string) => {
+    toast.error(
+      `Error occurred while handling files. ${error}`,
+    );
+  };
+
   const sendMessage = async (
     userInput: string,
     selectedModel: IModelList,
@@ -171,7 +177,7 @@ export default function ConversationPage() {
         // add path to each file
         preparedFiles = serverFiles.map((file) => ({
           ...file,
-          path: `/${folderName}/${file.name}`,
+          path: folderName ? `/${folderName}/${file.name}` : `/${file.name}`,
         }));
       }
 
@@ -293,6 +299,7 @@ export default function ConversationPage() {
             onChatbotWriting={onAiWriting}
             onAbort={handleAbort}
             onSend={sendMessage}
+            onError={handleError}
           />
         </div>
       </div>

@@ -52,7 +52,7 @@ export async function extractTextFromFiles(files: preparedFiles[]) {
         const text = pdfResult.text
         const newFile: preparedFiles = {
           ...file,
-          data: Buffer.from(text, 'binary').toString('base64')
+          data: text
         }
         textResults.push(newFile);
       }

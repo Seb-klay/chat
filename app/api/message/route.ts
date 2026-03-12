@@ -40,30 +40,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { status: 400 },
       );
 
-    let storedFiles: preparedFiles[] = [];
-    if (files && files.length > 0) {
-      const messageId = messagesResponse.rows[0].messid;
-
-      for (const file of files) {
-        const fileResponse = await client.query(
-          `INSERT INTO files (name, type, size, path, createdAt, isDirectory, messid, userid) 
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-          RETURNING *`,
-          [file.name, file.type, file.size, file.path || "/", new Date(Date.now()), file.isdirectory || false, messageId, userID],
-        );
-        storedFiles.push(fileResponse.rows[0]);
-
-        if (!fileResponse)
-          return NextResponse.json(
-            { error: "Files could not be stored. " },
-            { status: 400 },
-          );
-      }
-    }
-
     await client.query("COMMIT");
 
-    return NextResponse.json({ storedFiles: storedFiles }, { status: 200 });
+    return NextResponse.json({ messID: messagesResponse.rows[0].messid }, { status: 200 });
   } catch (err) {
     await client?.query("ROLLBACK");
     return NextResponse.json(err, { status: 500 });

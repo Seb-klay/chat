@@ -1,7 +1,6 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-import { MODELS } from "../../utils/listModels";
 import { IMessage } from "@/app/utils/chatUtils";
 import { extractTextFromFiles, IExtractResult } from "@/app/utils/pdf-parser";
 
@@ -18,21 +17,20 @@ export async function POST(request: NextRequest) {
     
     // prepare files for model
     let result: IExtractResult | null = null;
-    let filesText: string | undefined = undefined;
+    let filesText: string[] | undefined = [];
     let filesImages: string[] | null = null;
     const files = lastMessage.files;
 
     if (files && files?.length > 0) {
-      //const preparedFiles = await prepareFilesForServer(files);
       const pdfResponse = await extractTextFromFiles(files);
       
       if (pdfResponse) {
         result = pdfResponse;
-        filesText = result?.text?.map(file => {
+        result?.text?.map(file => {
           if (file.data)
-            Buffer.from(file.data, 'base64').toString('utf-8')
+            filesText.push(file.data)
         }
-        ).join('\n\n');
+        );
         filesImages = result.images;
       } else {
         throw new Error("Error while parsing files.")
@@ -47,7 +45,7 @@ export async function POST(request: NextRequest) {
         model: model.model_name,
         messages: messages.map((m: IMessage) => ({
           role: m.role,
-          content: m.content + "\n\n" + filesText,
+          content: m.content + "\n\n" + filesText.join('\n\n'),
           images: filesImages ?? [],
         })),
         think: false,
@@ -67,7 +65,6 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (err) {
-    console.log(err)
     return NextResponse.json(err, { status: 500 });
   }
 }

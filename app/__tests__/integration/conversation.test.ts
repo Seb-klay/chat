@@ -66,6 +66,10 @@ describe("Conversation Integration", () => {
         await new Promise(res => setTimeout(res, 1000)); // Wait 3s before retry
       }
     }
+
+    await pool.query("DELETE FROM files");
+    await pool.query("DELETE FROM messages");
+    await pool.query("DELETE FROM conversations");
   });
 
   afterEach(async () => {
@@ -227,7 +231,7 @@ describe("Conversation Integration", () => {
     );
     const newConvID = seed.rows[0].convid;
     const messagePayload: IPayload = {
-      messages: [{ role: "user", content: "Test 6", model: { id: 1 } }],
+      messages: [{ role: "user", content: "Test 6", model: { id: 1 }, files: undefined, images: null }],
       conversationID: newConvID,
       isStream: true,
     };

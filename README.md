@@ -113,6 +113,22 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+6. **Build project for production**
+To build the project for production :
+
+```bash
+npm run build
+npm run start
+```
+
+> [!NOTE]
+> The app may require another way to build the project by using :
+
+```bash
+npm i -D cross-env
+cross-env NODE_ENV=production next build
+```
+
 ## Project Status
 
 ### ✅ Completed Features
@@ -151,7 +167,7 @@ Open [http://localhost:3000](http://localhost:3000).
 - [x] Error handling and Toast notifications
 
 **AI Capabilities**:
-- [ ] Store files directly in app
+- [x] Store files directly in app
 - [ ] Add tools functionalities for AI to use
 - [ ] More AI model integrations
 

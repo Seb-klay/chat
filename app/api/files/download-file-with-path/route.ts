@@ -78,7 +78,6 @@ export async function POST(
       },
     });
   } catch (err: any) {
-    console.error(err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
