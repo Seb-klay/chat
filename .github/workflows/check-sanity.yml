@@ -51,8 +51,6 @@ jobs:
         working-directory: .
         run: |
           cat <<EOF > .env
-          POSTGRES_USER="user_admin"
-          POSTGRES_PASSWORD="mypassword"
           POSTGRES_DB="chat_db"
           POSTGRES_HOST="127.0.0.1"
           POSTGRES_REG_USER="regular_user"

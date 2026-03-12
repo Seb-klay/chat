@@ -9,7 +9,6 @@ import {
 } from "@/app/utils/chatUtils";
 import { sendChatMessage } from "@/app/service/aiService";
 import { toast } from "sonner";
-import React from "react";
 
 // Mock the services
 vi.mock("../../service", () => ({

@@ -50,8 +50,9 @@ describe("ChatInput", () => {
         onSend={onSendMock}
         onAbort={onAbortMock}
         onChatbotWriting={false}
-        onThought={false}
-      />
+        onThought={false} onError={function (error: string): void {
+          throw new Error("Function not implemented.");
+        } }      />
     );
 
     const textarea = screen.getByPlaceholderText(
@@ -70,7 +71,9 @@ describe("ChatInput", () => {
 
     expect(onSendMock).toHaveBeenCalledWith(
       "Hello world",
-      { id: 1, model_name: "llama3.2:3b" }
+      { id: 1, model_name: "llama3.2:3b" },
+      [],
+      "",
     );
     expect(textarea).toHaveValue("");
   });
@@ -81,8 +84,9 @@ describe("ChatInput", () => {
         onSend={onSendMock}
         onAbort={onAbortMock}
         onChatbotWriting={false}
-        onThought={false}
-      />
+        onThought={false} onError={function (error: string): void {
+          throw new Error("Function not implemented.");
+        } }      />
     );
 
     const textarea = screen.getByPlaceholderText(
@@ -108,8 +112,9 @@ describe("ChatInput", () => {
         onSend={onSendMock}
         onAbort={onAbortMock}
         onChatbotWriting={false}
-        onThought={false}
-      />
+        onThought={false} onError={function (error: string): void {
+          throw new Error("Function not implemented.");
+        } }      />
     );
 
     const textarea = screen.getByPlaceholderText(
@@ -125,7 +130,9 @@ describe("ChatInput", () => {
 
     expect(onSendMock).toHaveBeenCalledWith(
       "Click send",
-      { id: 1, model_name: "llama3.2:3b" }
+      { id: 1, model_name: "llama3.2:3b" },
+      [],
+      "",
     );
     expect(textarea).toHaveValue("");
   });
@@ -136,8 +143,9 @@ describe("ChatInput", () => {
         onSend={onSendMock}
         onAbort={onAbortMock}
         onChatbotWriting={false}
-        onThought={false}
-      />
+        onThought={false} onError={function (error: string): void {
+          throw new Error("Function not implemented.");
+        } }      />
     );
 
     const sendButton = screen.getByTestId("send-button");
@@ -150,8 +158,9 @@ describe("ChatInput", () => {
         onSend={onSendMock}
         onAbort={onAbortMock}
         onChatbotWriting={true}
-        onThought={false}
-      />
+        onThought={false} onError={function (error: string): void {
+          throw new Error("Function not implemented.");
+        } }      />
     );
 
     expect(screen.getByTestId("abort-button")).toBeInTheDocument();
@@ -163,8 +172,9 @@ describe("ChatInput", () => {
         onSend={onSendMock}
         onAbort={onAbortMock}
         onChatbotWriting={false}
-        onThought={false}
-      />
+        onThought={false} onError={function (error: string): void {
+          throw new Error("Function not implemented.");
+        } }      />
     );
 
     fireEvent.click(screen.getByTestId("model-button"));
@@ -183,7 +193,9 @@ describe("ChatInput", () => {
 
     expect(onSendMock).toHaveBeenCalledWith(
       "Model test",
-      { id: 2, model_name: "gemma3:1b" }
+      { id: 2, model_name: "gemma3:1b" },
+      [],
+      "",
     );
   });
 });
