@@ -7,12 +7,16 @@ import { IModelList } from "../../utils/listModels";
 import { useState } from "react";
 import { useTheme } from "../../components/contexts/theme-provider";
 import { Toaster, toast } from "sonner";
-import { set } from 'idb-keyval';
+import { set } from "idb-keyval";
 
 export default function HomePage() {
   const router = useRouter();
   const [onAiThought, setOnAiThought] = useState(false);
   const { theme } = useTheme();
+
+  const handleError = (error: string) => {
+    toast.error(`Error occurred while handling files. ${error}`);
+  };
 
   const createAndRedirect = async (
     userInput: string,
@@ -32,7 +36,7 @@ export default function HomePage() {
       if (!response?.ok)
         toast.warning(
           `Response ${response?.status} occurred while creating new conversation. `,
-      );
+        );
 
       const data = await response?.json();
       const conversationId = data[0].convid;
@@ -83,6 +87,7 @@ export default function HomePage() {
         onThought={onAiThought}
         onChatbotWriting={false}
         onSend={createAndRedirect}
+        onError={handleError}
       />
     </div>
   );
