@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     }
 
     // send request to AI
-    const response = await fetch(AI_MODEL_URL + "/api/chat", {
+    const response = await fetch(AI_MODEL_URL + "/api/chat?model=" + model.model_name, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
