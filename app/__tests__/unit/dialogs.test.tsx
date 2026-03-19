@@ -10,16 +10,22 @@ const messages: IMessage[] = [
     role: "system",
     model: baseModel,
     content: "You should not see this",
+    files: [],
+    images: null,
   },
   {
     role: "user",
     model: baseModel,
     content: "Hello **world**",
+    files: [],
+    images: null,
   },
   {
     role: "assistant",
     model: baseModel,
     content: "Hi there!",
+    files: [],
+    images: null,
   },
 ];
 
