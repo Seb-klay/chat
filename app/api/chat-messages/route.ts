@@ -50,6 +50,7 @@ export async function POST(request: NextRequest) {
         })),
         think: false,
         stream: isStream,
+        keep_alive: -1,
       }),
     });
     if (!response.ok)
