@@ -24,6 +24,12 @@ vi.mock("../../service/aiService", () => ({
   sendChatMessage: vi.fn(),
 }));
 
+// Mock the indexed DB for files
+vi.mock('idb-keyval', () => ({
+  get: vi.fn(() => Promise.resolve([])), // Mock empty files
+  del: vi.fn(() => Promise.resolve()),
+}));
+
 vi.mock("sonner", () => ({
   toast: {
     warning: vi.fn(),
@@ -115,6 +121,7 @@ describe("Loading history", () => {
     // Return conversation metadata
     (getSingleConversations as any).mockResolvedValue({
       ok: true,
+      status: 200,
       json: async () => [
         {
           title: "New Chat",
@@ -166,12 +173,6 @@ describe("Sending message", () => {
     vi.clearAllMocks();
   });
 
-  // Setup metadata mock (fixes the skeleton issue)
-  (getSingleConversations as any).mockResolvedValue({
-    ok: true,
-    json: async () => [{ title: "Test Title", defaultmodel: "llama3-2:3b" }],
-  });
-
   // Provide the conversation metadata
   (getSingleConversations as any).mockResolvedValue({
     ok: true,
@@ -196,7 +197,7 @@ describe("Sending message", () => {
       expect(sendChatMessage).toHaveBeenCalledWith(
         // The Payload
         expect.objectContaining({
-          conversationID: "test-id-123", // Matches your useParams mock
+          conversationID: "test-id-123",
           isStream: true,
           messages: expect.arrayContaining([
             expect.objectContaining({

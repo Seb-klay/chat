@@ -71,7 +71,7 @@ describe("ChatInput", () => {
 
     expect(onSendMock).toHaveBeenCalledWith(
       "Hello world",
-      { id: 1, model_name: "llama3.2:3b" },
+      { id: 1, model_name: "deepseek-r1:32b" },
       [],
       "",
     );
@@ -130,7 +130,7 @@ describe("ChatInput", () => {
 
     expect(onSendMock).toHaveBeenCalledWith(
       "Click send",
-      { id: 1, model_name: "llama3.2:3b" },
+      { id: 1, model_name: "deepseek-r1:32b" },
       [],
       "",
     );

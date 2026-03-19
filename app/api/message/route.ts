@@ -1,20 +1,18 @@
-import { preparedFiles } from "@/app/(main)/conversation/[id]/page";
+'use server'
+
 import {
-  closeClient,
-  getClient,
+  getPool,
 } from "@/app/backend/database/utils/databaseUtils";
 import { decrypt } from "@/app/lib/session";
 import { IMessage } from "@/app/utils/chatUtils";
 import { JWTPayload } from "jose";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { Client } from "pg";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
-  let client: Client | undefined;
   try {
     const { message, conversationId } = await request.json();
-    const { role, model, content, files }: IMessage = message.at(-1);
+    const { role, model, content }: IMessage = message.at(-1);
 
     const cookie = (await cookies()).get("session");
     const sessionUser: JWTPayload | undefined = await decrypt(cookie?.value);
@@ -25,10 +23,9 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { status: 400 },
       );
 
-    client = await getClient();
+    const pool = getPool();
     // create new message in conversation
-    await client.query("BEGIN");
-    const messagesResponse = await client.query(
+    const messagesResponse = await pool.query(
       `INSERT INTO messages (rolesender, model, content, convid, createdat) 
       values ($1, $2, $3, $4, $5)
       RETURNING messid`,
@@ -40,13 +37,8 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { status: 400 },
       );
 
-    await client.query("COMMIT");
-
     return NextResponse.json({ messID: messagesResponse.rows[0].messid }, { status: 200 });
   } catch (err) {
-    await client?.query("ROLLBACK");
     return NextResponse.json(err, { status: 500 });
-  } finally {
-    if (client) await closeClient();
   }
 }

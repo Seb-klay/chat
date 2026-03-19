@@ -64,7 +64,9 @@ export const summaryConversationAndUpdate = async (
         `Could not store AI generated title with status ${responseSummary.status}.`,
       );
 
-    const newTitle = await responseSummary.json();
+    let newTitle = await responseSummary.json();
+    if (newTitle.error)
+      newTitle = 'New conversation';
     // update new generated title
     const responseUpdatedTitle = await updateTitleConversation(
       newConversation.convid,

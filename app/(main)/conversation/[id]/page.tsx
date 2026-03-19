@@ -91,7 +91,7 @@ export default function ConversationPage() {
       // in case of a new conversation
       if (history.length === 0) {
         const response = await getSingleConversations(id);
-        if (!loadHistory?.ok)
+        if (!response?.ok || !response)
           toast.warning(
             `Response ${response?.status} occurred while loading conversation. `,
           );

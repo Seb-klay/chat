@@ -12,6 +12,7 @@ import { redirect } from "next/navigation";
 vi.mock("next/navigation", () => ({
   useRouter: vi.fn(),
   useParams: () => ({ id: "test-id-123" }),
+  usePathname: vi.fn(() => "/conversations/test-id-123"),
   redirect: vi.fn(),
 }));
 

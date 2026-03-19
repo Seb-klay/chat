@@ -72,7 +72,7 @@ import { isAccountUsed, validateUser, verifySignupCode } from '../../service';
     try {
       const result = await isAccountUsed(email);
       const isVerified = await result?.json();
-      if (isVerified.length === 0) {
+      if (!isVerified[0]) {
         return false;
       }
 
@@ -81,5 +81,3 @@ import { isAccountUsed, validateUser, verifySignupCode } from '../../service';
       throw new Error(String(error));
     }
   }
-
-  // 123456789Aa@
