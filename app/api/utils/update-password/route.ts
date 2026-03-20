@@ -1,13 +1,14 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getPool } from "../../backend/database/utils/databaseUtils";
+import { getPool } from "@/app/backend/database/utils/databaseUtils";
 import { cookies } from "next/headers";
 import { JWTPayload } from "jose";
 import { decrypt } from "@/app/lib/session";
 
-export async function GET(request: NextRequest): Promise<NextResponse> {
+export async function PUT(request: NextRequest): Promise<NextResponse> {
   try {
+    const { newPassword } = await request.json();
     // get cookie for user id
     const cookie = (await cookies()).get("session");
     const sessionUser: JWTPayload | undefined = await decrypt(cookie?.value);
@@ -21,22 +22,21 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
         },
         { status: 404 },
       );
-    // get list of conversations
+    // update password user
     const response = await pool.query(
-      `SELECT convid, title, createdat, updatedat
-       FROM conversations 
-       WHERE userid = $1
-       AND isdeleted = false
-       ORDER BY createdat DESC`,
-      [userID],
+      `UPDATE users
+       SET userpassword = $1
+       WHERE userid = $2
+       RETURNING *`,
+      [newPassword, userID],
     );
     if (!response)
       return NextResponse.json(
-        { error: "Conversations could not be loaded. " },
+        { error: "Password could not be updated. " },
         { status: 400 },
       );
 
-    return NextResponse.json({ conversations: response.rows }, { status: 200 });
+    return NextResponse.json(response.rows, { status: 200 });
   } catch (err) {
     return NextResponse.json(err, { status: 500 });
   }

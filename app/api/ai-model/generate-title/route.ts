@@ -9,11 +9,11 @@ export async function POST(request: NextRequest) {
     // get AI URL from list
     const AI_MODEL_URL: string | undefined = process.env.LLM_URL;
     // send prompt to AI
-    const response = await fetch(AI_MODEL_URL + "/api/generate?model=" + aiModel.model_name, {
+    const response = await fetch(AI_MODEL_URL + "/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: aiModel.model_name,
+        model: "tinyllama", // taking a lightweight model for title summarisation
         prompt: titleToSummarize,
         stream: false,
       }),

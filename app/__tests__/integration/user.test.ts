@@ -3,12 +3,12 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { getPool } from "../../backend/database/utils/databaseUtils";
 import { NextRequest } from "next/server";
-import * as authUserRoute from "../../api/authuser/route";
-import * as getEmailRoute from "../../api/get-email/route";
-import * as deleteUserRoute from "../../api/delete-user/route";
-import * as updatePasswordRoute from "../../api/update-password/route";
-import * as updateSettingsRoute from "../../api/update-user-settings/route";
-import * as getSettingsRoute from "../../api/get-user-settings/route";
+import * as authUserRoute from "../../api/utils/authuser/route";
+import * as getEmailRoute from "../../api/utils/get-email/route";
+import * as deleteUserRoute from "../../api/utils/delete-user/route";
+import * as updatePasswordRoute from "../../api/utils/update-password/route";
+import * as updateSettingsRoute from "../../api/utils/update-user-settings/route";
+import * as getSettingsRoute from "../../api/utils/get-user-settings/route";
 import { IUser } from "@/app/utils/userUtils";
 const URL: string = process.env.FULL_URL || "";
 

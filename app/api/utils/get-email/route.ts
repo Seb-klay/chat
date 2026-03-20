@@ -1,38 +1,37 @@
-'use server'
+"use server";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getPool } from "../../backend/database/utils/databaseUtils";
+import { getPool } from "@/app/backend/database/utils/databaseUtils";
 import { cookies } from "next/headers";
 import { JWTPayload } from "jose";
 import { decrypt } from "@/app/lib/session";
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const { title, defaultModel } = await request.json();
     // get cookie for user id
     const cookie = (await cookies()).get("session");
     const sessionUser: JWTPayload | undefined = await decrypt(cookie?.value);
     const userID = sessionUser?.userId;
     const pool = getPool();
-    
-    // Create conversation
+    if (!userID)
+      return NextResponse.json(
+        {
+          error: "No user has been found with these credentials.",
+        },
+        { status: 404 },
+      );
+    // get email
     const response = await pool.query(
-      `INSERT INTO conversations (title, userid, createdat, updatedat, defaultModel, isDeleted) 
-        values ($1, $2, $3, $4, $5, $6) 
-        RETURNING convid`,
-      [
-        title,
-        userID,
-        new Date(Date.now()),
-        new Date(Date.now()),
-        defaultModel,
-        false,
-      ],
+      `SELECT
+          email
+      FROM users
+      WHERE userid = $1`,
+      [userID],
     );
     if (!response)
       return NextResponse.json(
-        { error: "Could not create a new conversation. " },
-        { status: 400 },
+        { error: "The user could not be found." },
+        { status: 404 },
       );
 
     return NextResponse.json(response.rows, { status: 200 });

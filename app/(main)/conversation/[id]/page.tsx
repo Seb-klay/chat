@@ -111,11 +111,12 @@ export default function ConversationPage() {
         await del("local_files");
 
         // rename conversation
-        await summaryConversationAndUpdate(newConversation[0], {
-          onError: (err) => {
-            toast.warning(`Bad response while summarizing title : ` + err);
-          },
-        });
+        if (!onAiWriting)
+          await summaryConversationAndUpdate(newConversation[0], {
+            onError: (err) => {
+              toast.warning(`Bad response while summarizing title : ` + err);
+            },
+          });
 
         // otherwise just load the history
       } else {

@@ -1,7 +1,7 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getPool } from "../../backend/database/utils/databaseUtils";
+import { getPool } from "@/app/backend/database/utils/databaseUtils";
 import { cookies } from "next/headers";
 import { JWTPayload } from "jose";
 import { decrypt } from "@/app/lib/session";
@@ -16,25 +16,27 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
     if (!userID)
       return NextResponse.json(
         {
-          error: "No user has been found with these credentials.",
+          error:
+            "No user has been found with these credentials. Try to login again or you are not allowed to see this conversation.",
         },
         { status: 404 },
       );
-    // get email
+    // get list of conversations
     const response = await pool.query(
-      `SELECT
-          email
-      FROM users
-      WHERE userid = $1`,
+      `SELECT convid, title, createdat, updatedat
+       FROM conversations 
+       WHERE userid = $1
+       AND isdeleted = false
+       ORDER BY createdat DESC`,
       [userID],
     );
     if (!response)
       return NextResponse.json(
-        { error: "The user could not be found." },
-        { status: 404 },
+        { error: "Conversations could not be loaded. " },
+        { status: 400 },
       );
 
-    return NextResponse.json(response.rows, { status: 200 });
+    return NextResponse.json({ conversations: response.rows }, { status: 200 });
   } catch (err) {
     return NextResponse.json(err, { status: 500 });
   }

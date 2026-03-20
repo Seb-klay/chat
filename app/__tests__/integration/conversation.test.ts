@@ -1,15 +1,15 @@
 // @vitest-environment node
 
-import { describe, it, expect, vi, beforeAll, afterEach, afterAll } from "vitest";
+import { describe, it, expect, vi, beforeAll, afterEach } from "vitest";
 import { getPool } from "../../backend/database/utils/databaseUtils";
 import { NextRequest } from "next/server";
-import * as createConversation from "../../api/conversation/route";
-import * as getUserConversations from "../../api/get-user-conversation/route";
-import * as getSingleConversations from "../../api/get-single-conversation/[id]/route";
-import * as updateTitleConversation from "../../api/update-title-conversation/route";
-import * as deleteConversation from "../../api/delete-conversation/route";
-import * as storeMessageRoute from "../../api/message/route";
-import * as getHistoryRoute from "../../api/get-history/[id]/route";
+import * as createConversation from "../../api/chat/create-conversation/route";
+import * as getUserConversations from "../../api/chat/get-user-conversations/route";
+import * as getSingleConversations from "../../api/chat/get-conversation-infos/[id]/route";
+import * as updateTitleConversation from "../../api/ai-model/update-title-conversation/route";
+import * as deleteConversation from "../../api/chat/delete-conversation/route";
+import * as storeMessageRoute from "../../api/chat/create-message/route";
+import * as getHistoryRoute from "../../api/chat/get-history/[id]/route";
 import { IPayload } from "@/app/utils/chatUtils";
 import { IUser } from "@/app/utils/userUtils";
 const URL: string = process.env.FULL_URL || "";

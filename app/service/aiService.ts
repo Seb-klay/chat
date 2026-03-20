@@ -24,7 +24,7 @@ export const sendChatMessage = async (
       );
 
     // send user input to AI model
-    const responseChat = await fetch(`/api/chat-messages`, {
+    const responseChat = await fetch(`/api/ai-model/chat-messages`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),

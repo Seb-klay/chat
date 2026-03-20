@@ -10,7 +10,7 @@ export const createConversation = async (
   title: string,
   defaultModel: IModelList,
 ): Promise<Response | null> => {
-  return await fetch(`${URL}/api/conversation`, {
+  return await fetch(`${URL}/api/chat/create-conversation`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -27,7 +27,7 @@ export const createConversation = async (
 };
 
 export const deleteConversation = async (conversationID: string) => {
-  return await fetch(`${URL}/api/delete-conversation`, {
+  return await fetch(`${URL}/api/chat/delete-conversation`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -39,7 +39,7 @@ export const deleteConversation = async (conversationID: string) => {
 };
 
 export const getUserConversations = async () => {
-  return await fetch(`${URL}/api/get-user-conversation`, {
+  return await fetch(`${URL}/api/chat/get-user-conversations`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",
@@ -50,7 +50,7 @@ export const getUserConversations = async () => {
 };
 
 export const getSingleConversations = async (conversationID: string) => {
-  return await fetch(`${URL}/api/get-single-conversation/${conversationID}`, {
+  return await fetch(`${URL}/api/chat/get-conversation-infos/${conversationID}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   }).catch((err) => {
@@ -63,7 +63,7 @@ export const updateTitleConversation = async (
   newTitle: string,
 ) => {
   if (!conversationID) return;
-  return await fetch(`${URL}/api/update-title-conversation`, {
+  return await fetch(`${URL}/api/ai-model/update-title-conversation`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -79,9 +79,9 @@ export const summaryConversation = async (
   userInput: string,
   model: IModelList,
 ) => {
-  const titleToSummarize = "Summarize this text in 6 words : " + userInput;
+  const titleToSummarize = `Summarize this text in 6 words : ${userInput}. Give me only the title.`;
 
-  return await fetch(`${URL}/api/generate-title`, {
+  return await fetch(`${URL}/api/ai-model/generate-title`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -98,7 +98,7 @@ export const storeMessage = async (
 ): Promise<Response | null> => {
   try {
     // store message in DB
-    const responseMessage = await fetch(`${URL}/api/message`, {
+    const responseMessage = await fetch(`${URL}/api/chat/create-message`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -131,7 +131,7 @@ export const storeMessage = async (
 };
 
 export const getConversationHistory = async (conversationID: string) => {
-  return await fetch(`${URL}/api/get-history/${conversationID}`, {
+  return await fetch(`${URL}/api/chat/get-history/${conversationID}`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   }).catch((err) => {
@@ -142,7 +142,7 @@ export const getConversationHistory = async (conversationID: string) => {
 export const getUserWithEmail = async (
   user: IUser,
 ): Promise<Response | null> => {
-  return await fetch(`${URL}/api/authuser`, {
+  return await fetch(`${URL}/api/utils/authuser`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(user),
@@ -152,7 +152,7 @@ export const getUserWithEmail = async (
 };
 
 export const getEmail = async (): Promise<Response | null> => {
-  return await fetch(`${URL}/api/get-email`, {
+  return await fetch(`${URL}/api/utils/get-email`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   }).catch((err) => {
@@ -161,7 +161,7 @@ export const getEmail = async (): Promise<Response | null> => {
 };
 
 export const createUser = async (user: IUser): Promise<Response | null> => {
-  return await fetch(`${URL}/api/user`, {
+  return await fetch(`${URL}/api/utils/create-user`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(user),
@@ -171,7 +171,7 @@ export const createUser = async (user: IUser): Promise<Response | null> => {
 };
 
 export const deleteUserAccount = async (): Promise<Response | null> => {
-  return await fetch(`${URL}/api/delete-user`, {
+  return await fetch(`${URL}/api/utils/delete-user`, {
     method: "DELETE",
     headers: { "Content-Type": "application/json" },
   }).catch((err) => {
@@ -182,7 +182,7 @@ export const deleteUserAccount = async (): Promise<Response | null> => {
 export const updatePasswordUser = async (
   newPassword: string,
 ): Promise<Response | null> => {
-  return await fetch(`${URL}/api/update-password`, {
+  return await fetch(`${URL}/api/utils/update-password`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ newPassword }),
@@ -192,7 +192,7 @@ export const updatePasswordUser = async (
 };
 
 export const getUserSettings = async (): Promise<Response | null> => {
-  return await fetch(`${URL}/api/get-user-settings`, {
+  return await fetch(`${URL}/api/utils/get-user-settings`, {
     method: "GET",
     headers: { "Content-Type": "application/json" },
   }).catch((err) => {
@@ -204,7 +204,7 @@ export const updateUserSettings = async (
   newTheme: string | null,
   newModel: IModelList | null,
 ): Promise<Response | null> => {
-  return await fetch(`${URL}/api/update-user-settings`, {
+  return await fetch(`${URL}/api/utils/update-user-settings`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ newTheme: newTheme, newModel: newModel }),
@@ -298,7 +298,7 @@ export const validateUser = async (
   code: string,
   expiresAt: string,
 ): Promise<Response | null> => {
-  return await fetch(`${URL}/api/validate-user`, {
+  return await fetch(`${URL}/api/utils/validate-user`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: email, code: code, expiresAt: expiresAt }),
@@ -310,7 +310,7 @@ export const validateUser = async (
 export const isAccountUsed = async (
   email: string,
 ): Promise<Response | null> => {
-  return await fetch(`${URL}/api/is-account-used`, {
+  return await fetch(`${URL}/api/utils/is-account-used`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: email }),
@@ -323,7 +323,7 @@ export const verifySignupCode = async (
   email: string,
   code: string,
 ): Promise<Response | null> => {
-  return await fetch(`${URL}/api/verify-code`, {
+  return await fetch(`${URL}/api/utils/verify-code`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ email: email, code: code }),
@@ -335,7 +335,7 @@ export const verifySignupCode = async (
 export const addUserAnalytics = async (
   analytics: IAnswer,
 ): Promise<Response | null> => {
-  return await fetch(`${URL}/api/user-analytics`, {
+  return await fetch(`${URL}/api/utils/user-analytics`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(analytics),
@@ -345,7 +345,7 @@ export const addUserAnalytics = async (
 };
 
 export const getUserAnalytics = async (): Promise<IAnalytics[]> => {
-  const response = await fetch(`${URL}/api/get-user-analytics`, {
+  const response = await fetch(`${URL}/api/utils/get-user-analytics`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

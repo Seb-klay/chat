@@ -1,12 +1,12 @@
 "use server";
 
 import { NextRequest, NextResponse } from "next/server";
-import { getPool } from "../../backend/database/utils/databaseUtils";
+import { getPool } from "@/app/backend/database/utils/databaseUtils";
 import { cookies } from "next/headers";
 import { JWTPayload } from "jose";
 import { decrypt } from "@/app/lib/session";
 
-export async function DELETE(request: NextRequest): Promise<NextResponse> {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
     // get cookie for user id
     const cookie = (await cookies()).get("session");
@@ -15,24 +15,33 @@ export async function DELETE(request: NextRequest): Promise<NextResponse> {
     const pool = getPool();
     if (!userID)
       return NextResponse.json(
-        { error: "Conversation ID is required. " },
+        {
+          error:
+            "No user has been found with these credentials. Try to login again or you are not allowed to see this conversation.",
+        },
         { status: 404 },
       );
-    // Delete conversation
+    // get user settings
     const response = await pool.query(
-      `UPDATE users
-       SET isDeleted = true
-       WHERE userid = $1
-       RETURNING *`,
+      `SELECT
+          colortheme, defaultmodel
+        FROM users_settings
+        WHERE userid = $1`,
       [userID],
     );
-    if (response.rowCount === 0)
+    if (!response)
       return NextResponse.json(
-        { error: "Conversation could not be found. " },
+        { error: "The user settings could not be loaded." },
         { status: 400 },
       );
 
-    return NextResponse.json(response.rows[0], { status: 200 });
+    return NextResponse.json(
+      {
+        colortheme: response.rows[0].colortheme,
+        defaultmodel: response.rows[0].defaultmodel,
+      },
+      { status: 200 },
+    );
   } catch (err) {
     return NextResponse.json(err, { status: 500 });
   }

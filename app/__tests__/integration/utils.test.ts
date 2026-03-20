@@ -5,11 +5,11 @@ import { NextRequest } from "next/server";
 import { getPool } from "../../backend/database/utils/databaseUtils";
 
 // Import the Route Handlers (Adjust paths to your actual file structure)
-import * as validateUser from "../../api/validate-user/route";
-import * as isAccountUsed from "../../api/is-account-used/route";
-import * as verifyCode from "../../api/verify-code/route";
-import * as userAnalytics from "../../api/user-analytics/route";
-import * as getAnalytics from "../../api/get-user-analytics/route";
+import * as validateUser from "../../api/utils/validate-user/route";
+import * as isAccountUsed from "../../api/utils/is-account-used/route";
+import * as verifyCode from "../../api/utils/verify-code/route";
+import * as userAnalytics from "../../api/utils/user-analytics/route";
+import * as getAnalytics from "../../api/utils/get-user-analytics/route";
 import { IUser } from "@/app/utils/userUtils";
 const URL: string = process.env.FULL_URL || "";
 

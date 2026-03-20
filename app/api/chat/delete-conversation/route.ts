@@ -1,7 +1,7 @@
 'use server'
 
 import { NextRequest, NextResponse } from "next/server";
-import { getPool } from "../../backend/database/utils/databaseUtils";
+import { getPool } from "@/app/backend/database/utils/databaseUtils";
 
 export async function DELETE(
   request: NextRequest

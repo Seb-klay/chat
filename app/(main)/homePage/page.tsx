@@ -39,6 +39,8 @@ export default function HomePage() {
         );
 
       const data = await response?.json();
+      if (!data[0])
+        throw new Error("An error arose. The conversation could not be created. ");
       const conversationId = data[0].convid;
 
       // Redirect to the new conversation
