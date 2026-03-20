@@ -3,10 +3,8 @@
 import {
   getPool,
 } from "@/app/backend/database/utils/databaseUtils";
-import { decrypt } from "@/app/lib/session";
+import { verifySession } from "@/app/lib/session";
 import { IMessage } from "@/app/utils/chatUtils";
-import { JWTPayload } from "jose";
-import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -14,8 +12,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const { message, conversationId } = await request.json();
     const { role, model, content }: IMessage = message.at(-1);
 
-    const cookie = (await cookies()).get("session");
-    const sessionUser: JWTPayload | undefined = await decrypt(cookie?.value);
+    const sessionUser = await verifySession();
     const userID = sessionUser?.userId;
     if (!userID)
       return NextResponse.json(

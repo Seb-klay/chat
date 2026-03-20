@@ -1,15 +1,12 @@
 import { getPool } from "@/app/backend/database/utils/databaseUtils";
 import { IAnswer } from "@/app/utils/chatUtils";
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { JWTPayload } from "jose";
-import { decrypt } from "@/app/lib/session";
+import { verifySession } from "@/app/lib/session";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
     // get user id in cookie
-    const session = (await cookies()).get("session")?.value;
-    const sessionUser: JWTPayload | undefined = await decrypt(session);
+    const sessionUser = await verifySession();
     const userID = sessionUser?.userId;
     if (!userID)
       return NextResponse.json(

@@ -22,15 +22,15 @@ vi.mock("next/headers", () => ({
   })),
 }));
 
-// Mock decrypt function
-const { decryptMock } = vi.hoisted(() => {
+// Mock verifySession function
+const { VerifySessionMock } = vi.hoisted(() => {
   return {
-    decryptMock: vi.fn(),
+    VerifySessionMock: vi.fn(),
   };
 });
 vi.mock("../../lib/session", () => {
   return {
-    decrypt: decryptMock,
+    verifySession: VerifySessionMock,
   };
 });
 
@@ -44,6 +44,8 @@ const testUser: IUser = {
 
 describe("User Integration Endpoints", () => {
   beforeEach(async () => {
+    vi.clearAllMocks();
+
     // Insert Parent
     const seed = await pool.query(
       "INSERT INTO users (email, userpassword) VALUES ($1, $2) RETURNING userid",
@@ -58,7 +60,7 @@ describe("User Integration Endpoints", () => {
     );
 
     // mock decrypt function
-    decryptMock.mockResolvedValue({
+    VerifySessionMock.mockResolvedValue({
       userId: userID,
     });
   });
@@ -72,7 +74,7 @@ describe("User Integration Endpoints", () => {
   });
 
   it("verifies the seeded user exists via authuser endpoint", async () => {
-    const req = new NextRequest(`${URL}/api/authuser`, {
+    const req = new NextRequest(`${URL}/api/utils/authuser`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(testUser),
@@ -86,7 +88,7 @@ describe("User Integration Endpoints", () => {
   });
 
   it("authenticates/gets user with email", async () => {
-    const req = new NextRequest(`${URL}/api/authuser`, {
+    const req = new NextRequest(`${URL}/api/utils/authuser`, {
       method: "POST",
       body: JSON.stringify({ email: testUser.email }),
     });
@@ -99,7 +101,7 @@ describe("User Integration Endpoints", () => {
   });
 
   it("retrieves the current user's email", async () => {
-    const req = new NextRequest(`${URL}/api/get-email`);
+    const req = new NextRequest(`${URL}/api/utils/get-email`);
     const response = await getEmailRoute.GET(req);
     const data = await response.json();
 
@@ -109,7 +111,7 @@ describe("User Integration Endpoints", () => {
 
   it("updates the user password", async () => {
     const newPassword = "new_secure_password_456";
-    const req = new NextRequest(`${URL}/api/update-password`, {
+    const req = new NextRequest(`${URL}/api/utils/update-password`, {
       method: "PUT",
       body: JSON.stringify({ newPassword }),
     });
@@ -132,7 +134,7 @@ describe("User Integration Endpoints", () => {
     };
 
     const updateReq = new NextRequest(
-      `${URL}/api/update-user-settings`,
+      `${URL}/api/utils/update-user-settings`,
       {
         method: "PUT",
         body: JSON.stringify(settings),
@@ -143,7 +145,7 @@ describe("User Integration Endpoints", () => {
     expect(updateRes.status).toBe(200);
 
     const getReq = new NextRequest(
-      `${URL}/api/get-user-settings`,
+      `${URL}/api/utils/get-user-settings`,
     );
     const getRes = await getSettingsRoute.GET(getReq);
     const data = await getRes.json();
@@ -161,7 +163,7 @@ describe("User Integration Endpoints", () => {
   });
 
   it("soft deletes a user account", async () => {
-    const req = new NextRequest(`${URL}/api/delete-user`, {
+    const req = new NextRequest(`${URL}/api/utils/delete-user`, {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
     });

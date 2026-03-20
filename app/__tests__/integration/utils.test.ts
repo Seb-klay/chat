@@ -23,15 +23,15 @@ vi.mock("next/headers", () => ({
   })),
 }));
 
-// Mock decrypt function
-const { decryptMock } = vi.hoisted(() => {
+// Mock verifySession function
+const { VerifySessionMock } = vi.hoisted(() => {
   return {
-    decryptMock: vi.fn(),
+    VerifySessionMock: vi.fn(),
   };
 });
 vi.mock("../../lib/session", () => {
   return {
-    decrypt: decryptMock,
+    verifySession: VerifySessionMock,
   };
 });
 
@@ -64,7 +64,7 @@ describe("User Utility API Integration", () => {
     userID = seed.rows[0].userid;
 
     // mock decrypt function
-    decryptMock.mockResolvedValue({
+    VerifySessionMock.mockResolvedValue({
       userId: userID,
     });
   });
@@ -89,7 +89,7 @@ describe("User Utility API Integration", () => {
       expiresAt: new Date(Date.now() + 10000).toISOString(),
     };
 
-    const req = new NextRequest(`${URL}/api/validate-user`, {
+    const req = new NextRequest(`${URL}/api/utils/validate-user`, {
       method: "POST",
       body: JSON.stringify(payload),
     });
@@ -104,7 +104,7 @@ describe("User Utility API Integration", () => {
   });
 
   it("should return 500 if the database query fails", async () => {
-    const req = new NextRequest(`${URL}/api/validate-user`, {
+    const req = new NextRequest(`${URL}/api/utils/validate-user`, {
       method: "POST",
       body: JSON.stringify({ email: null }),
     });
@@ -120,7 +120,7 @@ describe("User Utility API Integration", () => {
       expiresAt: new Date(Date.now() + 10000).toISOString(),
     };
 
-    const req = new NextRequest(`${URL}/api/validate-user`, {
+    const req = new NextRequest(`${URL}/api/utils/validate-user`, {
       method: "POST",
       body: JSON.stringify(validation_object),
     });
@@ -148,7 +148,7 @@ describe("User Utility API Integration", () => {
       ],
     );
 
-    const req = new NextRequest(`${URL}/api/is-account-used`, {
+    const req = new NextRequest(`${URL}/api/utils/is-account-used`, {
       method: "POST",
       body: JSON.stringify({ email: testUser.email }),
     });
@@ -157,7 +157,6 @@ describe("User Utility API Integration", () => {
     const data = await response.json();
 
     expect(response.status).toBe(200);
-    // Based on your original test: data[0] implies an array response
     expect(data[0].verified).toBe(true);
   });
 
@@ -167,7 +166,7 @@ describe("User Utility API Integration", () => {
       [testUser.email, "999999", new Date(Date.now() + 10000).toISOString()],
     );
 
-    const req = new NextRequest(`${URL}/api/verify-code`, {
+    const req = new NextRequest(`${URL}/api/utils/verify-code`, {
       method: "POST",
       body: JSON.stringify({ email: testUser.email, code: "999999" }),
     });
@@ -188,7 +187,7 @@ describe("User Utility API Integration", () => {
       eval_duration: 6269251027,
     };
 
-    const addReq = new NextRequest(`${URL}/api/user-analytics`, {
+    const addReq = new NextRequest(`${URL}/api/utils/user-analytics`, {
       method: "POST",
       body: JSON.stringify(analytics),
     });
@@ -197,7 +196,7 @@ describe("User Utility API Integration", () => {
     expect(addRes.status).toBe(200);
 
     const getReq = new NextRequest(
-      `${URL}/api/get-user-analytics`,
+      `${URL}/api/utils/get-user-analytics`,
     );
 
     const getRes = await getAnalytics.GET(getReq);

@@ -21,7 +21,8 @@ export async function createSession(userId: string) {
   });
 };
 
-export const verifySession = cache(async () => {
+// possible to cache the result using cache(async() => {...}))
+export const verifySession = async () => {
   const cookie = (await cookies()).get('session')?.value
   const session = await decrypt(cookie)
  
@@ -30,7 +31,7 @@ export const verifySession = cache(async () => {
   };
  
   return { userId: session.userId }
-})
+}
 
 export async function deleteSession() {
   (await cookies()).delete("session");

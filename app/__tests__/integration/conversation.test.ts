@@ -24,15 +24,15 @@ vi.mock("next/headers", () => ({
   })),
 }));
 
-// Mock decrypt function
-const { decryptMock } = vi.hoisted(() => {
+// Mock verifySession function
+const { VerifySessionMock } = vi.hoisted(() => {
   return {
-    decryptMock: vi.fn(),
+    VerifySessionMock: vi.fn(),
   };
 });
 vi.mock("../../lib/session", () => {
   return {
-    decrypt: decryptMock,
+    verifySession: VerifySessionMock,
   };
 });
 
@@ -58,7 +58,7 @@ describe("Conversation Integration", () => {
         );
         
         userID = seed.rows[0].userid;
-        decryptMock.mockResolvedValue({ userId: userID });
+        VerifySessionMock.mockResolvedValue({ userId: userID });
         break;
       } catch (err) {
         attempts++;
@@ -73,6 +73,7 @@ describe("Conversation Integration", () => {
   });
 
   afterEach(async () => {
+    await pool.query("DELETE FROM files");
     await pool.query("DELETE FROM messages");
     await pool.query("DELETE FROM conversations");
   });
@@ -97,7 +98,7 @@ describe("Conversation Integration", () => {
     );
 
     const req = new NextRequest(
-      `${URL}/api/get-user-conversation`,
+      `${URL}/api/chat/get-user-conversation`,
     );
     const response = await getUserConversations.GET(req);
     const data = await response.json();
@@ -109,7 +110,7 @@ describe("Conversation Integration", () => {
   it("creates a conversation without a running server", async () => {
     const testTitle = "test 2";
 
-    const req = new NextRequest(`${URL}/api/conversation`, {
+    const req = new NextRequest(`${URL}/api/chat/create-conversation`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ title: testTitle, defaultModel: testModel }),
@@ -144,7 +145,7 @@ describe("Conversation Integration", () => {
     const targetId = seed.rows[0].convid;
 
     const req = new NextRequest(
-      `${URL}/api/get-single-conversation/${targetId}`,
+      `${URL}/api/chat/get-conversation-infos/${targetId}`,
     );
     const response = await getSingleConversations.GET(req, {
       params: Promise.resolve({ id: targetId }),
@@ -170,7 +171,7 @@ describe("Conversation Integration", () => {
     const targetId = seed.rows[0].convid;
 
     const req = new NextRequest(
-      `${URL}/api/update-title-conversation`,
+      `${URL}/api/ai-model/update-title-conversation`,
       {
         method: "PUT",
         body: JSON.stringify({ id: targetId, newTitle: "New Shiny Title" }),
@@ -201,7 +202,7 @@ describe("Conversation Integration", () => {
     const targetId = seed.rows[0].convid;
 
     const req = new NextRequest(
-      `${URL}/api/delete-conversation`,
+      `${URL}/api/chat/delete-conversation`,
       {
         method: "DELETE",
         body: JSON.stringify({ id: targetId }),
@@ -236,7 +237,7 @@ describe("Conversation Integration", () => {
       isStream: true,
     };
 
-    const postReq = new NextRequest(`${URL}/api/message`, {
+    const postReq = new NextRequest(`${URL}/api/chat/create-message`, {
       method: "POST",
       body: JSON.stringify({
         message: messagePayload.messages,
@@ -248,7 +249,7 @@ describe("Conversation Integration", () => {
     expect(postRes.status).toBe(200);
 
     const getReq = new NextRequest(
-      `${URL}/api/get-history/${newConvID}`,
+      `${URL}/api/chat/get-history/${newConvID}`,
     );
     const response = await getHistoryRoute.GET(getReq, {
       params: Promise.resolve({ id: newConvID }),

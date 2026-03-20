@@ -7,9 +7,7 @@ import {
   deleteFiles,
   downloadFile,
   downloadFileWithPath,
-  createFiles,
 } from "../service";
-import { preparedFiles } from "../(main)/conversation/[id]/page";
 
 const getIcon = ({ fileType }: any) => {
   if (fileType.includes("image")) {

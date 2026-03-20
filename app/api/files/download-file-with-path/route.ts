@@ -1,8 +1,6 @@
 import { getPool } from "@/app/backend/database/utils/databaseUtils";
 import { getAppwriteClient } from "@/app/backend/file-database/appwriteUtils";
-import { decrypt } from "@/app/lib/session";
-import { JWTPayload } from "jose";
-import { cookies } from "next/headers";
+import { verifySession } from "@/app/lib/session";
 import { NextRequest, NextResponse } from "next/server";
 import { Storage } from "node-appwrite";
 const BUCKET_ID = process.env.APPWRITE_BUCKET_ID!;
@@ -18,8 +16,7 @@ export async function POST(
     const appWrite = await getAppwriteClient();
     const storage = new Storage(appWrite);
 
-    const cookie = (await cookies()).get("session");
-    const sessionUser: JWTPayload | undefined = await decrypt(cookie?.value);
+    const sessionUser = await verifySession();
     const userID = sessionUser?.userId;
     if (!userID)
       return NextResponse.json(

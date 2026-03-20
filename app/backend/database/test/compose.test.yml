@@ -12,6 +12,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
+      - ./utils/db-data:/var/lib/postgres/data
+      - ./utils/log-data:/var/lib/postgres/logs
       - ../utils/init.sql:/docker-entrypoint-initdb.d/init.sql
       - ../test/seed.sql:/docker-entrypoint-initdb.d/seed.sql
     ports:
@@ -27,3 +29,7 @@ services:
 networks:
   db:
     driver: bridge
+
+volumes:
+  db-data:
+  log-data:

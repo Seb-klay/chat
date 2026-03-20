@@ -2,9 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { getPool } from "@/app/backend/database/utils/databaseUtils";
-import { cookies } from "next/headers";
-import { JWTPayload } from "jose";
-import { decrypt } from "@/app/lib/session";
+import { verifySession } from "@/app/lib/session";
 
 export async function GET(
   request: Request,
@@ -12,8 +10,7 @@ export async function GET(
 ): Promise<NextResponse> {
   try {
     // get cookie for user id
-    const cookie = (await cookies()).get("session");
-    const sessionUser: JWTPayload | undefined = await decrypt(cookie?.value);
+    const sessionUser = await verifySession();
     const userID = sessionUser?.userId;
     const { id } = await params;
     const pool = getPool();
