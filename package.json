@@ -34,6 +34,7 @@
     "recharts": "^3.7.0",
     "rehype-raw": "^7.0.0",
     "remark-gfm": "^4.0.1",
+    "searxng": "^0.0.5",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.4.0",
     "tailwindcss": "^4.2.1",

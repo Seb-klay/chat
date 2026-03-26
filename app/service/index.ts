@@ -356,3 +356,14 @@ export const getUserAnalytics = async (): Promise<IAnalytics[]> => {
   if (!response.ok) return [];
   return response.json() as Promise<IAnalytics[]>;
 };
+
+export const getSearchResults = async (input: string): Promise<Response | null> => {
+  const query = encodeURIComponent(input);
+  
+  return await fetch(`${URL}/api/tools/get-search-results?q=${query}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  }).catch((err) => {
+    throw new Error(err);
+  });
+};

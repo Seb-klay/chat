@@ -7,6 +7,7 @@ import {
   IPayload,
   summaryConversationAndUpdate,
   prepareFilesForServer,
+  tool,
 } from "../../../utils/chatUtils";
 import {
   getConversationHistory,
@@ -127,7 +128,7 @@ export default function ConversationPage() {
             model: chat.model,
             content: chat.content,
             files: chat.files,
-            images: null,
+            images: undefined,
           };
           messageHistory.push(newMessage);
         }
@@ -161,7 +162,7 @@ export default function ConversationPage() {
   ) => {
     const messageText = userInput;
     // TODO: handle images in files
-    let filesImages: string[] | null = null;
+    let filesImages: string[] | undefined = undefined;
     try {
       let preparedFiles: preparedFiles[] = [];
       if (files) {
@@ -190,11 +191,10 @@ export default function ConversationPage() {
         images: filesImages,
       };
       const assistantPlaceholder: IMessage = {
-        role: "assistant", // This ensures it uses the "Bot" styling/side
+        role: "assistant",
         model: selectedModel,
         content: "",
-        files: undefined,
-        images: null,
+        tool_calls: []
       };
       // store USER message in history
       setMessages((prev) => [...prev, messageFromUser, assistantPlaceholder]);
@@ -216,19 +216,16 @@ export default function ConversationPage() {
         // pass the controller when message is aborting
         controller,
         {
-          onData: (chunk: string) => {
+          onData: (chunk: string, toolcalls?: tool[]) => {
             setMessages((prev) => {
               const last = prev[prev.length - 1];
-              const updated = { ...last, content: last.content + chunk };
+              const updated = { ...last, content: last.content + chunk, tool_calls: toolcalls };
               return [...prev.slice(0, -1), updated];
             });
           },
 
-          // Handle errors
-          onError: (err) => {
-            setOnAiThought(false);
-            setOnAiWriting(false);
-            toast.warning(String(err));
+          onToolCalls: (toolMessage: IMessage) => {
+            setMessages((prev) => [...prev, toolMessage]);
           },
 
           onWrite: () => {
@@ -239,6 +236,13 @@ export default function ConversationPage() {
           // Finalize the message
           onCompleted: () => {
             setOnAiWriting(false);
+          },
+
+          // Handle errors
+          onError: (err) => {
+            setOnAiThought(false);
+            setOnAiWriting(false);
+            toast.warning(String(err));
           },
         },
       );

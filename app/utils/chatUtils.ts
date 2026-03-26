@@ -1,17 +1,28 @@
 import { IConversation, preparedFiles } from "../(main)/conversation/[id]/page";
 import { summaryConversation, updateTitleConversation } from "../service/index";
+import { ToolName } from "../tools/tools";
+import { IModelList } from "./listModels";
 
-type role = "user" | "assistant" | "system";
+type role = "user" | "assistant" | "system" | "tool";
+
+export type tool = {
+        function: {
+          name: ToolName;
+          description: string;
+          arguments: {}
+        }
+      }
 
 export interface IMessage {
-  role: role;
-  model: {
-    id: number;
+    // for api/chat
+    role: role;
+    content: string;
+    model: IModelList;
+    thinking?: string;
+    tool_calls?: tool[],
+    files?: preparedFiles[];
+    images?: string[];
   };
-  content: string;
-  files: preparedFiles[] | undefined;
-  images: string[] | null;
-}
 
 export interface IPayload {
   messages: IMessage[];
@@ -23,12 +34,7 @@ export interface IAnswer {
   model: string;
   created_at: string;
   response?: string; // for api/generate
-  message?: {
-    // for api/chat
-    role: role;
-    content: string;
-    thinking?: string;
-  };
+  message?: IMessage;
   done?: boolean;
   done_reason?: string;
   context?: number[];

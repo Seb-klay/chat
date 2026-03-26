@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { IMessage } from "@/app/utils/chatUtils";
 import { extractTextFromFiles, IExtractResult } from "@/app/utils/pdf-parser";
+import { tools } from "@/app/tools/tools";
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,6 +50,7 @@ export async function POST(request: NextRequest) {
           images: filesImages ?? [],
         })),
         think: false,
+        tools: tools,
         stream: isStream,
         keep_alive: -1,
       }),
@@ -69,6 +71,122 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(err, { status: 500 });
   }
 }
+
+// test end-point for tool calling :
+// export async function POST(request: NextRequest) {
+//   try {
+//     const { messages } = await request.json();
+//     console.log(messages);
+
+//     const hasToolResult = messages?.some((m: any) => m.role === "tool");
+
+//     const encoder = new TextEncoder();
+
+//     // Helper to enqueue JSON line (without "data:" prefix)
+//     const enqueueJson = (controller: any, payload: object) => {
+//       controller.enqueue(encoder.encode(JSON.stringify(payload) + "\n"));
+//     };
+
+//     if (hasToolResult) {
+//       // Tool call stream
+//       const stream = new ReadableStream({
+//         start(controller) {
+//           const payload = {
+//             model: "deepseek-r1:700b",
+//             created_at: new Date().toISOString(),
+//             message: {
+//               role: "assistant",
+//               content: "",
+//               tool_calls: [
+//                 {
+//                   function: {
+//                     name: "search",
+//                     arguments: {
+//                       input: "What is the current price for Tesla stock market?",
+//                     },
+//                   },
+//                 },
+//               ],
+//             },
+//             done: true,
+//           };
+
+//           enqueueJson(controller, payload);
+//           controller.close();
+//         },
+//       });
+
+//       return new NextResponse(stream, {
+//         headers: {
+//           "Content-Type": "text/event-stream",
+//           "Cache-Control": "no-cache",
+//           Connection: "keep-alive",
+//         },
+//       });
+//     }
+
+//     // Normal streaming response
+//     const mockChunks = [
+//       "Hello! ",
+//       "I am ",
+//       "simulating ",
+//       "a response ",
+//       "to help ",
+//       "you test ",
+//       "your UI. ",
+//     ];
+
+//     const stream = new ReadableStream({
+//       async start(controller) {
+//         // stream each chunk
+//         for (const chunk of mockChunks) {
+//           enqueueJson(controller, {
+//             model: "deepseek-r1:7b",
+//             created_at: new Date().toISOString(),
+//             message: {
+//               role: "assistant",
+//               content: chunk,
+//             },
+//             done: false,
+//           });
+
+//           // simulate typing delay
+//           await new Promise((r) => setTimeout(r, 150));
+//         }
+
+//         // final "done" message
+//         enqueueJson(controller, {
+//           model: "deepseek-r1:7b",
+//           created_at: new Date().toISOString(),
+//           message: {
+//             role: "assistant",
+//             content: "",
+//           },
+//           done: true,
+//           total_duration: 82617974642,
+//           load_duration: 69127099622,
+//           prompt_eval_count: 44,
+//           prompt_eval_duration: 6792859223,
+//           eval_count: 20,
+//           eval_duration: 6269251027,
+//         });
+
+//         controller.close();
+//       },
+//     });
+
+//     return new NextResponse(stream, {
+//       headers: {
+//         "Content-Type": "text/event-stream",
+//         "Cache-Control": "no-cache",
+//         Connection: "keep-alive",
+//       },
+//     });
+//   } catch (err) {
+//     console.error("POST error:", err);
+//     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+//   }
+// }
 
 // test end-point :
 // export async function POST(req: Request) {
@@ -115,8 +233,16 @@ export async function POST(request: NextRequest) {
 //         const payload = JSON.stringify({
 //           model: "llama3.2:3b",
 //           created_at: new Date().toISOString(),
-//           response: chunk,
-//           done: false
+//           message: {
+//             content: chunk
+//           },
+//           done: false,
+//           total_duration: 82617974642,
+//           load_duration: 69127099622,
+//           prompt_eval_count: 44,
+//           prompt_eval_duration: 6792859223,
+//           eval_count: 20,
+//           eval_duration: 6269251027
 //         });
 
 //         // Push the encoded JSON + a newline (standard for many stream parsers)
@@ -125,20 +251,6 @@ export async function POST(request: NextRequest) {
 //         // Wait 100ms between chunks to simulate "thinking" time
 //         await new Promise((resolve) => setTimeout(resolve, 100));
 //       }
-
-//       // Final "done" message
-//       const finalPayload = JSON.stringify({
-//         model: 'llama3.2:3b',
-//         created_at: '2026-01-25T17:32:51.861260784Z',
-//         total_duration: 82617974642,
-//         load_duration: 69127099622,
-//         prompt_eval_count: 44,
-//         prompt_eval_duration: 6792859223,
-//         eval_count: 20,
-//         eval_duration: 6269251027
-//       });
-
-//       controller.enqueue(encoder.encode(finalPayload + "\n"));
 //       controller.close();
 //     },
 //   });
