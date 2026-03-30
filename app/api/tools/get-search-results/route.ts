@@ -27,8 +27,9 @@ export async function GET(request: Request): Promise<NextResponse> {
     }
 
     const searxngService = new SearxngService(searxConfig);
-    //const results = await searxngService.search(input);
-    const results = "The stock market of tesla grew up to 15% which value the company to 1 trillion today !"
+    const results = await searxngService.search(input);
+    // for test purposes only !
+    //const results = "The stock market of tesla grew up to 15% which value the company to 1 trillion today !"
 
     return NextResponse.json(results, { status: 200 });
   } catch (err) {
