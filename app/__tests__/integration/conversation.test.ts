@@ -232,7 +232,7 @@ describe("Conversation Integration", () => {
     );
     const newConvID = seed.rows[0].convid;
     const messagePayload: IPayload = {
-      messages: [{ role: "user", content: "Test 6", model: { id: 1 }, files: undefined, images: null }],
+      messages: [{ role: "user", content: "Test 6", model: { id: 1, model_name: "llama3.2:3b" }, files: undefined, images: undefined }],
       conversationID: newConvID,
       isStream: true,
     };
@@ -262,7 +262,4 @@ describe("Conversation Integration", () => {
     expect(history[0].content).toBe("Test 6");
   });
 });
-function sleep(arg0: number) {
-  throw new Error("Function not implemented.");
-}
 
