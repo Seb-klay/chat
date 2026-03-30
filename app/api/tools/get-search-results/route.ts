@@ -6,7 +6,7 @@ import { SearxngService, SearxngServiceConfig } from "searxng";
 const searxConfig: SearxngServiceConfig = {
   baseURL: process.env.SEARXNG_INSTANCE!,
   defaultSearchParams: {
-    format: 'json',
+    //format: 'json',
     lang: 'auto',
   },
   defaultRequestHeaders: {
@@ -27,6 +27,8 @@ export async function GET(request: Request): Promise<NextResponse> {
     }
 
     const searxngService = new SearxngService(searxConfig);
+    console.log(searxConfig)
+    console.log(searxngService)
     const results = await searxngService.search(input);
     // for test purposes only !
     //const results = "The stock market of tesla grew up to 15% which value the company to 1 trillion today !"
