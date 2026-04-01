@@ -6,23 +6,23 @@ import { IModelList } from "./listModels";
 type role = "user" | "assistant" | "system" | "tool";
 
 export type tool = {
-        function: {
-          name: ToolName;
-          description: string;
-          arguments: {}
-        }
-      }
+  function: {
+    name: ToolName;
+    description: string;
+    arguments: {};
+  };
+};
 
 export interface IMessage {
-    // for api/chat
-    role: role;
-    content: string;
-    model: IModelList;
-    thinking?: string;
-    tool_calls?: tool[],
-    files?: preparedFiles[];
-    images?: string[];
-  };
+  // for api/chat
+  role: role;
+  content: string;
+  model: IModelList;
+  thinking?: string;
+  tool_calls?: tool[];
+  files?: preparedFiles[];
+  images?: string[];
+}
 
 export interface IPayload {
   messages: IMessage[];
@@ -57,6 +57,7 @@ export const summaryConversationAndUpdate = async (
   { onError }: ErrorCallbacks,
 ) => {
   try {
+    let newTitle = "New conversation";
     const titleToSummarize =
       "Summarize this text in 6 words : " + newConversation.title;
 
@@ -65,21 +66,23 @@ export const summaryConversationAndUpdate = async (
       titleToSummarize,
       newConversation.defaultmodel,
     );
-    if (!responseSummary?.ok)
+    if (responseSummary?.ok) {
+      newTitle = await responseSummary.json();
+
+      // update new generated title if summary is successful
+      const responseUpdatedTitle = await updateTitleConversation(
+        newConversation.convid,
+        newTitle,
+      );
+      if (!responseUpdatedTitle?.ok)
+        onError(
+          `Could not store AI generated title ${responseSummary.status}.`,
+        );
+    } else {
       onError(
         `Could not store AI generated title with status ${responseSummary.status}.`,
       );
-
-    let newTitle = await responseSummary.json();
-    if (newTitle.error)
-      newTitle = 'New conversation';
-    // update new generated title
-    const responseUpdatedTitle = await updateTitleConversation(
-      newConversation.convid,
-      newTitle,
-    );
-    if (!responseUpdatedTitle?.ok)
-      onError(`Could not store AI generated title ${responseSummary.status}.`);
+    }
 
     // add event emitter
     const updatedConversation = {
@@ -97,18 +100,18 @@ export const summaryConversationAndUpdate = async (
   }
 };
 
-  export async function prepareFilesForServer(
-    files: File[],
-  ): Promise<preparedFiles[]> {
-    return await Promise.all(
-      Array.from(files).map(async (file) => {
-        const buffer = await file.arrayBuffer();
-        return {
-          name: file.name,
-          type: file.type,
-          size: file.size,
-          data: Buffer.from(buffer).toString("base64"),
-        };
-      }),
-    );
-  }
+export async function prepareFilesForServer(
+  files: File[],
+): Promise<preparedFiles[]> {
+  return await Promise.all(
+    Array.from(files).map(async (file) => {
+      const buffer = await file.arrayBuffer();
+      return {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        data: Buffer.from(buffer).toString("base64"),
+      };
+    }),
+  );
+}

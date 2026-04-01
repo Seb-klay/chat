@@ -112,16 +112,7 @@ export const storeMessage = async (
     if (files && files.length > 0){
       const { messID } = await responseMessage.json();
 
-      const responseFiles = await createFiles(files!, messID);
-      const storedFiles = await responseFiles?.json();
-
-      filesWithIds = files?.map((file, index) => ({
-        id: storedFiles[index],
-        ...file,
-      }));
-
-      // store files in Appwrite object storage
-      return await storeFiles(filesWithIds);
+      return await createFiles(files!, messID);
     }
     
     return responseMessage;
@@ -213,11 +204,11 @@ export const updateUserSettings = async (
   });
 };
 
-export const storeFiles = async (
+export const uploadFiles = async (
   files: preparedFiles[] | undefined,
 ): Promise<Response | null> => {
-  return await fetch(`${URL}/api/files/store-files`, {
-    method: "POST",
+  return await fetch(`${URL}/api/files/upload-files`, {
+    method: "PUT",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ files: files }),
   }).catch((err) => {
@@ -279,7 +270,7 @@ export const createFiles = async (
     const responseMetadata = await fetch(`${URL}/api/files/create-files`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ files: files, MessID: messID }),
+      body: JSON.stringify({ files: files, messID: messID }),
     });
     const data = await responseMetadata.json();
     const filesWithIds = files.map((file, index) => ({
@@ -287,7 +278,7 @@ export const createFiles = async (
       ...file,
     }));
     // store files in Appwrite object storage
-    return await storeFiles(filesWithIds);
+    return await uploadFiles(filesWithIds);
   } catch (err: any) {
     throw new Error(err);
   }

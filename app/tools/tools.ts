@@ -11,10 +11,8 @@ export async function search(input: string): Promise<string> {
     }
     const data = await results.text(); 
 
-    return `{results:\n${data}}`;
+    return data;
   } catch (error) {
-    console.error("Search failed:", error);
-
     return "Search failed. Unable to retrieve results.";
   }
 }

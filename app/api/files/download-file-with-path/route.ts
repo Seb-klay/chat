@@ -1,9 +1,9 @@
 import { getPool } from "@/app/backend/database/utils/databaseUtils";
-import { getAppwriteClient } from "@/app/backend/file-database/appwriteUtils";
+import { getStorageToken } from "@/app/backend/file-database/storageUtils";
 import { verifySession } from "@/app/lib/session";
 import { NextRequest, NextResponse } from "next/server";
-import { Storage } from "node-appwrite";
-const BUCKET_ID = process.env.APPWRITE_BUCKET_ID!;
+const PUBLIC_URL = process.env.OBJECT_STORAGE_URL!;
+const container = process.env.OBJECT_STORAGE_CONTAINER;
 
 export async function POST(
   request: NextRequest,
@@ -13,8 +13,7 @@ export async function POST(
     
     if (!filePath) return NextResponse.json({ error: "No path given for the file. " }, { status: 404 });
 
-    const appWrite = await getAppwriteClient();
-    const storage = new Storage(appWrite);
+    const token = await getStorageToken();
 
     const sessionUser = await verifySession();
     const userID = sessionUser?.userId;
@@ -25,21 +24,15 @@ export async function POST(
       );
     const pool = getPool();
 
-    // get files metadata in main DB
-    const [parent, fileName] = [
-      filePath.slice(0, filePath.lastIndexOf("/")),
-      filePath.slice(filePath.lastIndexOf("/") + 1)
-    ];
     const response = await pool.query(
       `SELECT
           fileid, name, type, isdirectory
         FROM Files
         WHERE userID = $1
-        AND path = $2
-        AND name = $3`,
-      [userID, parent || '/', fileName],
+        AND path = $2`,
+      [userID, filePath],
     );
-    if (!response)
+    if (!response.rows[0])
       return NextResponse.json(
         { error: "File metadata could not be loaded. " },
         { status: 400 },
@@ -52,22 +45,27 @@ export async function POST(
       );
 
     const fileID = response.rows[0].fileid;
+    const fileName = response.rows[0].name;
     const mimeType = response.rows[0].type;
 
-    const file = await storage.getFileDownload({
-      bucketId: BUCKET_ID,
-      fileId: fileID,
+    const responseFile = await fetch(`${PUBLIC_URL}/${container}/${fileID}`, {
+      method: "GET",
+      headers: {
+        "X-Auth-Token": token,
+      },
     });
 
-    if (!file) {
-      return NextResponse.json({ error: "File not found in AW database. " }, { status: 404 });
+    if (!responseFile.ok) {
+      return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
+
+    // file data
+    const file = Buffer.from(await responseFile.arrayBuffer());
 
     // Convert ArrayBuffer to Blob
     const blob = new Blob([file], { type: mimeType });
-    const bytes = await blob.arrayBuffer();
 
-    return new NextResponse(bytes, {
+    return new NextResponse(blob, {
       status: 200,
       headers: {
         "Content-Type": mimeType,

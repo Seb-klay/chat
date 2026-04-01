@@ -1,16 +1,13 @@
 import { preparedFiles } from "@/app/(main)/conversation/[id]/page";
-import { getAppwriteClient } from "@/app/backend/file-database/appwriteUtils";
+import { getStorageToken } from "@/app/backend/file-database/storageUtils";
 import { NextRequest, NextResponse } from "next/server";
-import { Client, Storage } from "node-appwrite";
-import { InputFile } from 'node-appwrite/file';
-const BUCKET_ID = process.env.APPWRITE_BUCKET_ID!;
+const PUBLIC_URL = process.env.OBJECT_STORAGE_URL!;
+const container = process.env.OBJECT_STORAGE_CONTAINER;
 
-export async function POST(request: NextRequest): Promise<NextResponse> {
+export async function PUT(request: NextRequest): Promise<NextResponse> {
   try {
     const { files } = await request.json();
-
-    const appWrite: Client | undefined = await getAppwriteClient();
-    const storage = new Storage(appWrite);
+    const token = await getStorageToken();
 
     const uploadPromises = files.map(async (file: preparedFiles) => {
       if (file.isdirectory) return;
@@ -19,11 +16,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
       const fileBuffer = Buffer.from(file.data, "base64");
       
-      return await storage.createFile(
-        BUCKET_ID,
-        file.id, // if no id, file not stored and api not triggered
-        InputFile.fromBuffer(fileBuffer, file.name)
-      );
+      return await fetch(`${PUBLIC_URL}/${container}/${file.id}`, { // store object with name as id to avoid conflict
+        method: "PUT",
+        headers: {
+          "X-Auth-Token": token,
+          "Content-Type": file.type || (`application/${file.name.split('.').pop()}`),
+        },
+        body: fileBuffer,
+      });
     });
 
     const results = await Promise.all(uploadPromises);

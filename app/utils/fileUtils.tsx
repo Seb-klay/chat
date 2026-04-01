@@ -70,11 +70,10 @@ export const handleFileDownload = async ({
       response = await downloadFileWithPath(filePath);
     }
 
-    if (!response) throw new Error("No file returned from server. ");
+    if (!response?.ok) throw new Error("No file returned from server. ");
 
-    const arrayBuffer = await response.arrayBuffer();
-    const blob = new Blob([arrayBuffer], { type: "application/pdf" });
-
+    // const arrayBuffer = await response.arrayBuffer();
+    const blob = await response.blob();
     // Create object URL
     const url = window.URL.createObjectURL(blob);
 

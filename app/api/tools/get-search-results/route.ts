@@ -27,16 +27,12 @@ export async function GET(request: Request): Promise<NextResponse> {
     }
 
     const searxngService = new SearxngService(searxConfig);
-    console.log(searxConfig)
-    console.log(searxngService)
     const results = await searxngService.search(input);
     // for test purposes only !
     //const results = "The stock market of tesla grew up to 15% which value the company to 1 trillion today !"
 
     return NextResponse.json(results, { status: 200 });
   } catch (err) {
-    console.error("Search API error:", err);
-
     return NextResponse.json(
       { error: "Search failed" },
       { status: 500 }
