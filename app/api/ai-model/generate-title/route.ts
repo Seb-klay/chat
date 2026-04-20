@@ -9,11 +9,14 @@ export async function POST(request: NextRequest) {
     // get AI URL from list
     const AI_MODEL_URL: string | undefined = process.env.LLM_URL;
     // send prompt to AI
-    const response = await fetch(AI_MODEL_URL + "/api/generate", {
+    //const OLLAMA_URL = '/api/generate' // if used with OLLAMA for test
+    const vllm_URL = '/v1/responses' // if used with vLLM for prod
+
+    const response = await fetch(AI_MODEL_URL + vllm_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "tinyllama", // taking a lightweight model for title summarisation
+        model: aiModel.model_name, // taking a lightweight model for title summarisation
         prompt: titleToSummarize,
         stream: false,
       }),

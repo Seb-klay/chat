@@ -128,7 +128,7 @@ export default function ConversationPage() {
             model: chat.model,
             content: chat.content,
             files: chat.files,
-            images: undefined,
+            //images: undefined,
           };
           messageHistory.push(newMessage);
         }
@@ -188,7 +188,7 @@ export default function ConversationPage() {
         model: selectedModel,
         content: messageText,
         files: preparedFiles,
-        images: filesImages,
+        //images: filesImages,
       };
       const assistantPlaceholder: IMessage = {
         role: "assistant",

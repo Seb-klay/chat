@@ -25,12 +25,15 @@ export interface IAnalytics {
   day: string;
   model: string;
   requests: string;
-  total_duration: string;
-  load_duration: string;
-  prompt_eval_count: string;
-  prompt_eval_duration: string;
-  eval_count: string;
-  eval_duration: string;
+  prompt_tokens?: number; // = prompt_eval_count from ollama
+  completion_tokens?: number; // = eval_count from ollama
+  total_tokens?: number;
+  // total_duration: string;
+  // load_duration: string;
+  // prompt_eval_count: string;
+  // prompt_eval_duration: string;
+  // eval_count: string;
+  // eval_duration: string;
 }
 import { useTheme } from "../../components/contexts/theme-provider";
 import { getUserAnalytics } from "../../service";
@@ -39,9 +42,9 @@ import AnalyticsSkeleton from "./analyticsSkeleton";
 
 // Color palette for models
 const MODEL_COLORS = {
-  "llama3.2:3b": "#3B82F6", // blue
-  tinyllama: "#10B981", // emerald
-  "gemma3:1b": "#8B5CF6", // violet
+  "deepseek-r1:7b": "#3B82F6", // blue
+  "Qwen/Qwen3.5-4B": "#10B981", // emerald
+  //"gemma3:1b": "#8B5CF6", // violet
 };
 
 // Format date for display
@@ -83,11 +86,11 @@ export default function Analytics() {
   const processedData = dataAnalytics?.map((item) => ({
     ...item,
     formattedDay: formatDate(item.day),
-    total_tokens: parseInt(item.prompt_eval_count) + parseInt(item.eval_count),
-    total_duration_seconds: parseInt(item.total_duration) / 1_000_000_000,
-    eval_duration_seconds: parseInt(item.eval_duration) / 1_000_000_000,
-    prompt_eval_duration_seconds:
-      parseInt(item.prompt_eval_duration) / 1_000_000_000,
+    total_tokens:
+      item.total_tokens ||
+      (item.prompt_tokens || 0) + (item.completion_tokens || 0),
+    prompt_tokens: item.prompt_tokens || 0,
+    completion_tokens: item.completion_tokens || 0,
   }));
 
   // Group data by model for pie chart
@@ -99,16 +102,17 @@ export default function Analytics() {
             model: item.model,
             total_tokens: 0,
             total_requests: 0,
-            total_eval_duration: 0,
+            total_prompt_tokens: 0,
+            total_completion_tokens: 0,
             color:
               MODEL_COLORS[item.model as keyof typeof MODEL_COLORS] ||
               "#6B7280",
           };
         }
-        acc[item.model].total_tokens +=
-          parseInt(item.prompt_eval_count) + parseInt(item.eval_count);
-        acc[item.model].total_requests += parseInt(item.requests);
-        acc[item.model].total_eval_duration += parseInt(item.eval_duration);
+        acc[item.model].total_tokens += item.total_tokens || 0;
+        acc[item.model].total_requests += parseInt(item.requests) || 0;
+        acc[item.model].total_prompt_tokens += item.prompt_tokens || 0;
+        acc[item.model].total_completion_tokens += item.completion_tokens || 0;
         return acc;
       },
       {} as Record<string, any>,
@@ -116,9 +120,14 @@ export default function Analytics() {
   );
 
   // if loading state, display skeleton
-  if (isLoading) return <AnalyticsSkeleton />
+  if (isLoading) return <AnalyticsSkeleton />;
   // if no analytics to display, show message
-  if (dataAnalytics.length === 0) return <div className="flex p-6 md:p-12 justify-center items-center mx-auto">No Analytics to display yet.</div>
+  if (dataAnalytics.length === 0)
+    return (
+      <div className="flex p-6 md:p-12 justify-center items-center mx-auto">
+        No Analytics to display yet.
+      </div>
+    );
 
   return (
     <div>
@@ -168,7 +177,6 @@ export default function Analytics() {
         <div className="flex border-b border-gray-700/50 mb-6">
           {[
             { id: "tokens", label: "Token Usage", icon: "🧠" },
-            { id: "duration", label: "Response Times", icon: "⚡" },
             { id: "requests", label: "Request Volume", icon: "📊" },
           ].map((tab) => (
             <button
@@ -216,10 +224,18 @@ export default function Analytics() {
                         tickFormatter={(value) => value.toLocaleString()}
                       />
                       <Tooltip
-                        formatter={(value) => [
-                          value?.toLocaleString(),
-                          "Tokens",
-                        ]}
+                        formatter={(value, name) => {
+                          if (name === "total_tokens")
+                            return [value?.toLocaleString(), "Total Tokens"];
+                          if (name === "prompt_tokens")
+                            return [value?.toLocaleString(), "Prompt Tokens"];
+                          if (name === "completion_tokens")
+                            return [
+                              value?.toLocaleString(),
+                              "Completion Tokens",
+                            ];
+                          return [value, name];
+                        }}
                         labelFormatter={(label) => `Date: ${label}`}
                         contentStyle={{
                           backgroundColor: "#1F2937",
@@ -246,47 +262,6 @@ export default function Analytics() {
                         />
                       ))}
                     </AreaChart>
-                  )}
-
-                  {activeTab === "duration" && (
-                    <BarChart data={processedData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
-                      <XAxis
-                        dataKey="formattedDay"
-                        stroke="#9CA3AF"
-                        fontSize={12}
-                      />
-                      <YAxis
-                        stroke="#9CA3AF"
-                        fontSize={12}
-                        tickFormatter={(value) => `${value}s`}
-                      />
-                      <Tooltip
-                        formatter={(value) => [
-                          `${Number(value).toFixed(2)}s`,
-                          "Duration",
-                        ]}
-                        labelFormatter={(label) => `Date: ${label}`}
-                        contentStyle={{
-                          backgroundColor: "#1F2937",
-                          borderColor: "#374151",
-                          color: "white",
-                        }}
-                      />
-                      <Legend />
-                      <Bar
-                        dataKey="eval_duration_seconds"
-                        name="Response Generation"
-                        fill="#10B981"
-                        radius={[4, 4, 0, 0]}
-                      />
-                      <Bar
-                        dataKey="prompt_eval_duration_seconds"
-                        name="Prompt Processing"
-                        fill="#3B82F6"
-                        radius={[4, 4, 0, 0]}
-                      />
-                    </BarChart>
                   )}
 
                   {activeTab === "requests" && (
@@ -327,6 +302,54 @@ export default function Analytics() {
                   )}
                 </ResponsiveContainer>
               </div>
+            </div>
+          </div>
+
+          {/* Token Breakdown Bar Chart */}
+          <div
+            style={{
+              backgroundColor: theme.colors.background_second,
+              color: theme.colors.secondary,
+            }}
+            className="rounded-xl p-4"
+          >
+            <h3 className="text-lg font-medium mb-4">
+              Token Breakdown (Prompt vs Completion)
+            </h3>
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={modelSummary}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
+                  <XAxis dataKey="model" stroke="#9CA3AF" fontSize={12} />
+                  <YAxis
+                    stroke="#9CA3AF"
+                    fontSize={12}
+                    tickFormatter={(value) => value.toLocaleString()}
+                  />
+                  <Tooltip
+                    formatter={(value) => [value?.toLocaleString(), "Tokens"]}
+                    labelFormatter={(label) => `Model: ${label}`}
+                    contentStyle={{
+                      backgroundColor: "#1F2937",
+                      borderColor: "#374151",
+                      color: "white",
+                    }}
+                  />
+                  <Legend />
+                  <Bar
+                    dataKey="total_prompt_tokens"
+                    name="Prompt Tokens"
+                    fill="#3B82F6"
+                    radius={[4, 4, 0, 0]}
+                  />
+                  <Bar
+                    dataKey="total_completion_tokens"
+                    name="Completion Tokens"
+                    fill="#10B981"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
@@ -424,7 +447,10 @@ export default function Analytics() {
                     >
                       {model.model}
                     </span>
-                    <span className="text-xs bg-slate-700 px-2 py-1 rounded">
+                    <span
+                      className="text-xs px-2 py-1 rounded text-white font-medium"
+                      style={{ backgroundColor: model.color }}
+                    >
                       {model.total_requests} requests
                     </span>
                   </div>
@@ -436,14 +462,26 @@ export default function Analytics() {
                       </p>
                     </div>
                     <div>
-                      <p>Avg Eval Time</p>
+                      <p>Prompt/Completion Ratio</p>
                       <p className="font-semibold">
-                        {(
-                          model.total_eval_duration /
-                          model.total_requests /
-                          1_000_000_000
-                        ).toFixed(2)}
-                        s
+                        {model.total_prompt_tokens}:
+                        {model.total_completion_tokens}
+                      </p>
+                    </div>
+                    <div>
+                      <p>Avg Prompt Tokens/Req</p>
+                      <p className="font-semibold">
+                        {Math.round(
+                          model.total_prompt_tokens / model.total_requests,
+                        )}
+                      </p>
+                    </div>
+                    <div>
+                      <p>Avg Completion Tokens/Req</p>
+                      <p className="font-semibold">
+                        {Math.round(
+                          model.total_completion_tokens / model.total_requests,
+                        )}
                       </p>
                     </div>
                   </div>
@@ -473,20 +511,19 @@ export default function Analytics() {
                     </span>
                   </div>
                   <div className="flex justify-between">
-                    <span>Avg Response Time:</span>
+                    <span>Total Prompt Tokens:</span>
                     <span className="font-medium">
-                      {(
-                        modelSummary.reduce(
-                          (sum, m) => sum + m.total_eval_duration,
-                          0,
-                        ) /
-                        modelSummary.reduce(
-                          (sum, m) => sum + m.total_requests,
-                          0,
-                        ) /
-                        1_000_000_000
-                      ).toFixed(2)}
-                      s
+                      {modelSummary
+                        .reduce((sum, m) => sum + m.total_prompt_tokens, 0)
+                        .toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Total Completion Tokens:</span>
+                    <span className="font-medium">
+                      {modelSummary
+                        .reduce((sum, m) => sum + m.total_completion_tokens, 0)
+                        .toLocaleString()}
                     </span>
                   </div>
                 </div>

@@ -7,8 +7,8 @@ import * as themeHooks from "../../components/contexts/theme-provider";
 describe("SettingsPage Component", () => {
 const mockUpdateModel = vi.fn();
   const mockModels = [
-    { id: 1, model_name: "llama3.2:3b" },
-    { id: 2, model_name: "gemma3:1b" },
+    { id: 1, model_name: "llama3.2:3b", simple_name: "llama3.2", nb_params: "3b" },
+    { id: 2, model_name: "gemma3:1b", simple_name: "gemma3", nb_params: "1b" },
   ];
 
   beforeEach(() => {

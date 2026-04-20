@@ -39,7 +39,10 @@ export async function POST(request: NextRequest) {
     }
 
     // send request to AI
-    const response = await fetch(AI_MODEL_URL + "/api/chat?model=" + model.model_name, {
+    //const OLLAMA_URL = '/api/chat' // if used with OLLAMA (legacy)
+    const vllm_URL = '/v1/chat/completions' // if used with vLLM for prod
+
+    const response = await fetch(AI_MODEL_URL + vllm_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -47,19 +50,25 @@ export async function POST(request: NextRequest) {
         messages: messages.map((m: IMessage) => ({
           role: m.role,
           content: m.content + "\n\n" + filesText.join('\n\n'),
-          images: filesImages ?? [],
+          //images: filesImages ?? [],
         })),
-        think: false,
-        tools: tools,
         stream: isStream,
-        keep_alive: -1,
+        reasoning_effort: "none", // none, low, medium, high,
+        stream_options: {
+          include_usage: true
+        },
+        // tool_choice: "auto" // "none" or "auto" or "required"
+        // tools: tools,
+        // verbosity: "medium" // "low" or "medium" or "high"
       }),
     });
-    if (!response.ok)
+    if (!response.ok) {
+      const errorDetails = await response.json();
       return NextResponse.json(
-        { error: "AI message could not be generated. " },
+        { error: "AI message could not be generated: " + errorDetails },
         { status: 400 },
       );
+    }
 
     return new NextResponse(response.body, {
       headers: {

@@ -102,14 +102,14 @@ export default function Settings() {
                         <div className="text-center">
                           <p style={{color: theme.colors.secondary}} className="text-sm">Model</p>
                           <p className="font-semibold">
-                            {model.model_name.split(":")[0] || "N/A"}
+                            {model.simple_name || "N/A"}
                           </p>
                         </div>
 
                         <div className="text-center">
                           <p style={{color: theme.colors.secondary}} className="text-sm">Parameters</p>
                           <p className="font-semibold">
-                            {model.model_name.split(":")[1] || "N/A"}
+                            {model.nb_params || "N/A"}
                           </p>
                         </div>
 
@@ -141,11 +141,11 @@ export default function Settings() {
               </h2>
               <div className="py-2">
                 <p className="font-medium">
-                  {selectedModel.model_name.split(":")[0]}
+                  {selectedModel.simple_name}
                 </p>
                 <p style={{color: theme.colors.secondary}} className="text-sm mt-1">
                   Parameters:{" "}
-                  {selectedModel.model_name.split(":")[1] || " - "}
+                  {selectedModel.nb_params || " - "}
                 </p>
               </div>
               <div className="mt-2 pt-4 border-t border-gray-700/50">

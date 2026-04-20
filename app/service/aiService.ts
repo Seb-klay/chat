@@ -51,8 +51,14 @@ const handleStream = async (
   let aiResponse = "";
   let data: IAnswer = {
     model: "",
-    created_at: "",
+    created: "",
+    usage: {
+      prompt_tokens: 0,
+      completion_tokens: 0,
+      total_tokens: 0,
+    }
   };
+  let usage: IAnswer["usage"] | undefined;
   const toolCalls: tool[] = [];
   const toolResults: IMessage[] = [];
 
@@ -79,34 +85,46 @@ const handleStream = async (
       for (const line of lines) {
         const trimmed = line.trim();
         if (!trimmed) continue;
-        data = JSON.parse(trimmed);
+        if (!trimmed.startsWith("data:")) continue;
+
+        const jsonString = trimmed.slice(5).trim();
+
+        if (jsonString === "[DONE]") break;
+
+        // get content value
+        data = JSON.parse(jsonString);
+        const delta = data.choices?.[0]?.delta;
 
         if (data.error) {
           callbacks.onError(data.error);
           return;
         }
 
-        // handles thinking models
-        if (data.message?.thinking) {
-          aiResponse += data.message?.thinking;
-          callbacks.onData(data.message?.thinking);
+        // handles reasoning models
+        if (delta?.reasoning) {
+          const reasoning = delta.reasoning;
+
+          aiResponse += reasoning;
+          callbacks.onData(reasoning);
         }
 
-        if (data.message?.content) {
-          aiResponse += data.message?.content;
-          callbacks.onData(data.message?.content);
+        if (delta?.content) {
+          const content = delta.content;
+
+          aiResponse += content;
+          callbacks.onData(content);
         }
 
-        if (data.message?.tool_calls && data.message?.tool_calls?.length > 0) {
-          callbacks.onData("", data.message.tool_calls)
-          toolCalls.push(...data.message.tool_calls);
+        // legacy from ollama : data.message?.tool_calls
+        if (delta?.tool_calls && delta?.tool_calls?.length > 0) {
+          callbacks.onData("", delta?.tool_calls)
+          toolCalls.push(...delta?.tool_calls);
         }
-
-        if (data.done) break;
       }
 
       // call all tools required from the model and store it in message list
-      if (data.message?.tool_calls && data.message?.tool_calls?.length > 0)
+      // const ai_tool_calls = data.choices?.[0]?.delta?.tool_calls
+      if (toolCalls && toolCalls?.length > 0)
         await Promise.all(
           toolCalls.map(async (call) => {
             const args = call.function.arguments as { input: string };
@@ -212,13 +230,19 @@ const storeMessageAndAnalytics = async (
     // store analytics detail
     const analytics: IAnswer = {
       model: data.model,
-      created_at: data.created_at,
-      total_duration: data.total_duration,
-      load_duration: data.load_duration,
-      prompt_eval_count: data.prompt_eval_count,
-      prompt_eval_duration: data.prompt_eval_duration,
-      eval_count: data.eval_count,
-      eval_duration: data.eval_duration,
+      created: data.created,
+      // new vLLM answer
+      usage: {
+        prompt_tokens: data.usage?.prompt_tokens, // = prompt_eval_count from ollama
+        completion_tokens: data.usage?.completion_tokens, // = eval_count from ollama
+        total_tokens: data.usage?.total_tokens,
+      },
+      // total_duration: data.total_duration,
+      // load_duration: data.load_duration,
+      // prompt_eval_count: data.prompt_eval_count,
+      // prompt_eval_duration: data.prompt_eval_duration,
+      // eval_count: data.eval_count,
+      // eval_duration: data.eval_duration,
     };
     // store Analytics
     const analyticsResponse = await addUserAnalytics(analytics);

@@ -1,6 +1,6 @@
 import { getSearchResults } from "../service";
 
-export type ToolName = 'search' // | 'tool2' | tool3
+export type ToolName = "search"; // | 'tool2' | tool3
 
 export async function search(input: string): Promise<string> {
   try {
@@ -9,7 +9,7 @@ export async function search(input: string): Promise<string> {
     if (!results) {
       return "No results found.";
     }
-    const data = await results.text(); 
+    const data = await results.text();
 
     return data;
   } catch (error) {
@@ -17,23 +17,26 @@ export async function search(input: string): Promise<string> {
   }
 }
 
-export const availableFunctions : Record<ToolName, (input: string) => Promise<string | undefined> > = {
-    search
-}
+export const availableFunctions: Record<
+  ToolName,
+  (input: string) => Promise<string | undefined>
+> = {
+  search,
+};
 
 export const tools = [
-    {
-        type: 'function',
-        function: {
-            name: 'search',
-            description: 'search on the internet using meta-search engine tool',
-            parameters: {
-                type: 'object',
-                required: ['input'],
-                properties: {
-                    input: { type: 'string', description: 'The search query' },
-                },
-            },
+  {
+    type: "function",
+    function: {
+      name: "search",
+      description: "search on the internet using meta-search engine tool",
+      parameters: {
+        type: "object",
+        properties: {
+          input: { type: "string", description: "The search query" },
         },
+      },
+      required: ["input"],
     },
-]
+  },
+];

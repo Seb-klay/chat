@@ -177,14 +177,19 @@ describe("User Utility API Integration", () => {
 
   it("adds and then retrieves user analytics", async () => {
     const analytics = {
-      model: { id: 1, model_name: "llama3.2:3b" },
-      created_at: new Date().toISOString(), // Use ISO string for consistency
-      total_duration: 82617974642,
-      load_duration: 69127099622,
-      prompt_eval_count: 44,
-      prompt_eval_duration: 6792859223,
-      eval_count: 20,
-      eval_duration: 6269251027,
+      model: "llama3.2:3b",
+      created: Math.floor(Date.now() / 1000), // Use ISO string for consistency
+      usage: {
+        prompt_tokens: 44, // = prompt_eval_count from ollama
+        completion_tokens: 20, // = eval_count from ollama
+        total_tokens: 19000,
+      },
+      // total_duration: 82617974642,
+      // load_duration: 69127099622,
+      // prompt_eval_count: 44,
+      // prompt_eval_duration: 6792859223,
+      // eval_count: 20,
+      // eval_duration: 6269251027,
     };
 
     const addReq = new NextRequest(`${URL}/api/utils/user-analytics`, {
@@ -195,9 +200,7 @@ describe("User Utility API Integration", () => {
     const addRes = await userAnalytics.POST(addReq);
     expect(addRes.status).toBe(200);
 
-    const getReq = new NextRequest(
-      `${URL}/api/utils/get-user-analytics`,
-    );
+    const getReq = new NextRequest(`${URL}/api/utils/get-user-analytics`);
 
     const getRes = await getAnalytics.GET(getReq);
     const data = await getRes.json();

@@ -30,7 +30,7 @@ const ModelContext = createContext<ModelContextType>(defaultSelectedModel);
 
 export const ModelProvider = ({ children }: { children: React.ReactNode }) => {
   // By default, always first model in the list
-  const [selectedModel, setSelectedModel] = useState<IModelList>(MODELS[1]);
+  const [selectedModel, setSelectedModel] = useState<IModelList>(MODELS[0]);
   const [isLoading, setIsLoading] = useState(true);
   const allModels = Object.values(MODELS);
 

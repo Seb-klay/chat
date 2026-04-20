@@ -68,6 +68,11 @@ CREATE TABLE Users_analytics
   id UUID PRIMARY KEY DEFAULT uuidv7(),
   userID UUID,
   created_at TIMESTAMP DEFAULT NOW(),
+  -- new lines from vLLM
+  prompt_tokens BIGINT,
+  completion_tokens BIGINT,
+  total_tokens BIGINT,
+  -- legacy from ollama
   total_duration BIGINT, 
   load_duration BIGINT,
   prompt_eval_count BIGINT,

@@ -1,6 +1,3 @@
-# check https://stackoverflow.com/questions/74116725/docker-container-production-vs-testing-environment
-# when going from test env to production env !
-
 services:
   db:
     container_name: ${POSTGRES_DB}

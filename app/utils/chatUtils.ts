@@ -17,11 +17,12 @@ export interface IMessage {
   // for api/chat
   role: role;
   content: string;
-  model: IModelList;
-  thinking?: string;
+  model?: IModelList;
+  //thinking?: string; legacy from ollama
+  reasoning?: string;
   tool_calls?: tool[];
   files?: preparedFiles[];
-  images?: string[];
+  //images?: string[]; legagy from ollama
 }
 
 export interface IPayload {
@@ -32,11 +33,21 @@ export interface IPayload {
 
 export interface IAnswer {
   model: string;
-  created_at: string;
-  response?: string; // for api/generate
+  created: string;
+  response?: string; // for api/generate (title)
   message?: IMessage;
+  choices?: {
+      delta: IMessage; // chat response
+    }[];
+  usage?: { // analytics purposes
+    prompt_tokens?: number; // = prompt_eval_count from ollama
+    completion_tokens?: number; // = eval_count from ollama
+    total_tokens?: number;
+  };
   done?: boolean;
   done_reason?: string;
+  error?: string;
+  // legacy from ollama
   context?: number[];
   total_duration?: number; // The total time from when you hit "send" to when the AI finished the final word.
   load_duration?: number; // Time spent loading the model from your disk into your RAM/GPU.
@@ -44,8 +55,8 @@ export interface IAnswer {
   prompt_eval_duration?: number; // How long it took the AI to "read" and understand your prompt before it started writing.
   eval_count?: number; // The AI's response ("Discussing love is my current desire.") was 9 tokens long.
   eval_duration?: number;
-  error?: string;
 }
+// ollama answer (legacy)
 // {"model":"tinyllama","created_at":"2025-10-16T17:56:49.249317848Z","response":"","done":true,"done_reason":"stop","context":[529,29989]
 
 type ErrorCallbacks = {

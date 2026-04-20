@@ -17,6 +17,11 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
           DATE(created_at) AS day,
           defaultModel AS model,
           COUNT(*) AS requests,
+          -- vLLM metrics (new)
+          SUM(prompt_tokens) AS prompt_tokens,
+          SUM(completion_tokens) AS completion_tokens,
+          SUM(total_tokens) AS total_tokens,
+          -- Legacy Ollama metrics (for backward compatibility)
           SUM(total_duration) AS total_duration,
           SUM(load_duration) AS load_duration,
           SUM(prompt_eval_count) AS prompt_eval_count,

@@ -20,30 +20,34 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     const pool = getPool();
     const analytics = (await request.json()) as IAnswer;
     const {
+      created,
+      usage,
       model,
-      created_at,
-      total_duration,
-      load_duration,
-      prompt_eval_count,
-      prompt_eval_duration,
-      eval_count,
-      eval_duration,
+      // total_duration,
+      // load_duration,
+      // prompt_eval_count,
+      // prompt_eval_duration,
+      // eval_count,
+      // eval_duration,
     } = analytics;
     // update user analytics
     const response = await pool.query(
       `INSERT INTO users_analytics 
-      (userid, created_at, total_duration, load_duration, prompt_eval_count, prompt_eval_duration, eval_count, eval_duration, defaultmodel) 
-      values ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      (userid, created_at, prompt_tokens, completion_tokens, total_tokens, defaultmodel) 
+      values ($1, TO_TIMESTAMP($2), $3, $4, $5, $6)`,
       [
         userID,
-        created_at,
-        total_duration,
-        load_duration,
-        prompt_eval_count,
-        prompt_eval_duration,
-        eval_count,
-        eval_duration,
+        created,
+        usage?.prompt_tokens,
+        usage?.completion_tokens,
+        usage?.total_tokens,
         model,
+        // total_duration,
+        // load_duration,
+        // prompt_eval_count,
+        // prompt_eval_duration,
+        // eval_count,
+        // eval_duration,
       ],
     );
     if (!response)
