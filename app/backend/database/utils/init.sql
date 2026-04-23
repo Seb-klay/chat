@@ -25,9 +25,9 @@ CREATE TABLE Messages
 (
   messID UUID PRIMARY KEY DEFAULT uuidv7(),
   roleSender VARCHAR(50),
-  model VARCHAR(50),
+  model VARCHAR(500),
   content TEXT,
-  thinking TEXT,
+  reasoning TEXT,
   convID UUID,
   createdAt TIMESTAMP NOT NULL,
   CONSTRAINT FK_convMess FOREIGN KEY (convID)
