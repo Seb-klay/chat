@@ -8,12 +8,6 @@ export interface IModelList {
 export const MODELS: Record<number, IModelList> = {
   1: {
     id: 1,
-    model_name: "deepseek-r1:7b",
-    simple_name: "Deepseek-r1",
-    nb_params: "7b",
-  },
-  2: {
-    id: 2,
     model_name: "Qwen/Qwen3.5-4B",
     simple_name: "Qwen3.5",
     nb_params: "4b",
