@@ -58,7 +58,6 @@ const handleStream = async (
       total_tokens: 0,
     }
   };
-  let usage: IAnswer["usage"] | undefined;
   const toolCalls: tool[] = [];
   const toolResults: IMessage[] = [];
 
