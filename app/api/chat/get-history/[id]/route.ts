@@ -3,11 +3,14 @@
 import { NextResponse } from "next/server";
 import { getPool } from "@/app/backend/database/utils/databaseUtils";
 import { verifySession } from "@/app/lib/session";
+import { logger, httpRequestDuration } from "@/app/utils/logger";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<NextResponse> {
+  const endTimer = httpRequestDuration.startTimer();
+
   try {
     // get cookie for user id
     const sessionUser = await verifySession();
@@ -22,6 +25,14 @@ export async function GET(
         },
         { status: 404 },
       );
+
+    logger.info(
+      {
+        path: "/api/chat/get-history/[id]",
+      },
+      "History retrieval started",
+    );
+
     // Get list of messages
     const response = await pool.query(
       `SELECT 
@@ -49,14 +60,52 @@ export async function GET(
       ORDER BY m.createdat ASC`,
       [id],
     );
-    if (!response)
+    if (!response) {
+      endTimer({
+        method: "GET",
+        route: "/api/chat/get-history/[id]",
+        status_code: 400,
+      });
+
+      logger.warn(
+        {
+          path: "/api/chat/get-history/[id]",
+        },
+        "Message lookup failed: Conversation not found",
+      );
+
       return NextResponse.json(
         { error: "Messages could not be loaded. " },
         { status: 400 },
       );
+    }
+    
+    // Stop the timer and record the duration
+    endTimer({ method: "GET", route: "/api/chat/get-history/[id]", status_code: 200 });
+
+    logger.info(
+      {
+        path: "/api/chat/get-history/[id]",
+      },
+      "History retrieved successfully.",
+    );
 
     return NextResponse.json(response.rows, { status: 200 });
   } catch (err) {
+    endTimer({
+      method: "GET",
+      route: "/api/chat/get-history/[id]",
+      status_code: 500,
+    });
+
+    logger.error(
+      {
+        err,
+        path: "/api/chat/get-history/[id]",
+      },
+      "Internal server error during history retrieval",
+    );
+
     return NextResponse.json(err, { status: 500 });
   }
 }

@@ -2,11 +2,15 @@ import { getPool } from "@/app/backend/database/utils/databaseUtils";
 import { IAnswer } from "@/app/utils/chatUtils";
 import { NextRequest, NextResponse } from "next/server";
 import { verifySession } from "@/app/lib/session";
+import { logger, httpRequestDuration } from "@/app/utils/logger";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const endTimer = httpRequestDuration.startTimer();
+
   try {
     // get user id in cookie
     const sessionUser = await verifySession();
+    const pool = getPool();
     const userID = sessionUser?.userId;
     if (!userID)
       return NextResponse.json(
@@ -17,7 +21,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         { status: 404 },
       );
 
-    const pool = getPool();
+    logger.info(
+      {
+        userID,
+        path: "/api/utils/user-analytics",
+      },
+      "User analytics update attempt started",
+    );
+
     const analytics = (await request.json()) as IAnswer;
     const {
       created,
@@ -50,11 +61,55 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         // eval_duration,
       ],
     );
-    if (!response)
+    if (!response) {
+      logger.warn(
+        {
+          userID,
+          path: "/api/utils/user-analytics",
+        },
+        "User lookup failed: Email not found",
+      );
+
+      endTimer({
+        method: "POST",
+        route: "/api/utils/user-analytics",
+        status_code: 404,
+      });
+
       return NextResponse.json({ error: "Analytics could not be updated. " });
+    }
+
+    // Stop the timer and record the duration
+    endTimer({
+      method: "POST",
+      route: "/api/utils/user-analytics",
+      status_code: 200,
+    });
+
+    logger.info(
+      {
+        userId: userID,
+        path: "/api/utils/user-analytics",
+      },
+      "User successfully retrieved",
+    );
 
     return NextResponse.json(response, { status: 200 });
   } catch (err) {
+    endTimer({
+      method: "POST",
+      route: "/api/utils/user-analytics",
+      status_code: 500,
+    });
+
+    logger.error(
+      {
+        err,
+        path: "/api/utils/user-analytics",
+      },
+      "Internal server error during user analytics update",
+    );
+    
     return NextResponse.json(err, { status: 500 });
   }
 }

@@ -1,6 +1,6 @@
 # AI Chatbot Platform with Docker and PostgreSQL
 
-A modern web application that allows you to converse with multiple open-weight AI models (LLaMA 3, Gemma 3, Tinyllama, ...) or add them directly from ollama repo while seamlessly switching between them during conversations. Built with containerized AI models, PostgreSQL database, and a responsive web interface in NextJS 15. Self hosted and do not require API keys or subscriptions.
+A modern web application that allows you to converse with multiple open-weight AI models using OLLAMA (CPU) or vLLM (GPU) while seamlessly switching between them during conversations. Built with containerized AI models, PostgreSQL database, and a responsive web interface in NextJS 15. Self hosted and do not require API keys or subscriptions.
 
 ![AI Chatbot Interface](https://img.shields.io/badge/Status-Almost%20Complete-success) ![Docker](https://img.shields.io/badge/Docker-Containers-blue) ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Database-blue)
 
@@ -47,7 +47,7 @@ docker build -t chat-docker .
 docker run -it --rm -p 3000:3000  --name chat-docker --network=chat-network --env-file .env.docker chat-docker
 ```
 
-2. **AI set up**
+2.1 **AI set up using OLLAMA**
 Then, open Docker Desktop, download the image and run the containers :
 
 Download the ollama image :
@@ -59,23 +59,25 @@ Navigate to the folder ai-setup :
 ```bash
 cd app/backend/ai-setup
 ```
-<details open>
-<summary>Run and deploy llama3-2 model (3 billion params)</summary>
+
+Run and deploy llama3-2 model (3 billion params) or any other model available on OLLAMA
 
 ```bash
 docker compose -f compose.llama-3.yaml up
 ```
-</details>
-<details>
-<summary>Run and deploy gemma-3 model (4 billion params)</summary>
+
+2.2 **AI set up using vLLM**
+Then, open Docker Desktop, download the image and run the script :
 
 ```bash
-docker compose -f compose.gemma-3.yaml up
+docker run --runtime nvidia --gpus all \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    --env "HF_TOKEN=$HF_TOKEN" \
+    -p 8000:8000 \
+    --ipc=host \
+    vllm/vllm-openai:latest \
+    --model Qwen/Qwen3-0.6B
 ```
-</details>
-
-> [!NOTE]
-> Other models coming soon !
 
 3. **Start up the database (postgres)**
 Run the Postgres database on docker container :
@@ -93,16 +95,9 @@ cd app/backend/database/prod
 docker-compose --env-file ../../../../.env -f compose.prod.yml up
 ```
 
-4. **Start up the file database (AppWrite)**
-Run the Postgres database on docker container :
+4. **Init the object storage database (Optional)**
+You can connect it to an object storage DB and store your files there.
 
-```bash
-docker run -it --rm \
-    -v /var/run/docker.sock:/var/run/docker.sock \
-    -v "$(pwd)/app/backend/file-database/appwrite":/usr/src/code/appwrite:rw \
-    --env-file ../../../../.env
-    appwrite/appwrite:1.8.1
-```
 
 5. **Start up the interface**
 Finally, run the development server in terminal:
@@ -131,7 +126,7 @@ cross-env NODE_ENV=production next build
 
 ## Project Status
 
-### ✅ Completed Features
+### ✅ Available Features
 **Web Interface**:
 - [x] Create web interface
 
@@ -168,9 +163,7 @@ cross-env NODE_ENV=production next build
 
 **AI Capabilities**:
 - [x] Store files directly in app
-- [ ] Add tools functionalities for AI to use
-- [ ] More AI model integrations
+- [x] Add tools functionalities for AI to use
 
-### 🔧 In Progress / Upcoming
-- [ ] Handle logs using promtail and loki (grafana)
-- [ ] Implement backup solution for data
+**Metrics**:
+- [x] Handle logs using promtail and loki (grafana)

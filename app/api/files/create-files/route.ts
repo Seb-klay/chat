@@ -1,8 +1,11 @@
 import { getPool } from "@/app/backend/database/utils/databaseUtils";
 import { verifySession } from "@/app/lib/session";
 import { NextRequest, NextResponse } from "next/server";
+import { logger, httpRequestDuration } from "@/app/utils/logger";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const endTimer = httpRequestDuration.startTimer();
+
   try {
     const { files, messID } = await request.json();
 
@@ -15,6 +18,13 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       );
 
     const pool = getPool();
+
+    logger.info(
+      {
+        path: "/api/files/create-files",
+      },
+      "File creation attempt started",
+    );
 
     let filesID: string[] = [];
     for (const file of files) {
@@ -68,17 +78,54 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
           userID,
         ],
       );
-      if (!responseMeta)
+      if (!responseMeta){
+        endTimer({
+          method: "POST",
+          route: "/api/files/create-files",
+          status_code: 400,
+        });
+
+        logger.warn(
+          {
+            path: "/api/files/create-files",
+          },
+          "File metadata could not be stored.",
+        );
         return NextResponse.json(
           { error: "File metadata could not be stored. " },
           { status: 400 },
         );
+      }
       const fileID = responseMeta.rows[0].fileid || "";
       filesID.push(fileID);
     }
 
+    // Stop the timer and record the duration
+    endTimer({ method: "POST", route: "/api/files/create-files", status_code: 200 });
+
+    logger.info(
+      {
+        path: "/api/files/create-files",
+      },
+      "File metadata stored successfully.",
+    );
+
     return NextResponse.json({ storedFiles: filesID }, { status: 200 });
   } catch (err: any) {
+    endTimer({
+      method: "POST",
+      route: "/api/files/create-files",
+      status_code: 500,
+    });
+
+    logger.error(
+      {
+        err,
+        path: "/api/files/create-files",
+      },
+      "Internal server error during file creation",
+    );
+
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

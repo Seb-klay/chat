@@ -2,6 +2,7 @@
 
 import { NextResponse } from "next/server";
 import { SearxngService, SearxngServiceConfig } from "searxng";
+import { logger, httpRequestDuration } from "@/app/utils/logger";
 
 const searxConfig: SearxngServiceConfig = {
   baseURL: process.env.SEARXNG_INSTANCE!,
@@ -15,6 +16,8 @@ const searxConfig: SearxngServiceConfig = {
 };
 
 export async function GET(request: Request): Promise<NextResponse> {
+  const endTimer = httpRequestDuration.startTimer();
+
   try {
     const { searchParams } = new URL(request.url);
     const input = searchParams.get("q");
@@ -26,6 +29,13 @@ export async function GET(request: Request): Promise<NextResponse> {
       );
     }
 
+    logger.info(
+      {
+        path: "/api/tools/get-search-results",
+      },
+      "Search attempt started",
+    );
+
     const searxngService = new SearxngService(searxConfig);
     const results = await searxngService.search(input);
     // for test purposes only !
@@ -33,6 +43,20 @@ export async function GET(request: Request): Promise<NextResponse> {
 
     return NextResponse.json(results, { status: 200 });
   } catch (err) {
+    endTimer({
+      method: "GET",
+      route: "/api/tools/get-search-results",
+      status_code: 500,
+    });
+
+    logger.error(
+      {
+        err,
+        path: "/api/tools/get-search-results",
+      },
+      "Internal server error during search",
+    );
+
     return NextResponse.json(
       { error: "Search failed" },
       { status: 500 }
