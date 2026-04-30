@@ -9,7 +9,7 @@ const isProduction = process.env.NODE_ENV === "production";
 const transport = pino.transport<LokiOptions>({
   target: "pino-loki",
   options: {
-    host: process.env.LOKI_HOST || "http://localhost:3100",
+    host: process.env.LOKI_HOST!,
     labels: { application: "node_a-lex" }, // Base label for all logs
     // basicAuth: {
     //   username: "username",
@@ -36,26 +36,26 @@ export const logger = pino(
 // Configuration for pushing to Prometheus
 const register = new client.Registry();
 
-  const gateway = new client.Pushgateway(
-    process.env.PUSHGATEWAY_URL!,
-    {
-      timeout: 5000, //Set the request timeout to 5000ms
-      agent: new http.Agent({
-        keepAlive: true,
-        maxSockets: 5,
-      }),
-    },
-    isProduction ? register : undefined, // Only use the registry in production
-  );
+const gateway = new client.Pushgateway(
+  process.env.PUSHGATEWAY_URL!,
+  {
+    timeout: 5000, //Set the request timeout to 5000ms
+    agent: new http.Agent({
+      keepAlive: true,
+      maxSockets: 5,
+    }),
+  },
+  isProduction ? register : undefined, // Only use the registry in production
+);
 
-  // pushes every 5 seconds to Prometheus Pushgateway
-  setInterval(async () => {
-    try {
-      await gateway.push({ jobName: "node_a-lex" });
-    } catch (err) {
-      // do nothing
-    }
-  }, 5000);
+// pushes every 5 seconds to Prometheus Pushgateway
+setInterval(async () => {
+  try {
+    await gateway.push({ jobName: "node_a-lex" });
+  } catch (err) {
+    // do nothing
+  }
+}, 5000);
 
 // creates histogram for distribution value (like time) with Prometheus
 export const httpRequestDuration = new client.Histogram({
