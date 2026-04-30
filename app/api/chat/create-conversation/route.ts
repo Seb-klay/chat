@@ -3,15 +3,30 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPool } from "@/app/backend/database/utils/databaseUtils";
 import { verifySession } from "@/app/lib/session";
+import { logger, httpRequestDuration } from "@/app/utils/logger";
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
+  const endTimer = httpRequestDuration.startTimer();
+
   try {
     const { title, defaultModel } = await request.json();
     // get cookie for user id
     const sessionUser = await verifySession();
     const userID = sessionUser?.userId;
     const pool = getPool();
-    
+    if (!userID)
+      return NextResponse.json(
+        { error: "No user could be found with these credentials. " },
+        { status: 400 },
+      );
+
+    logger.info(
+      {
+        path: "/api/chat/create-conversation",
+      },
+      "Conversation creation attempt started",
+    );
+
     // Create conversation
     const response = await pool.query(
       `INSERT INTO conversations (title, userid, createdat, updatedat, defaultModel, isDeleted) 
@@ -26,14 +41,52 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         false,
       ],
     );
-    if (!response)
+    if (!response){
+      endTimer({
+        method: "POST",
+        route: "/api/chat/create-conversation",
+        status_code: 400,
+      });
+
+      logger.warn(
+        {
+          path: "/api/chat/create-conversation",
+        },
+        "Conversation creation failed: Conversation could not be stored",
+      );
+
       return NextResponse.json(
         { error: "Could not create a new conversation. " },
         { status: 400 },
       );
+    }
+
+    // Stop the timer and record the duration
+    endTimer({ method: "POST", route: "/api/chat/create-conversation", status_code: 200 });
+
+    logger.info(
+      {
+        path: "/api/chat/create-conversation",
+      },
+      "Conversation created successfully.",
+    );
 
     return NextResponse.json(response.rows, { status: 200 });
   } catch (err) {
+    endTimer({
+      method: "POST",
+      route: "/api/chat/create-conversation",
+      status_code: 500,
+    });
+
+    logger.error(
+      {
+        err,
+        path: "/api/chat/create-conversation",
+      },
+      "Internal server error during conversation creation",
+    );
+
     return NextResponse.json(err, { status: 500 });
   }
 }

@@ -3,9 +3,12 @@ import { getAppwriteClient } from "@/app/backend/file-database/appwriteUtils";
 import { verifySession } from "@/app/lib/session";
 import { NextRequest, NextResponse } from "next/server";
 import { Storage } from "node-appwrite";
+import { logger, httpRequestDuration } from "@/app/utils/logger";
 const BUCKET_ID = process.env.APPWRITE_BUCKET_ID!;
 
 export async function DELETE(request: NextRequest) {
+  const endTimer = httpRequestDuration.startTimer();
+
   try {
     const { files } = await request.json();
     if (!files)
@@ -21,6 +24,13 @@ export async function DELETE(request: NextRequest) {
         { error: "No user could be found with these credentials. " },
         { status: 400 },
       );
+
+    logger.info(
+      {
+        path: "/api/files/delete-files",
+      },
+      "Deletion attempt started",
+    );
 
     const appWrite = await getAppwriteClient();
     const storage = new Storage(appWrite);
@@ -66,18 +76,55 @@ export async function DELETE(request: NextRequest) {
             AND fileID = $3`,
         [new Date(Date.now()), userID, fileID],
       );
-      if (!response)
+      if (!response){
+      endTimer({
+        method: "DELETE",
+        route: "/api/files/delete-files",
+        status_code: 404,
+      });
+
+      logger.warn(
+        {
+          path: "/api/files/delete-files",
+        },
+        "File deletion failed.",
+      );
         return NextResponse.json(
           { error: "Messages could not be loaded. " },
           { status: 400 },
         );
+      }
     }
+
+    // Stop the timer and record the duration
+    endTimer({ method: "DELETE", route: "/api/files/delete-files", status_code: 200 });
+
+    logger.info(
+      {
+        path: "/api/files/delete-files",
+      },
+      "Deletion attempt succeeded",
+    );
 
     return NextResponse.json(
       { message: "Files deleted successfully. " },
       { status: 200 },
     );
   } catch (err: any) {
+    endTimer({
+      method: "DELETE",
+      route: "/api/files/delete-files",
+      status_code: 500,
+    });
+
+    logger.error(
+      {
+        err,
+        path: "/api/files/delete-files",
+      },
+      "Internal server error during file deletion",
+    );
+
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

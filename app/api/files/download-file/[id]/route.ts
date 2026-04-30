@@ -1,5 +1,6 @@
 import { getStorageToken } from "@/app/backend/file-database/storageUtils";
 import { NextRequest, NextResponse } from "next/server";
+import { logger, httpRequestDuration } from "@/app/utils/logger";
 const PUBLIC_URL = process.env.OBJECT_STORAGE_URL!;
 const container = process.env.OBJECT_STORAGE_CONTAINER;
 
@@ -7,6 +8,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ){
+  const endTimer = httpRequestDuration.startTimer();
+
   try {
     const { id } = await params;
     if (!id) return NextResponse.json({ error: "No file could be found. " }, { status: 404 });
@@ -30,6 +33,13 @@ export async function GET(
     //   fileId: id,
     // });
 
+    logger.info(
+      {
+        path: "/api/files/download-file",
+      },
+      "Download file attempt started",
+    );
+
     const responseFile = await fetch(`${PUBLIC_URL}/${container}/${id}`, { // store object with name as id to avoid conflict
       method: "GET",
       headers: {
@@ -38,6 +48,19 @@ export async function GET(
     });
 
     if (!responseFile) {
+      endTimer({
+        method: "POST",
+        route: "/api/files/download-file",
+        status_code: 404,
+      });
+
+      logger.warn(
+        {
+          path: "/api/files/download-file",
+        },
+        "File lookup failed: File not found",
+      );
+
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
@@ -51,6 +74,16 @@ export async function GET(
     const blob = new Blob([file], { type: contentType });
     const bytes = await blob.arrayBuffer();
 
+    // Stop the timer and record the duration
+    endTimer({ method: "POST", route: "/api/files/download-file", status_code: 200 });
+
+    logger.info(
+      {
+        path: "/api/files/download-file",
+      },
+      "File successfully retrieved",
+    );
+
     return new NextResponse(bytes, {
       status: 200,
       headers: {
@@ -59,6 +92,20 @@ export async function GET(
       },
     });
   } catch (err: any) {
+    endTimer({
+      method: "POST",
+      route: "/api/files/download-file",
+      status_code: 500,
+    });
+
+    logger.error(
+      {
+        err,
+        path: "/api/files/download-file",
+      },
+      "Internal server error during file download",
+    );
+
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

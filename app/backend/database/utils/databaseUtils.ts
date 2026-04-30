@@ -1,5 +1,4 @@
 // define functions for database connection, transactions and close.
-
 import { Pool, Client } from 'pg'
 
 type Config = {
