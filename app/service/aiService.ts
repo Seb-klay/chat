@@ -4,7 +4,6 @@ import { addUserAnalytics, storeMessage } from ".";
 import { availableFunctions, ToolName } from "../tools/tools";
 import { IAnswer, IMessage, IPayload, tool } from "../utils/chatUtils";
 import { MODELS } from "../utils/listModels";
-import { logger, httpRequestDuration } from "@/app/utils/logger";
 
 type StreamCallbacks = {
   onData: (content: string, toolcalls?: tool[]) => void;
@@ -20,13 +19,6 @@ export const sendChatMessage = async (
   callbacks: StreamCallbacks,
 ) => {
   try {
-    logger.info(
-      {
-        path: "/aiService/sendChatMessage",
-      },
-      "Chat message generation started.",
-    );
-
     // send user input to AI model
     const responseChat = await fetch(`/api/ai-model/chat-messages`, {
       method: "POST",
@@ -34,37 +26,14 @@ export const sendChatMessage = async (
       body: JSON.stringify(payload),
       signal: abortController.signal,
     });
-    if (!responseChat.ok){
-      logger.warn(
-        {
-          path: "/aiService/sendChatMessage",
-        },
-        "Chat message generation failed: AI model could not generate a message.",
-      );
-
+    if (!responseChat.ok)
       throw new Error(
         `Response ${responseChat.status} occurred while chatting with AI. `,
       );
-    }
-
-    logger.info(
-      {
-        path: "/aiService/sendChatMessage",
-      },
-      "Handle streaming started.",
-    );
 
     // Pass the stream to the handler
     await handleStream(responseChat, payload, abortController, callbacks);
-  } catch (error: any) {
-    logger.error(
-      {
-        path: "/aiService/sendChatMessage",
-        err: error,
-      },
-      "Error occurred while sending chat message",
-    );
-    
+  } catch (error: any) {    
     callbacks.onError(error);
   }
 };
