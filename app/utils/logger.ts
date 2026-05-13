@@ -1,7 +1,7 @@
 import pino from "pino";
 import type { LokiOptions } from "pino-loki";
 import client from "prom-client";
-import http from "http";
+import * as https from 'https';
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -30,7 +30,8 @@ export const logger = pino(
       service: "frontend-api",
     },
   },
-  isProduction ? transport : undefined, // Use Loki transport in production, console in development
+  transport,
+  //isProduction ? transport : undefined, // Use Loki transport in production, console in development
 );
 
 // Configuration for pushing to Prometheus
@@ -40,12 +41,14 @@ const gateway = new client.Pushgateway(
   process.env.PUSHGATEWAY_URL!,
   {
     timeout: 5000, //Set the request timeout to 5000ms
-    agent: new http.Agent({
+    agent: new https.Agent({
       keepAlive: true,
       maxSockets: 5,
+      rejectUnauthorized: false,
     }),
   },
-  isProduction ? register : undefined, // Only use the registry in production
+  register,
+  //isProduction ? register : undefined, // Only use the registry in production
 );
 
 // pushes every 5 seconds to Prometheus Pushgateway
