@@ -1,7 +1,7 @@
 "use server";
 
 import { NextResponse } from "next/server";
-import { SearxngService, SearxngServiceConfig } from "searxng";
+import { SearxngSearchResult, SearxngService, SearxngServiceConfig } from "searxng";
 import { logger, httpRequestDuration } from "@/app/utils/logger";
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
@@ -65,45 +65,35 @@ export async function GET(request: Request): Promise<NextResponse> {
     );
 
     const searxngService = new SearxngService(searxConfig);
-    //const results = await searxngService.search(input);
+    const results = await searxngService.search(input);
     // for test purposes only !
-    const results = {
-      query: "openai",
-      number_of_results: 1230000,
-      results: [
-        {
-          url: "https://openai.com/",
-          title: "OpenAI",
-          content: "OpenAI develops artificial intelligence systems...",
-          engine: "duckduckgo",
-          score: 12.5,
-          publishedDate: "2026-05-10",
-          category: "general",
-        },
-        {
-          url: "https://platform.openai.com/docs",
-          title: "OpenAI API Docs",
-          content: "Learn how to use the OpenAI API...",
-          engine: "bing",
-          score: 10.2,
-        },
-      ],
-      answers: [],
-      suggestions: [],
-      infoboxes: [],
-    };
+    // const results = {
+    //   query: "openai",
+    //   number_of_results: 1230000,
+    //   results: [
+    //     {
+    //       url: "https://openai.com/",
+    //       title: "OpenAI",
+    //       content: "OpenAI develops artificial intelligence systems...",
+    //       engine: "duckduckgo",
+    //       score: 12.5,
+    //       publishedDate: "2026-05-10",
+    //       category: "general",
+    //     },
+    //     {
+    //       url: "https://platform.openai.com/docs",
+    //       title: "OpenAI API Docs",
+    //       content: "Learn how to use the OpenAI API...",
+    //       engine: "bing",
+    //       score: 10.2,
+    //     },
+    //   ],
+    //   answers: [],
+    //   suggestions: [],
+    //   infoboxes: [],
+    // };
 
-    // Enrich results with content extraction using Readability
-    type SearchResult = {
-      url: string;
-      title: string;
-      content?: string;
-      engine: string;
-      score: number;
-      publishedDate?: string;
-      category?: string;
-    };
-    const webArticles: SearchResult[] = [];
+    const webArticles: SearxngSearchResult[] = [];
     for (const res of results.results.slice(0, 10)) {
       if (webArticles.length >= 3) break;
 
