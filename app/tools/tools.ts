@@ -5,13 +5,13 @@ export type ToolName = "search"; // | 'tool2' | tool3
 export async function search(input: string): Promise<string> {
   try {
     const results = await getSearchResults(input);
+    const data = await results?.json();
 
-    if (!results) {
+    if (data.results?.length === 0) {
       return "No results found.";
     }
-    const data = await results.text();
 
-    return data;
+    return data.results;
   } catch (error) {
     return "Search failed. Unable to retrieve results.";
   }

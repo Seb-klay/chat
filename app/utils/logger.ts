@@ -30,8 +30,7 @@ export const logger = pino(
       service: "frontend-api",
     },
   },
-  transport,
-  //isProduction ? transport : undefined, // Use Loki transport in production, console in development
+  isProduction ? transport : undefined, // Use Loki transport in production, console in development
 );
 
 // Configuration for pushing to Prometheus
@@ -47,8 +46,7 @@ const gateway = new client.Pushgateway(
       rejectUnauthorized: false,
     }),
   },
-  register,
-  //isProduction ? register : undefined, // Only use the registry in production
+  isProduction ? register : undefined, // Only use the registry in production
 );
 
 // pushes every 5 seconds to Prometheus Pushgateway
