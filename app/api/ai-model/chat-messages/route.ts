@@ -27,7 +27,22 @@ export async function POST(request: NextRequest) {
 
     if (files && files?.length > 0) {
       const pdfResponse = await extractTextFromFiles(files);
-      
+
+      if (pdfResponse.error) {
+        endTimer({
+          method: "POST",
+          route: "/api/ai-model/chat-messages",
+          status_code: 500,
+        });
+
+        logger.warn(
+          {
+            path: "/api/ai-model/chat-messages",
+          },
+          "Chat message generation failed: " + pdfResponse.error
+        );
+      }
+
       if (pdfResponse) {
         result = pdfResponse;
         result?.text?.map(file => {

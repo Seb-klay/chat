@@ -2,10 +2,12 @@
 
 import { preparedFiles } from "../(main)/conversation/[id]/page";
 import * as PdfParse from 'pdf-parse-new';
+import { AnonymizeNlp } from 'anonymize-nlp';
 
 export interface IExtractResult {
   text: preparedFiles[] | null;
   images: string[] | null;
+  error: string | null ;
 }
 
 export async function extractTextFromFiles(files: preparedFiles[]) {
@@ -14,6 +16,7 @@ export async function extractTextFromFiles(files: preparedFiles[]) {
   const result: IExtractResult = {
     text: null,
     images: null,
+    error: null,
   };
   if (!files)
     return result;
@@ -38,30 +41,40 @@ export async function extractTextFromFiles(files: preparedFiles[]) {
       // Check if it's a PDF file
       if (!file.data)
         return result;
-      const pdfText = await file.data;
+      const fileText = await file.data;
       if (
         file.type === "application/pdf" ||
         file.name.toLowerCase().endsWith(".pdf")
       ) {
         // Convert base64 back to buffer
-        const pdfBuffer = Buffer.from(pdfText, "base64");
+        const pdfBuffer = Buffer.from(fileText, "base64");
 
         const pdfResult = await parser.parse(pdfBuffer);
         if (!pdfResult)
           return result
         const text = pdfResult.text
+
+        // data anonymization
+        const anonymizer = new AnonymizeNlp();
+        const anonymizedText = anonymizer.anonymize(text);
+
         const newFile: preparedFiles = {
           ...file,
-          data: text
+          data: anonymizedText
         }
         textResults.push(newFile);
       }
       //Handle text files
       else if (file.type && file.type.startsWith("text/") || file.name.endsWith(".txt")) {
-        const text = Buffer.from(pdfText, "base64").toString("utf-8");
+        const text = Buffer.from(fileText, "base64").toString("utf-8");
+
+        // data anonymization
+        const anonymizer = new AnonymizeNlp();
+        const anonymizedText = anonymizer.anonymize(text);
+
         textResults.push({
           ...file,
-          data: text,
+          data: anonymizedText,
         });
       }
       // Handle images
@@ -74,12 +87,14 @@ export async function extractTextFromFiles(files: preparedFiles[]) {
       ...result,
       text: textResults,
       images: images.length > 0 ? images : null,
+      error: null,
     };
   } catch (error) {
     return {
       ...result,
       text: null,
       images: null,
+      error: error instanceof Error ? error.message : "Error while parsing files.",
     };
   }
 }
