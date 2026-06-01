@@ -11,8 +11,8 @@ interface ChooseAiModelProps {
 }
 
 export default function ChooseAiModel({ onModelSelect }: ChooseAiModelProps) {
-  const { selectedModel, allModels } = useModel();
-  const [choosenModel, setChoosenModel] = useState<IModelList>(selectedModel);
+  const { defaultModel, allModels } = useModel();
+  const [choosenModel, setChoosenModel] = useState<IModelList>(defaultModel);
   const { theme } = useTheme();
 
   // When user selects a model in the dropdown

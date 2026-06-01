@@ -21,6 +21,7 @@ import { sendChatMessage } from "@/app/service/aiService";
 import { useTheme } from "@/app/components/contexts/theme-provider";
 import { Toaster, toast } from "sonner";
 import { get, del } from "idb-keyval";
+import { useModel } from "@/app/components/contexts/model-provider";
 
 export interface IConversation {
   convid: string;
@@ -48,6 +49,7 @@ export type preparedFiles = {
 export default function ConversationPage() {
   const params = useParams();
   const { theme } = useTheme();
+  const { allModels } = useModel();
   const conversationId = params.id as string; // used to get the id in the URL
   const [messages, setMessages] = useState<IMessage[]>([]); // list of messages history
   const scrollRef = useRef<HTMLDivElement>(null); // used to go at the bottom of the page
@@ -102,6 +104,10 @@ export default function ConversationPage() {
         const newConversation: IConversation[] = await response?.json();
         // show conversation to user
         setLoadingConversation(false);
+
+        if (newConversation[0].defaultmodel == null || newConversation[0].defaultmodel === undefined) {
+          newConversation[0].defaultmodel = allModels[0];
+        }
 
         await sendMessage(
           newConversation[0].title,
@@ -185,14 +191,14 @@ export default function ConversationPage() {
 
       const messageFromUser: IMessage = {
         role: "user",
-        model: selectedModel,
+        model: selectedModel ?? allModels[0],
         content: messageText,
         files: preparedFiles,
         //images: filesImages,
       };
       const assistantPlaceholder: IMessage = {
         role: "assistant",
-        model: selectedModel,
+        model: selectedModel ?? allModels[0],
         content: "",
         tool_calls: []
       };

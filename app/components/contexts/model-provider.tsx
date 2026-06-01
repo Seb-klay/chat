@@ -11,16 +11,16 @@ import { IModelList, MODELS } from "../../utils/listModels";
 import { getUserSettings, updateUserSettings } from "@/app/service";
 
 interface ModelContextType {
-  selectedModel: IModelList;
-  setSelectedModel: (model: IModelList) => void;
+  defaultModel: IModelList;
+  setDefaultModel: (model: IModelList) => void;
   allModels: IModelList[];
   updateModel: (model: IModelList) => void;
   isLoading: boolean;
 }
 
 const defaultSelectedModel: ModelContextType = {
-  selectedModel: MODELS[1],
-  setSelectedModel: () => {},
+  defaultModel: MODELS[1],
+  setDefaultModel: () => {},
   allModels: Object.values(MODELS),
   updateModel: () => {},
   isLoading: true,
@@ -30,12 +30,12 @@ const ModelContext = createContext<ModelContextType>(defaultSelectedModel);
 
 export const ModelProvider = ({ children }: { children: React.ReactNode }) => {
   // By default, always first model in the list
-  const [selectedModel, setSelectedModel] = useState<IModelList>(MODELS[0]);
+  const [defaultModel, setDefaultModel] = useState<IModelList>(MODELS[0]);
   const [isLoading, setIsLoading] = useState(true);
   const allModels = Object.values(MODELS);
 
   const updateModel = async (newModel: IModelList) => {
-    setSelectedModel(newModel); // Update UI immediately (Optimistic)
+    setDefaultModel(newModel); // Update UI immediately (Optimistic)
 
     // Update DB in the background
     await updateUserSettings(null, newModel);
@@ -52,10 +52,10 @@ export const ModelProvider = ({ children }: { children: React.ReactNode }) => {
         const modelOfUser = MODELS[model.id];
 
         if (modelOfUser) {
-          setSelectedModel(modelOfUser);
+          setDefaultModel(modelOfUser);
         }
       } catch (error) {
-        setSelectedModel(MODELS[1]);
+        setDefaultModel(MODELS[1]);
         // throw new Error("Failed to fetch settings: " + error);
       } finally {
         setIsLoading(false);
@@ -68,8 +68,8 @@ export const ModelProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <ModelContext.Provider
       value={{
-        selectedModel,
-        setSelectedModel,
+        defaultModel,
+        setDefaultModel,
         allModels,
         updateModel,
         isLoading,

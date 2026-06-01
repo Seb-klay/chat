@@ -43,7 +43,13 @@ export default function ConversationsUser({
         >
           <div className="flex justify-between items-start">
             <div className="flex-1 min-w-0 pr-8">
-              <h3 style={{color: theme.colors.primary}} className="font-medium truncate">{title}</h3>
+              <h3
+                title={title}
+                style={{ color: theme.colors.primary }}
+                className="font-medium truncate"
+              >
+                {title}
+              </h3>
             </div>
           </div>
         </Link>

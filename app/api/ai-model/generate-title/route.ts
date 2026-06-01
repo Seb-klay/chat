@@ -8,7 +8,6 @@ export async function POST(request: NextRequest) {
 
   try {
     const { titleToSummarize, model } = await request.json();
-    const aiModel = JSON.parse(model);
     // get AI URL from list
     const AI_MODEL_URL: string | undefined = process.env.LLM_URL;
     // send prompt to AI
@@ -26,9 +25,12 @@ export async function POST(request: NextRequest) {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: aiModel.model_name, // taking a lightweight model for title summarisation
+        model: model.model_name,
         prompt: titleToSummarize,
         stream: false,
+        temperature: 0.8,
+        max_tokens: 10,
+        reasoning_effort: "none"
       }),
     });
     if (!response.ok){
@@ -51,6 +53,7 @@ export async function POST(request: NextRequest) {
       );
     }
     const data = await response.json();
+    const generatedTitle = data.choices[0].text.replace(/<think>[\s\S]*?<\/think>/g, "").trim();
 
     // Stop the timer and record the duration
     endTimer({ method: "POST", route: "/api/ai-model/generate-title", status_code: 200 });
@@ -62,7 +65,7 @@ export async function POST(request: NextRequest) {
       "Title generated successfully.",
     );
 
-    return NextResponse.json(data.response, { status: 200 });
+    return NextResponse.json(generatedTitle, { status: 200 });
   } catch (err) {
     endTimer({
       method: "POST",
