@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     const AI_MODEL_URL: string | undefined = process.env.LLM_URL;
     // send prompt to AI
     //const OLLAMA_URL = '/api/generate' // if used with OLLAMA for test
-    const vllm_URL = '/v1/responses' // if used with vLLM for prod
+    const vllm_URL = '/v1/completions' // if used with vLLM for prod
 
     logger.info(
       {

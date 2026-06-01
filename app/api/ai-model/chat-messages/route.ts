@@ -82,9 +82,9 @@ export async function POST(request: NextRequest) {
         stream_options: {
           include_usage: true
         },
-        // tool_choice: "auto" // "none" or "auto" or "required"
-        // tools: tools,
-        // verbosity: "medium" // "low" or "medium" or "high"
+        tool_choice: "auto", // "none" or "auto" or "required"
+        tools: tools,
+        verbosity: "medium" // "low" or "medium" or "high"
       }),
     });
     if (!response.ok) {
