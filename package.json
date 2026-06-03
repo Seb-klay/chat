@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "unit-test": "vitest unit",
-    "integration-test": "vitest integration"
+    "integration-test": "vitest integration",
+    "tool-test": "vitest tools"
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.73",

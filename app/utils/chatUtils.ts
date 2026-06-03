@@ -6,6 +6,7 @@ import { IModelList } from "./listModels";
 type role = "user" | "assistant" | "system" | "tool";
 
 export type tool = {
+  id: string;
   function: {
     name: ToolName;
     description: string;

@@ -33,7 +33,7 @@ export const sendChatMessage = async (
 
     // Pass the stream to the handler
     await handleStream(responseChat, payload, abortController, callbacks);
-  } catch (error: any) {    
+  } catch (error: any) {
     callbacks.onError(error);
   }
 };
@@ -57,10 +57,11 @@ const handleStream = async (
       prompt_tokens: 0,
       completion_tokens: 0,
       total_tokens: 0,
-    }
+    },
   };
   const toolCalls: tool[] = [];
   const toolResults: IMessage[] = [];
+  let toolArgs = "";
 
   try {
     const reader = response.body?.getReader();
@@ -117,39 +118,67 @@ const handleStream = async (
 
         // legacy from ollama : data.message?.tool_calls
         if (delta?.tool_calls && delta?.tool_calls?.length > 0) {
-          callbacks.onData("", delta?.tool_calls)
-          toolCalls.push(...delta?.tool_calls);
+          const toolCallsID = delta.tool_calls.map((call: tool) => call.id);
+
+          if (toolCallsID[0]) {
+            toolArgs = ""; // reset toolArgs for each new tool call with id
+
+            delta.tool_calls.map((call: tool) => {
+              toolCalls.push({
+                id: call.id,
+                function: {
+                  name: call.function?.name,
+                  description: call.function?.description,
+                  arguments: call.function?.arguments ?? "",
+                },
+              });
+            });
+          } else {
+            delta.tool_calls.map((call: tool) => {
+              toolArgs += call.function.arguments;
+            });
+
+            if (toolArgs.includes("}")) {
+              toolCalls[toolCalls.length - 1].function.arguments = JSON.parse(toolArgs);
+            }
+          }
+          callbacks.onData("", delta?.tool_calls);
         }
       }
-
-      // call all tools required from the model and store it in message list
-      // const ai_tool_calls = data.choices?.[0]?.delta?.tool_calls
-      if (toolCalls && toolCalls?.length > 0)
-        await Promise.all(
-          toolCalls.map(async (call) => {
-            const args = call.function.arguments as { input: string };
-            const result = await availableFunctions[
-              call.function.name as ToolName
-            ](args.input);
-
-            const toolMessage: IMessage = {
-              role: "tool",
-              content: result || "Error",
-              model: payload.messages.at(-1)?.model || MODELS[1],
-              tool_calls: [call],
-            };
-
-            toolResults.push(toolMessage)
-
-            // store tool message in client message list
-            callbacks.onToolCalls(toolMessage);
-          }),
-        );
     }
+
+    // call all tools required from the model and store it in message list
+    // const ai_tool_calls = data.choices?.[0]?.delta?.tool_calls
+    if (toolCalls && toolCalls.length > 0)
+      await Promise.all(
+        toolCalls.map(async (call) => {
+          const args = call.function.arguments as { input: string };
+          const result = await availableFunctions[
+            call.function.name as ToolName
+          ](args.input);
+
+          const toolMessage: IMessage = {
+            role: "tool",
+            content: result?.results ? JSON.stringify(result.results) : result?.error || "An error occurred while executing the tool.",
+            model: payload.messages.at(-1)?.model || MODELS[0],
+            tool_calls: [call],
+          };
+
+          toolResults.push(toolMessage);
+
+          // store tool message in client message list
+          callbacks.onToolCalls(toolMessage);
+        }),
+      );
   } catch (error: any) {
     if (error.name === "AbortError") {
       // store message when abortController.signal.aborted
-      await storeMessageAndAnalytics(data, payload, aiResponse, callbacks.onError);
+      await storeMessageAndAnalytics(
+        data,
+        payload,
+        aiResponse,
+        callbacks.onError,
+      );
       callbacks.onCompleted();
       return;
     } else {
@@ -162,12 +191,14 @@ const handleStream = async (
   if (toolCalls.length > 0) {
     const modelPayload: IPayload = {
       ...payload,
-      messages: [...payload.messages, ...toolResults]
-    }
+      messages: [...payload.messages, ...toolResults],
+    };
 
-    await sendChatMessage(modelPayload, abortController, callbacks).catch((error: any) => {
-      callbacks.onError(String(error));
-    });
+    await sendChatMessage(modelPayload, abortController, callbacks).catch(
+      (error: any) => {
+        callbacks.onError(String(error));
+      },
+    );
 
     callbacks.onCompleted();
     return;
@@ -206,9 +237,7 @@ const storeMessageAndAnalytics = async (
       .findIndex((msg) => msg.role === "user");
     // convert reverse index → normal index
     const startIndex =
-      lastUserIndex === -1
-        ? 0
-        : allMessages.length - 1 - lastUserIndex;
+      lastUserIndex === -1 ? 0 : allMessages.length - 1 - lastUserIndex;
     // slice the conversation block
     const latestConversation = allMessages.slice(startIndex);
 
@@ -223,7 +252,7 @@ const storeMessageAndAnalytics = async (
 
       if (!storingResponse?.ok) {
         throw new Error(
-          `Response with status ${storingResponse?.status} while storing a message.`
+          `Response with status ${storingResponse?.status} while storing a message.`,
         );
       }
     }

@@ -1,7 +1,11 @@
 "use server";
 
 import { NextResponse } from "next/server";
-import { SearxngSearchResult, SearxngService, SearxngServiceConfig } from "searxng";
+import {
+  SearxngSearchResult,
+  SearxngService,
+  SearxngServiceConfig,
+} from "searxng";
 import { logger, httpRequestDuration } from "@/app/utils/logger";
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
@@ -20,27 +24,29 @@ const searxConfig: SearxngServiceConfig = {
 
 // Utility function to clean and normalize text content
 function cleanText(text: string): string {
-  return text
-    // Remove weird unicode
-    .replace(/[\u00A0\u200B-\u200D\uFEFF]/g, "")
+  return (
+    text
+      // Remove weird unicode
+      .replace(/[\u00A0\u200B-\u200D\uFEFF]/g, "")
 
-    // Remove isolated numbers
-    .replace(/^\d+$/gm, "")
+      // Remove isolated numbers
+      .replace(/^\d+$/gm, "")
 
-    // Remove URLs
-    .replace(/https?:\/\/\S+/g, "")
+      // Remove URLs
+      .replace(/https?:\/\/\S+/g, "")
 
-    // Collapse whitespace
-    .replace(/[ \t]+/g, " ")
+      // Collapse whitespace
+      .replace(/[ \t]+/g, " ")
 
-    // Collapse newlines
-    .replace(/\n{3,}/g, "\n\n")
+      // Collapse newlines
+      .replace(/\n{3,}/g, "\n\n")
 
-    // Remove repeated punctuation
-    .replace(/([!?.,]){2,}/g, "$1")
+      // Remove repeated punctuation
+      .replace(/([!?.,]){2,}/g, "$1")
 
-    // Trim
-    .trim();
+      // Trim
+      .trim()
+  );
 }
 
 export async function GET(request: Request): Promise<NextResponse> {
@@ -112,7 +118,7 @@ export async function GET(request: Request): Promise<NextResponse> {
               "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
             Accept:
               "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.5",
+              "Accept-Language": "en-US,en;q=0.5",
           },
         });
         const html = await response.text();
@@ -133,15 +139,14 @@ export async function GET(request: Request): Promise<NextResponse> {
             pw_html = await page.content();
 
             if (!pw_html) continue;
-
           } catch (err) {
             logger.warn(
-          {
-            err,
-            url: res.url,
-          },
-          "Failed to fetch or parse content for URL using Playwright.",
-        );
+              {
+                err,
+                url: res.url,
+              },
+              "Failed to fetch or parse content for URL using Playwright.",
+            );
           } finally {
             await browser.close();
           }
@@ -156,7 +161,6 @@ export async function GET(request: Request): Promise<NextResponse> {
 
         res.content = cleanText(article.textContent.substring(0, 1500));
         webArticles.push(res);
-
       } catch (err) {
         logger.warn(
           {
@@ -174,10 +178,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       status_code: 200,
     });
 
-    return NextResponse.json(
-      { results: webArticles },
-      { status: 200 },
-    );
+    return NextResponse.json({ results: webArticles }, { status: 200 });
   } catch (err) {
     endTimer({
       method: "GET",
