@@ -105,7 +105,10 @@ export default function ConversationPage() {
         // show conversation to user
         setLoadingConversation(false);
 
-        if (newConversation[0].defaultmodel == null || newConversation[0].defaultmodel === undefined) {
+        if (
+          newConversation[0].defaultmodel == null ||
+          newConversation[0].defaultmodel === undefined
+        ) {
           newConversation[0].defaultmodel = allModels[0];
         }
 
@@ -155,9 +158,7 @@ export default function ConversationPage() {
   };
 
   const handleError = (error: string) => {
-    toast.error(
-      `Error occurred while handling files. ${error}`,
-    );
+    toast.error(`Error occurred while handling files. ${error}`);
   };
 
   const sendMessage = async (
@@ -200,7 +201,7 @@ export default function ConversationPage() {
         role: "assistant",
         model: selectedModel ?? allModels[0],
         content: "",
-        tool_calls: []
+        tool_calls: [],
       };
       // store USER message in history
       setMessages((prev) => [...prev, messageFromUser, assistantPlaceholder]);
@@ -222,10 +223,31 @@ export default function ConversationPage() {
         // pass the controller when message is aborting
         controller,
         {
+          // when receiving data from the stream, update the message in real time
           onData: (chunk: string, toolcalls?: tool[]) => {
             setMessages((prev) => {
+              if (prev.length === 0) return prev;
+
               const last = prev[prev.length - 1];
-              const updated = { ...last, content: last.content + chunk, tool_calls: toolcalls };
+
+              // if the last message is a tool, create a new assistant message.
+              if (last.role === "tool") {
+                return [
+                  ...prev,
+                  {
+                    role: "assistant",
+                    content: chunk, // start it off with this chunk
+                    tool_calls: toolcalls,
+                  },
+                ];
+              }
+
+              // Otherwise, append normally to the existing assistant message
+              const updated = {
+                ...last,
+                content: (last.content || "") + chunk,
+                tool_calls: toolcalls || last.tool_calls,
+              };
               return [...prev.slice(0, -1), updated];
             });
           },

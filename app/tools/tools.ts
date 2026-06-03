@@ -3,24 +3,26 @@ import { getSearchResults } from "../service";
 
 export type ToolName = "search"; // | 'tool2' | tool3
 
-export async function search(input: string): Promise<{ results?: string | SearxngSearchResult; error?: string; }> {
+export async function search(input: string): Promise<{ results: SearxngSearchResult[]; error?: string }> {
   try {
     const results = await getSearchResults(input);
     const data = await results?.json();
 
     if (data.results?.length === 0) {
-      return { results: "No results found."};
+      return { results: [], error: "No results found for the given query." };
     }
-
-    return data.results;
+    
+    const res: SearxngSearchResult[] = data.results ?? [];
+    
+    return { results: res };
   } catch (error) {
-    return { error: "An error occurred while fetching search results." };
+    return { results: [], error: "An error occurred while fetching search results." };
   }
 }
 
 export const availableFunctions: Record<
   ToolName,
-  (input: string) => Promise<{ results?: string | SearxngSearchResult; error?: string; } | undefined>
+  (input: string) => Promise<{ results: SearxngSearchResult[]; error?: string; } | undefined>
 > = {
   search,
 };

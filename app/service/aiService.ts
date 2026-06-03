@@ -105,8 +105,8 @@ const handleStream = async (
         if (delta?.reasoning) {
           const reasoning = delta.reasoning;
 
-          aiResponse += reasoning;
-          callbacks.onData(reasoning);
+          //aiResponse += reasoning;
+          //callbacks.onData(reasoning);
         }
 
         if (delta?.content) {
@@ -159,7 +159,7 @@ const handleStream = async (
 
           const toolMessage: IMessage = {
             role: "tool",
-            content: result?.results ? JSON.stringify(result.results) : result?.error || "An error occurred while executing the tool.",
+            content: result?.error ?? JSON.stringify(result?.results),
             model: payload.messages.at(-1)?.model || MODELS[0],
             tool_calls: [call],
           };
