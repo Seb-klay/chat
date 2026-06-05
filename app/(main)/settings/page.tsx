@@ -17,11 +17,11 @@ export default function Settings() {
   const [toastMessage, setToastMessage] = useState<string>("");
   const { theme, mode, toggleTheme } = useTheme();
   const isDarkMode = mode === 'dark';
-  const { selectedModel, allModels, updateModel } = useModel();
+  const { defaultModel, allModels, updateModel } = useModel();
 
   // Handle model selection
   const handleModelSelect = (modelId: number) => {
-    if (modelId !== selectedModel.id) {
+    if (modelId !== defaultModel.id) {
       const newModel = allModels.find(m => m.id === modelId);
     
       if (newModel) {
@@ -87,7 +87,7 @@ export default function Settings() {
               {/* Model List */}
               <div className="space-y-4">
                 {allModels.map((model) => {
-                  const isSelected = model.id === selectedModel?.id;
+                  const isSelected = model.id === defaultModel.id;
                   return (
                     <div
                       key={model.id}
@@ -141,11 +141,11 @@ export default function Settings() {
               </h2>
               <div className="py-2">
                 <p className="font-medium">
-                  {selectedModel?.simple_name}
+                  {defaultModel?.simple_name}
                 </p>
                 <p style={{color: theme.colors.secondary}} className="text-sm mt-1">
                   Parameters:{" "}
-                  {selectedModel?.nb_params || " - "}
+                  {defaultModel?.nb_params || " - "}
                 </p>
               </div>
               <div className="mt-2 pt-4 border-t border-gray-700/50">

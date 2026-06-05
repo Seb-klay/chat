@@ -52,7 +52,7 @@ export default function AiTools({ onFile, onError }: AiToolsProps) {
           backgroundColor: theme.colors.background_second,
           color: theme.colors.primary,
         }}
-        className="inline-flex items-center rounded-lg px-3 py-2 text-sm font-semibold shadow-lg ring-1 ring-white/10 hover:bg-white/20 transition-all duration-200"
+        className="inline-flex items-center rounded-lg px-3 py-2 text-sm inset-ring-1 inset-ring-white/5 hover:bg-white/20 transition-all duration-200"
       >
         <PlusIcon className="w-5 h-5 transition-transform duration-300" />
       </MenuButton>

@@ -17,10 +17,10 @@ const mockUpdateModel = vi.fn();
 
     // Mock useModel return value
     vi.spyOn(modelHooks, "useModel").mockReturnValue({
-      selectedModel: mockModels[0],
+      defaultModel: mockModels[0],
       allModels: mockModels,
       updateModel: mockUpdateModel,
-      setSelectedModel: vi.fn(),
+      setDefaultModel: vi.fn(),
       isLoading: false,
     });
 
@@ -89,11 +89,13 @@ const mockUpdateModel = vi.fn();
     // Update mock for this specific test
     vi.spyOn(themeHooks, "useTheme").mockReturnValue({
         theme: { colors:           
-          {background: "#000",
-          primary: "#fff",
-          secondary: "#ccc",
-          background_second: "#111",
-          tertiary_background: "#222"} },
+          {
+            background: "#000",
+            primary: "#fff",
+            secondary: "#ccc",
+            background_second: "#111",
+            tertiary_background: "#222"} 
+        },
         mode: "dark", 
         toggleTheme: mockToggleTheme,
     });

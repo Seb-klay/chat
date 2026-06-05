@@ -2,7 +2,6 @@ import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import { IModelList } from "../../utils/listModels";
 import { useState } from "react";
-import { CpuChipIcon } from "@heroicons/react/24/outline";
 import { useModel } from "../contexts/model-provider";
 import { useTheme } from "../contexts/theme-provider";
 
@@ -29,8 +28,8 @@ export default function ChooseAiModel({ onModelSelect }: ChooseAiModelProps) {
     <Menu as="div" className="relative inline-block">
       <MenuButton 
       style={{ backgroundColor: theme.colors.background_second, color: theme.colors.primary}} 
-      className="inline-flex w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm font-semibold inset-ring-1 inset-ring-white/5 hover:bg-white/20">
-        <CpuChipIcon className="w-5 h-5" />
+      className="inline-flex w-full justify-center gap-x-1.5 rounded-md px-3 py-2 text-sm inset-ring-1 inset-ring-white/5 hover:bg-white/20">
+        {choosenModel.simple_name}
         <ChevronDownIcon
           aria-hidden="true"
           className="-mr-1 size-5"

@@ -12,7 +12,12 @@ type ChatInputProps = {
   onThought: boolean;
   onChatbotWriting: boolean;
   onAbort?: () => void;
-  onSend: (message: string, model: IModelList, files: File[], folderName?: string) => void;
+  onSend: (
+    message: string,
+    model: IModelList,
+    files: File[],
+    folderName?: string,
+  ) => void;
   onError: (error: string) => void;
 };
 
@@ -26,8 +31,8 @@ export default function ChatInput({
   const [input, setInput] = useState("");
   const [nameFolder, setNameFolder] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { selectedModel } = useModel();
-  const [model, setModel] = useState<IModelList>(selectedModel);
+  const { defaultModel } = useModel();
+  const [model, setModel] = useState<IModelList>(defaultModel);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const { theme } = useTheme();
 
@@ -75,7 +80,7 @@ export default function ChatInput({
 
   const handleError = (error: string) => {
     onError(error);
-  }
+  };
 
   return (
     <div className="w-full mx-auto bottom-0">
@@ -83,18 +88,13 @@ export default function ChatInput({
       <div className="relative">
         <div
           className={`
-          absolute -bottom-2 left-0 right-0 
           rounded-t-xl 
           transition-all duration-300 ease-in-out
           overflow-x-auto overflow-y-hidden
           ${selectedFiles.length > 0 ? "h-16 opacity-100" : "h-0 opacity-0"}
         `}
           style={{
-            transform:
-              selectedFiles.length > 0 ? "translateY(0)" : "translateY(100%)",
-            visibility: selectedFiles.length > 0 ? "visible" : "hidden",
             backgroundColor: theme.colors.background_second,
-            paddingBottom: "1rem",
           }}
         >
           {/* Files list */}
@@ -115,9 +115,7 @@ export default function ChatInput({
                 >
                   {/* File icon/logo */}
                   <div className="text-2xl mb-1">
-                    <FileIcon 
-                      fileType={file.type} 
-                    />
+                    <FileIcon fileType={file.type} />
                   </div>
 
                   {/* File name */}
@@ -156,10 +154,7 @@ export default function ChatInput({
       </div>
       {/* Main Input Container */}
       <div className="relative">
-        <div className="absolute left-2 bottom-2.5 flex items-center gap-2 mb-2 ml-2">
-          <AiTools onFile={handleFileSelect} onError={handleError} />
-        </div>
-
+        {/* Textarea - First row */}
         <textarea
           ref={textareaRef}
           value={input}
@@ -171,21 +166,29 @@ export default function ChatInput({
             color: theme.colors.primary,
             height: "auto",
           }}
-          className="w-full py-4 pr-36 pl-18 border-gray-700 rounded-xl focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden overflow-y-scroll resize-none min-h-7.5 md:min-h-15"
-          rows={1}
+          className={`
+            w-full py-4 px-4 border-gray-700 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition-all duration-200 placeholder-gray-500 overflow-hidden overflow-y-scroll resize-none min-h-10 md:min-h-12
+            ${selectedFiles.length > 0 ? "rounded-b-xl" : "rounded-xl"}
+          `}
+          rows={2}
           disabled={onChatbotWriting}
         />
 
-        {/* Button Container */}
-        <div className="absolute right-2 bottom-2.5 flex items-center gap-2 mb-2 mr-2">
-          <ChooseAiModel
-            onModelSelect={(model) => {
-              setModel(model);
-            }}
-          ></ChooseAiModel>
-
-          {/* Send/Abort Button */}
+        {/* Buttons Container - Second row */}
+        <div className="flex items-center justify-between mt-2">
+          {/* Left side buttons */}
           <div className="flex items-center gap-2">
+            <AiTools onFile={handleFileSelect} onError={handleError} />
+            <ChooseAiModel
+              onModelSelect={(model) => {
+                setModel(model);
+              }}
+            />
+          </div>
+
+          {/* Right side buttons */}
+          <div className="flex items-center">
+            {/* Send/Abort Button */}
             {onChatbotWriting ? (
               <AbortButton onClick={onAbort || (() => {})} />
             ) : (
@@ -197,14 +200,13 @@ export default function ChatInput({
           </div>
         </div>
       </div>
-      {/* Character Counter */}
-      <span
-        className={`text-xs px-2 ${
-          input.length > 2000 ? "text-red-400" : "text-gray-500"
-        }`}
-      >
-        {input.length}
-      </span>
+
+      {/* Disclaimer */}
+      <div className="flex justify-center mb-2">
+        <span className="text-xs flex items-center gap-1">
+          <span>AI-generated content may be inaccurate</span>
+        </span>
+      </div>
     </div>
   );
 }

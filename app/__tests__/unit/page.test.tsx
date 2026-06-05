@@ -25,7 +25,7 @@ vi.mock("../../service/aiService", () => ({
 }));
 
 // Mock the indexed DB for files
-vi.mock('idb-keyval', () => ({
+vi.mock("idb-keyval", () => ({
   get: vi.fn(() => Promise.resolve([])), // Mock empty files
   del: vi.fn(() => Promise.resolve()),
 }));
@@ -204,8 +204,9 @@ describe("Sending message", () => {
               content: "Test Message",
               role: "user",
               model: expect.objectContaining({
-                model_name: "llama3.2:3b",
+                id: 1,
               }),
+              files: [],
             }),
           ]),
         }),
@@ -214,9 +215,12 @@ describe("Sending message", () => {
         // callbacks
         expect.objectContaining({
           onData: expect.any(Function),
-          onError: expect.any(Function),
-          onWrite: expect.any(Function),
+          onNewMessage: expect.any(Function),
+          onToolCalls: expect.any(Function),
+          onReasoning: expect.any(Function),
+          onAiWriting: expect.any(Function),
           onCompleted: expect.any(Function),
+          onError: expect.any(Function),
         }),
       );
     });

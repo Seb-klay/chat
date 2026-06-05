@@ -73,8 +73,6 @@ export const summaryConversationAndUpdate = async (
     const titleToSummarize =
       `Generate a short title (max 8 words).
         Output ONLY the title.
-        Do not explain your reasoning.
-        Do not include <think> tags.
         Text: ${newConversation.title}
       `;
 

@@ -56,6 +56,9 @@ export default function ConversationPage() {
   const [loadingConversation, setLoadingConversation] = useState(false); // when conv is loading, activate skeleton page
   const [onAiWriting, setOnAiWriting] = useState(false); // when AI is writing
   const [onAiThought, setOnAiThought] = useState(false); // when AI "thinks" or waiting for the AI stream, it triggers the 3 waiting dots
+  const [onAiReasoning, setOnAiReasoning] = useState(false); // when AI is reasoning, it triggers the reasoning state in the UI
+  const [onToolCall, setOnToolCall] = useState(false); // when AI calls a tool, it triggers the tool call state in the UI
+  const [toolName, setToolName] = useState<string>(""); // name of the tool being called, used to display in the UI
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -161,6 +164,10 @@ export default function ConversationPage() {
     toast.error(`Error occurred while handling files. ${error}`);
   };
 
+  const handleInfo = (info: string) => {
+    toast.info(info);
+  };
+
   const sendMessage = async (
     userInput: string,
     selectedModel: IModelList,
@@ -225,6 +232,11 @@ export default function ConversationPage() {
         {
           // when receiving data from the stream, update the message in real time
           onData: (chunk: string, toolcalls?: tool[]) => {
+            // if (onAiThought) {
+            //   setOnAiThought(false);
+            //   setOnAiWriting(true);
+            // }
+
             setMessages((prev) => {
               if (prev.length === 0) return prev;
 
@@ -252,11 +264,29 @@ export default function ConversationPage() {
             });
           },
 
-          onToolCalls: (toolMessage: IMessage) => {
-            setMessages((prev) => [...prev, toolMessage]);
+          onNewMessage: (newMessage: IMessage) => {
+            setMessages((prev) => [...prev, newMessage]);
           },
 
-          onWrite: () => {
+          onToolCalls: (isCalling: boolean, toolName?: string) => {
+            // if (onAiThought) {
+            //   setOnAiThought(false);
+            //   setOnAiWriting(true);
+            // }
+
+            setOnToolCall(isCalling);
+            setToolName(toolName || "");
+          },
+
+          onReasoning: (isReasoning: boolean) => {
+            // if (onAiThought) {
+            //   setOnAiThought(false);
+            //   setOnAiWriting(true);
+            // }
+            setOnAiReasoning(isReasoning);
+          },
+
+          onAiWriting: () => {
             setOnAiThought(false);
             setOnAiWriting(true);
           },
@@ -270,6 +300,7 @@ export default function ConversationPage() {
           onError: (err) => {
             setOnAiThought(false);
             setOnAiWriting(false);
+            setOnAiReasoning(false);
             toast.warning(String(err));
           },
         },
@@ -289,19 +320,21 @@ export default function ConversationPage() {
     >
       {/* Notifications */}
       <Toaster richColors position="top-center" />
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto">
-        <div className="space-y-2 bg-transparent rounded-lg w-full md:w-1/2 mx-auto">
+        <div className="space-y-2 bg-transparent rounded-lg w-full max-w-3xl mx-auto">
           {loadingConversation ? (
             <>
               <DialogsSkeleton />
             </>
           ) : (
             <>
-              <Dialog messages={messages} />
+              <Dialog messages={messages} onInfo={handleInfo} />
             </>
           )}
 
+          {/* AI Thinking Indicator */}
           {onAiThought && (
             <div className="flex space-x-2 mb-6">
               <div
@@ -319,13 +352,33 @@ export default function ConversationPage() {
             </div>
           )}
 
+          {/* Tool Call Indicator */}
+          {onToolCall && (
+            <div className="flex items-center gap-2 mb-6">
+              <span className="text-lg animate-pulse text-gray-500 dark:text-gray-400">
+                {toolName === "search"
+                  ? "Searching the internet..."
+                  : `Using ${toolName}...`}
+              </span>
+            </div>
+          )}
+
+          {/* Reasoning Indicator */}
+          {onAiReasoning && (
+            <div className="flex items-center gap-2 mb-6">
+              <span className="text-lg animate-pulse text-gray-500 dark:text-gray-400">
+                Reasoning...
+              </span>
+            </div>
+          )}
+
           {/* Anchor */}
           <div ref={scrollRef} className="h-1" />
         </div>
       </div>
 
       {/* Chat Input */}
-      <div className="w-full md:w-1/2 mx-auto sticky bottom-0">
+      <div className="w-full max-w-3xl mx-auto sticky bottom-0">
         <div className="rounded-lg">
           <ChatInput
             onThought={onAiThought}

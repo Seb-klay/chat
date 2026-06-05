@@ -1,5 +1,6 @@
 "use client";
 
+import { on } from "node:cluster";
 import { addUserAnalytics, storeMessage } from ".";
 import { availableFunctions, ToolName } from "../tools/tools";
 import { IAnswer, IMessage, IPayload, tool } from "../utils/chatUtils";
@@ -7,8 +8,10 @@ import { MODELS } from "../utils/listModels";
 
 type StreamCallbacks = {
   onData: (content: string, toolcalls?: tool[]) => void;
-  onToolCalls: (toolMessage: IMessage) => void;
-  onWrite: () => void;
+  onNewMessage: (newMessage: IMessage) => void;
+  onToolCalls: (isCalling: boolean, toolName?: string) => void;
+  onReasoning: (isReasoning: boolean) => void;
+  onAiWriting: () => void;
   onCompleted: () => void;
   onError: (error: any) => void;
 };
@@ -44,11 +47,8 @@ const handleStream = async (
   abortController: AbortController,
   callbacks: StreamCallbacks,
 ) => {
-  // AI stops thinking and starts writing message
-  callbacks.onWrite();
-
   // defining variables
-  let buffer = "";
+  let buffer: string = "";
   let aiResponse = "";
   let data: IAnswer = {
     model: "",
@@ -61,13 +61,16 @@ const handleStream = async (
   };
   const toolCalls: tool[] = [];
   const toolResults: IMessage[] = [];
-  let toolArgs = "";
+  let toolArgs: string = "";
 
   try {
     const reader = response.body?.getReader();
     const decoder = new TextDecoder("utf-8");
 
     if (!reader) throw new Error("No reader available");
+
+    // stop thought indicator (3 dots) and start writing indicator
+    callbacks.onAiWriting();
 
     while (true) {
       const { done, value } = await reader.read();
@@ -103,10 +106,9 @@ const handleStream = async (
 
         // handles reasoning models
         if (delta?.reasoning) {
-          const reasoning = delta.reasoning;
-
-          //aiResponse += reasoning;
-          //callbacks.onData(reasoning);
+          callbacks.onReasoning(true);
+        } else {
+          callbacks.onReasoning(false);
         }
 
         if (delta?.content) {
@@ -152,6 +154,7 @@ const handleStream = async (
     if (toolCalls && toolCalls.length > 0)
       await Promise.all(
         toolCalls.map(async (call) => {
+          callbacks.onToolCalls(true, call.function.name);
           const args = call.function.arguments as { input: string };
           const result = await availableFunctions[
             call.function.name as ToolName
@@ -160,14 +163,14 @@ const handleStream = async (
           const toolMessage: IMessage = {
             role: "tool",
             content: result?.error ?? JSON.stringify(result?.results),
-            model: payload.messages.at(-1)?.model || MODELS[0],
+            model: payload.messages.at(-1)?.model || MODELS[1],
             tool_calls: [call],
           };
 
+          // store tool result for next prompt
           toolResults.push(toolMessage);
-
           // store tool message in client message list
-          callbacks.onToolCalls(toolMessage);
+          callbacks.onNewMessage(toolMessage);
         }),
       );
   } catch (error: any) {
@@ -186,6 +189,8 @@ const handleStream = async (
       return;
     }
   }
+
+  callbacks.onToolCalls(false);
 
   // if toolCalls, resend message
   if (toolCalls.length > 0) {
