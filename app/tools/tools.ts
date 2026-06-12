@@ -12,6 +12,7 @@ export async function search(input: string): Promise<{ results: SearxngSearchRes
     }
 
     if (!results.ok) {
+      console.log(results)
       return { results: [], error: `Search upstream error (HTTP ${results.status}).` };
     }
 
