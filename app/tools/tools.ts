@@ -6,13 +6,22 @@ export type ToolName = "search"; // | 'tool2' | tool3
 export async function search(input: string): Promise<{ results: SearxngSearchResult[]; error?: string }> {
   try {
     const results = await getSearchResults(input);
+
+    if (!results) {
+      return { results: [], error: "No response received from the search engine." };
+    }
+
+    if (!results.ok) {
+      return { results: [], error: `Search upstream error (HTTP ${results.status}).` };
+    }
+
     const data = await results?.json();
 
-    if (data.results?.length === 0) {
+    if (!data.results || data.results?.length === 0) {
       return { results: [], error: "No results found for the given query." };
     }
     
-    const res: SearxngSearchResult[] = data.results ?? [];
+    const res: SearxngSearchResult[] = data.results;
     
     return { results: res };
   } catch (error) {
