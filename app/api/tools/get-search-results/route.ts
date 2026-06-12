@@ -71,7 +71,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     );
 
     const searxngService = new SearxngService(searxConfig);
-    const results = await searxngService.search(input);
+    const results = await searxngService.search(input + "&format=json");
     // for test purposes only !
     // const results = {
     //   query: "openai",

@@ -8,11 +8,10 @@ export async function search(input: string): Promise<{ results: SearxngSearchRes
     const results = await getSearchResults(input);
 
     if (!results) {
-      return { results: [], error: "No response received from the search engine." };
+      return { results: [], error: "No result from search engine." };
     }
 
     if (!results.ok) {
-      console.log(results)
       return { results: [], error: `Search upstream error (HTTP ${results.status}).` };
     }
 
