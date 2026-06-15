@@ -1,42 +1,12 @@
 "use server";
 
-import { logger, httpRequestDuration } from "@/app/utils/logger";
 import { NextResponse } from "next/server";
-  logger.info(
-    {
-      path: "/api/tools/get-search-results",
-    },
-    "Loading searxng",
-  );
-
 import {
   SearxngSearchResult,
   SearxngService,
   SearxngServiceConfig,
 } from "searxng";
-
-  logger.info(
-    {
-      path: "/api/tools/get-search-results",
-    },
-    "Loading readability",
-  );
-
-import { Readability } from "@mozilla/readability";  logger.info(
-    {
-      path: "/api/tools/get-search-results",
-    },
-    "Loading jdsom",
-  );
-
-import { JSDOM } from "jsdom";
-  logger.info(
-    {
-      path: "/api/tools/get-search-results",
-    },
-    "Loading playwrite",
-  );
-import playwrite from "playwright";
+import { logger, httpRequestDuration } from "@/app/utils/logger";
 
 // Utility function to clean and normalize text content
 function cleanText(text: string): string {
@@ -66,14 +36,33 @@ function cleanText(text: string): string {
 }
 
 export async function GET(request: Request): Promise<NextResponse> {
-  const endTimer = httpRequestDuration.startTimer();
-
   logger.info(
     {
       path: "/api/tools/get-search-results",
     },
     "Search attempt started",
   );
+
+  let firefox: typeof import("playwright").firefox | undefined;
+  let JSDOM: typeof import("jsdom").JSDOM | undefined;
+  let Readability:
+    | typeof import("@mozilla/readability").Readability
+    | undefined;
+
+  try {
+    const pw = await import("playwright");
+    firefox = pw.firefox;
+
+    const jsdom = await import("jsdom");
+    JSDOM = jsdom.JSDOM;
+
+    const readability = await import("@mozilla/readability");
+    Readability = readability.Readability;
+  } catch (e) {
+    console.error("Import failed to load", e);
+  }
+
+  const endTimer = httpRequestDuration.startTimer();
 
   try {
     const { searchParams } = new URL(request.url);
@@ -94,6 +83,13 @@ export async function GET(request: Request): Promise<NextResponse> {
       );
     }
 
+    if (!firefox || !JSDOM || !Readability) {
+      return NextResponse.json(
+        { error: "Missing variables for search look up." },
+        { status: 400 },
+      );
+    }
+
     const searxConfig: SearxngServiceConfig = {
       baseURL: BASE_URL,
       defaultSearchParams: {
@@ -109,7 +105,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     const results = await searxngService.search(input + "&format=json");
 
     const webArticles: SearxngSearchResult[] = [];
-    const browser = await playwrite["firefox"].launch();
+    const browser = await firefox.launch();
 
     for (const res of results.results.slice(0, 10)) {
       if (webArticles.length >= 3) break;
