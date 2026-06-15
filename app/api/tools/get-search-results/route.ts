@@ -1,4 +1,4 @@
-"use server";
+export const runtime = "nodejs"
 
 import { NextResponse } from "next/server";
 import {
@@ -36,6 +36,8 @@ function cleanText(text: string): string {
 }
 
 export async function GET(request: Request): Promise<NextResponse> {
+  const endTimer = httpRequestDuration.startTimer();
+  
   logger.info(
     {
       path: "/api/tools/get-search-results",
@@ -43,31 +45,14 @@ export async function GET(request: Request): Promise<NextResponse> {
     "Search attempt started",
   );
 
-  let firefox: typeof import("playwright").firefox | undefined;
-  let JSDOM: typeof import("jsdom").JSDOM | undefined;
-  let Readability:
-    | typeof import("@mozilla/readability").Readability
-    | undefined;
-
-  try {
-    const pw = await import("playwright");
-    firefox = pw.firefox;
-
-    const jsdom = await import("jsdom");
-    JSDOM = jsdom.JSDOM;
-
-    const readability = await import("@mozilla/readability");
-    Readability = readability.Readability;
-  } catch (e) {
-    console.error("Import failed to load", e);
-  }
-
-  const endTimer = httpRequestDuration.startTimer();
-
   try {
     const { searchParams } = new URL(request.url);
     const input = searchParams.get("q");
     const BASE_URL = process.env.SEARXNG_INSTANCE;
+    // playwright variables
+    const { firefox } = await import("playwright");
+    const { JSDOM } = await import("jsdom");
+    const { Readability } = await import("@mozilla/readability");
 
     if (!input) {
       return NextResponse.json(
