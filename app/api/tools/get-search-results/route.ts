@@ -9,18 +9,7 @@ import {
 import { logger, httpRequestDuration } from "@/app/utils/logger";
 import { Readability } from "@mozilla/readability";
 import { JSDOM } from "jsdom";
-import playwright from "playwright";
-
-const searxConfig: SearxngServiceConfig = {
-  baseURL: process.env.SEARXNG_INSTANCE!,
-  defaultSearchParams: {
-    format: "json",
-    lang: "auto",
-  },
-  defaultRequestHeaders: {
-    "Content-Type": "application/json",
-  },
-};
+import { firefox } from "playwright";
 
 // Utility function to clean and normalize text content
 function cleanText(text: string): string {
@@ -52,9 +41,17 @@ function cleanText(text: string): string {
 export async function GET(request: Request): Promise<NextResponse> {
   const endTimer = httpRequestDuration.startTimer();
 
+  logger.info(
+    {
+      path: "/api/tools/get-search-results",
+    },
+    "Search attempt started",
+  );
+
   try {
     const { searchParams } = new URL(request.url);
     const input = searchParams.get("q");
+    const BASE_URL = process.env.SEARXNG_INSTANCE;
 
     if (!input) {
       return NextResponse.json(
@@ -63,43 +60,30 @@ export async function GET(request: Request): Promise<NextResponse> {
       );
     }
 
-    logger.info(
-      {
-        path: "/api/tools/get-search-results",
+    if (!BASE_URL) {
+      return NextResponse.json(
+        { error: "Missing internet search tool address." },
+        { status: 400 },
+      );
+    }
+
+    const searxConfig: SearxngServiceConfig = {
+      baseURL: BASE_URL,
+      defaultSearchParams: {
+        format: "json",
+        lang: "auto",
       },
-      "Search attempt started",
-    );
+      defaultRequestHeaders: {
+        "Content-Type": "application/json",
+      },
+    };
 
     const searxngService = new SearxngService(searxConfig);
     const results = await searxngService.search(input + "&format=json");
-    // for test purposes only !
-    // const results = {
-    //   query: "openai",
-    //   number_of_results: 1230000,
-    //   results: [
-    //     {
-    //       url: "https://openai.com/",
-    //       title: "OpenAI",
-    //       content: "OpenAI develops artificial intelligence systems...",
-    //       engine: "duckduckgo",
-    //       score: 12.5,
-    //       publishedDate: "2026-05-10",
-    //       category: "general",
-    //     },
-    //     {
-    //       url: "https://platform.openai.com/docs",
-    //       title: "OpenAI API Docs",
-    //       content: "Learn how to use the OpenAI API...",
-    //       engine: "bing",
-    //       score: 10.2,
-    //     },
-    //   ],
-    //   answers: [],
-    //   suggestions: [],
-    //   infoboxes: [],
-    // };
 
     const webArticles: SearxngSearchResult[] = [];
+    const browser = await firefox.launch();
+
     for (const res of results.results.slice(0, 10)) {
       if (webArticles.length >= 3) break;
 
@@ -126,7 +110,6 @@ export async function GET(request: Request): Promise<NextResponse> {
         // if first time doesn't work, try with playwright to render potential dynamic content (like with react)
         let pw_html = undefined;
         if (!html || html.length === 0) {
-          const browser = await playwright["firefox"].launch();
           try {
             const context = await browser.newContext();
             const page = await context.newPage();
