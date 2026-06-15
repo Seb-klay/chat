@@ -1,15 +1,42 @@
 "use server";
 
+import { logger, httpRequestDuration } from "@/app/utils/logger";
 import { NextResponse } from "next/server";
+  logger.info(
+    {
+      path: "/api/tools/get-search-results",
+    },
+    "Loading searxng",
+  );
+
 import {
   SearxngSearchResult,
   SearxngService,
   SearxngServiceConfig,
 } from "searxng";
-import { logger, httpRequestDuration } from "@/app/utils/logger";
-import { Readability } from "@mozilla/readability";
+
+  logger.info(
+    {
+      path: "/api/tools/get-search-results",
+    },
+    "Loading readability",
+  );
+
+import { Readability } from "@mozilla/readability";  logger.info(
+    {
+      path: "/api/tools/get-search-results",
+    },
+    "Loading jdsom",
+  );
+
 import { JSDOM } from "jsdom";
-import { firefox } from "playwright";
+  logger.info(
+    {
+      path: "/api/tools/get-search-results",
+    },
+    "Loading playwrite",
+  );
+import playwrite from "playwright";
 
 // Utility function to clean and normalize text content
 function cleanText(text: string): string {
@@ -82,7 +109,7 @@ export async function GET(request: Request): Promise<NextResponse> {
     const results = await searxngService.search(input + "&format=json");
 
     const webArticles: SearxngSearchResult[] = [];
-    const browser = await firefox.launch();
+    const browser = await playwrite["firefox"].launch();
 
     for (const res of results.results.slice(0, 10)) {
       if (webArticles.length >= 3) break;
