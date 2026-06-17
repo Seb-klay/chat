@@ -9,8 +9,7 @@
     "lint": "eslint",
     "unit-test": "vitest unit",
     "integration-test": "vitest integration",
-    "tool-test": "vitest tools",
-    "postinstall": "playwright install firefox"
+    "tool-test": "vitest tools"
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.73",
