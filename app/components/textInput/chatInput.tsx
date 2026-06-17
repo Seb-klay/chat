@@ -19,8 +19,8 @@ type ChatInputProps = {
     folderName?: string,
   ) => void;
   onError: (error: string) => void;
-  aiError: boolean;
-  rollbackInput: string,
+  aiError?: boolean;
+  rollbackInput?: string,
   rollbackFiles?: File[],
 };
 
@@ -68,7 +68,7 @@ export default function ChatInput({
   useEffect(() => {
     if (!aiError) return;
 
-    setInput(rollbackInput);
+    setInput(rollbackInput || "");
     setSelectedFiles(rollbackFiles ?? []);
   }, [aiError]);
 

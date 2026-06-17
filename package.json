@@ -10,7 +10,7 @@
     "unit-test": "vitest unit",
     "integration-test": "vitest integration",
     "tool-test": "vitest tools",
-    "postinstall": "playwright install --with-deps firefox"
+    "postinstall": "playwright install firefox"
   },
   "dependencies": {
     "@ai-sdk/react": "^3.0.73",
