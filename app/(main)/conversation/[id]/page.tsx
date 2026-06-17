@@ -56,6 +56,14 @@ export default function ConversationPage() {
   const [loadingConversation, setLoadingConversation] = useState(false); // when conv is loading, activate skeleton page
   const [onAiState, setOnAiState] = useState({ id: 0, aiState: "" }); // when AI is writing, thinking, reasoning or using tools, update the UI
   const abortControllerRef = useRef<AbortController | null>(null);
+  const onAiErrorRef = useRef<boolean>(false);
+  const rollbackRef = useRef<{
+    userInput: string;
+    files?: File[];
+  }>({
+    userInput: "",
+    files: [],
+  });
 
   useEffect(() => {
     const container = scrollRef.current?.parentElement;
@@ -157,7 +165,14 @@ export default function ConversationPage() {
   };
 
   const handleError = (error: string) => {
-    toast.error(`Error occurred while handling files. ${error}`);
+    // remove indicators
+    setOnAiState({ id: 0, aiState: "" });
+    // add error for chat input to rollback
+    onAiErrorRef.current = true;
+    // remove previous 2 messages (user and assistant);
+    setMessages((prev) => prev.slice(0, -2));
+    // show error
+    toast.error(`${error}`);
   };
 
   const handleInfo = (info: string) => {
@@ -170,10 +185,20 @@ export default function ConversationPage() {
     files?: File[],
     folderName?: string,
   ) => {
+    // start by making sure error is false
+    onAiErrorRef.current = false;
+        // save current state
+    rollbackRef.current = {
+      userInput,
+      files,
+    };
+
     const messageText = userInput;
     // TODO: handle images in files
     let filesImages: string[] | undefined = undefined;
     try {
+      setOnAiState({ id: 5, aiState: "Reading files" });
+
       let preparedFiles: preparedFiles[] = [];
       if (files) {
         preparedFiles.push({
@@ -303,8 +328,7 @@ export default function ConversationPage() {
 
           // Handle errors
           onError: (err) => {
-            setOnAiState({ id: 0, aiState: "" });
-            toast.warning(String(err));
+            handleError(String(err));
           },
         },
       );
@@ -362,7 +386,7 @@ export default function ConversationPage() {
               {onAiState.id === 2 && (
                 <div className="flex items-center gap-2 transition-all duration-300 ease-in-out animate-fadeIn">
                   <span className="text-lg animate-pulse text-gray-500 dark:text-gray-400">
-                    {onAiState.aiState}
+                    { onAiState.aiState }
                   </span>
                 </div>
               )}
@@ -374,6 +398,15 @@ export default function ConversationPage() {
                     {onAiState.aiState === "search"
                       ? "Searching the internet..."
                       : `Using ${onAiState.aiState || "tool"}...`}
+                  </span>
+                </div>
+              )}
+
+              {/* File reading State (id: 5) */}
+              {onAiState.id === 5 && (
+                <div className="flex items-center gap-2 transition-all duration-300 ease-in-out animate-fadeIn">
+                  <span className="text-lg animate-pulse text-gray-500 dark:text-gray-400">
+                    { onAiState.aiState }
                   </span>
                 </div>
               )}
@@ -390,10 +423,13 @@ export default function ConversationPage() {
         <div className="rounded-lg">
           <ChatInput
             onThought={onAiState.id === 1}
-            onChatbotWriting={onAiState.id === 3}
+            onChatbotWriting={onAiState.id !== 0}
             onAbort={handleAbort}
             onSend={sendMessage}
             onError={handleError}
+            aiError={onAiErrorRef.current}
+            rollbackInput={onAiErrorRef.current ? rollbackRef.current.userInput : ""}
+            rollbackFiles={onAiErrorRef.current ? rollbackRef.current.files : []}
           />
         </div>
       </div>

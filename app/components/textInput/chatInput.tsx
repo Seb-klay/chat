@@ -19,6 +19,9 @@ type ChatInputProps = {
     folderName?: string,
   ) => void;
   onError: (error: string) => void;
+  aiError: boolean;
+  rollbackInput: string,
+  rollbackFiles?: File[],
 };
 
 export default function ChatInput({
@@ -27,13 +30,17 @@ export default function ChatInput({
   onAbort,
   onSend,
   onError,
+  aiError,
+  rollbackInput,
+  rollbackFiles,
 }: ChatInputProps) {
   const [input, setInput] = useState("");
   const [nameFolder, setNameFolder] = useState("");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { defaultModel } = useModel();
   const [model, setModel] = useState<IModelList>(defaultModel);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const { theme } = useTheme();
 
   useEffect(() => {
@@ -58,17 +65,24 @@ export default function ChatInput({
     textarea.style.overflowY = scrollHeight > maxHeight ? "auto" : "hidden";
   }, [input]);
 
+  useEffect(() => {
+    if (!aiError) return;
+
+    setInput(rollbackInput);
+    setSelectedFiles(rollbackFiles ?? []);
+  }, [aiError]);
+
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      onSend(input, model, selectedFiles, nameFolder);
-      setSelectedFiles([]);
-      setInput("");
+      handleSend();
     }
   };
 
   const handleSend = () => {
+    // send message
     onSend(input, model, selectedFiles, nameFolder);
+    // remove text for ui
     setSelectedFiles([]);
     setInput("");
   };
