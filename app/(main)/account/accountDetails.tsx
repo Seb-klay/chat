@@ -24,6 +24,8 @@ export default function Accountdetails() {
   const [email, setEmail] = useState<string>("");
   const router = useRouter();
   const { theme } = useTheme();
+  const TERMS_LINK = process.env.NEXT_PUBLIC_TERMS_CONDITIONS_LINK;
+  const PRIVACY_LINK = process.env.NEXT_PUBLIC_PRIVACY_POLICY_LINK;
 
   useEffect(() => {
     const loadEmail = async () => {
@@ -152,19 +154,59 @@ export default function Accountdetails() {
         )}
 
         {/* Additional Info */}
-        <div className="mt-8 pt-6 border-t border-gray-700/50">
-          <div
-            style={{ color: theme.colors.secondary }}
-            className="flex items-start gap-3 text-sm"
+<div className="mt-8 pt-6 border-t border-gray-700/50">
+  <div
+    style={{ color: theme.colors.secondary }}
+    className="flex flex-col gap-2 text-sm"
+  >
+    {/* Warning about account changes */}
+    <div className="flex items-start gap-3">
+      <InformationCircleIcon className="h-5 w-5 shrink-0 mt-0.5" />
+      <p>
+        Account changes are permanent. Make sure you have backup access
+        before deleting your account. Account settings are secured with
+        end-to-end encryption.
+      </p>
+    </div>
+
+    {/* Terms and Privacy Policy - Inline */}
+    <div 
+      className="flex flex-wrap items-center gap-1 pl-8"
+      style={{ color: theme.colors.secondary }}>
+      <span>Check our</span>
+        {TERMS_LINK ? (
+          <a
+            href={TERMS_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:underline transition-colors"
+            style={{ color: theme.colors.primary }}
           >
-            <InformationCircleIcon className="h-5 w-5 shrink-0 mt-0.5" />
-            <p>
-              Account changes are permanent. Make sure you have backup access
-              before deleting your account. Account settings are secured with
-              end-to-end encryption.
-            </p>
-          </div>
-        </div>
+            {"Terms & Conditions"}
+          </a>
+        ) : (
+          <span
+            style={{ color: theme.colors.secondary }}>
+            {"Terms & Conditions"}
+          </span>
+        )}
+        {PRIVACY_LINK && (
+          <>
+            {" "}and{" "}
+            <a
+              href={PRIVACY_LINK}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:underline transition-colors"
+              style={{ color: theme.colors.primary }}
+            >
+              Privacy Policy
+            </a>
+          </>
+        )}
+    </div>
+  </div>
+</div>
       </div>
     </div>
   );

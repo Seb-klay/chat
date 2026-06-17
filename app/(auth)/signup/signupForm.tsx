@@ -8,6 +8,8 @@ export function SignupForm() {
   const [verifyState, verifyAction] = useActionState(verifyAndRegister, null);
   const [verifying, setVerifying] = useState(false);
   const [temporaryData, setTemporaryData] = useState<any>(null);
+  const TERMS_LINK = process.env.NEXT_PUBLIC_TERMS_CONDITIONS_LINK;
+  const PRIVACY_LINK = process.env.NEXT_PUBLIC_PRIVACY_POLICY_LINK;
 
   // Watch for successful signup
   useEffect(() => {
@@ -124,14 +126,16 @@ export function SignupForm() {
                 >
                   I agree to the{" "}
                   <a
-                    href="#"
+                    href={TERMS_LINK}
+                    target="_blank"
                     className="text-blue-500 hover:text-blue-400 transition-colors"
                   >
                     Terms of Service
                   </a>{" "}
                   and{" "}
                   <a
-                    href="#"
+                    href={PRIVACY_LINK}
+                    target="_blank"
                     className="text-blue-500 hover:text-blue-400 transition-colors"
                   >
                     Privacy Policy
@@ -300,14 +304,16 @@ export function SignupForm() {
           <p className="text-sm text-gray-500">
             By creating an account, you agree to our{" "}
             <a
-              href="#"
+              href={TERMS_LINK}
+              target="_blank"
               className="text-blue-500 hover:text-blue-400 transition-colors"
             >
               Terms
             </a>{" "}
             and{" "}
             <a
-              href="#"
+              href={PRIVACY_LINK}
+              target="_blank"
               className="text-blue-500 hover:text-blue-400 transition-colors"
             >
               Privacy Policy

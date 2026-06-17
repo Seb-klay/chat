@@ -6,6 +6,8 @@ import { login } from "./actions";
 
 export function LoginForm() {
   const [state, loginAction] = useActionState(login, undefined);
+  const TERMS_LINK = process.env.NEXT_PUBLIC_TERMS_CONDITIONS_LINK;
+  const PRIVACY_LINK = process.env.NEXT_PUBLIC_PRIVACY_POLICY_LINK;
 
   return (
     <div className="min-h-dvh flex items-center justify-center p-4">
@@ -95,14 +97,16 @@ export function LoginForm() {
           <p className="text-sm text-gray-500">
             By signing in, you agree to our{" "}
             <a
-              href="#"
+              href={TERMS_LINK}
+              target="_blank"
               className="text-blue-500 hover:text-blue-400 transition-colors"
             >
               Terms
             </a>{" "}
             and{" "}
             <a
-              href="#"
+              href={PRIVACY_LINK}
+              target="_blank"
               className="text-blue-500 hover:text-blue-400 transition-colors"
             >
               Privacy Policy

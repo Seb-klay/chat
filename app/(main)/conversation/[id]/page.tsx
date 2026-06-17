@@ -361,7 +361,7 @@ export default function ConversationPage() {
             </>
           )}
 
-          {/* 0=none, 1=thinking, 2=reasoning, 3=writing, 4=tool */}
+          {/* 0=none, 1=thinking, 2=reasoning, 3=writing, 4=tool, 5=files (parsing) */}
           {onAiState.id !== 0 && (
             <div className="my-8 md:my-12">
               {/* Thinking State (id: 1) */}
@@ -382,8 +382,8 @@ export default function ConversationPage() {
                 </div>
               )}
 
-              {/* Reasoning State (id: 2) */}
-              {onAiState.id === 2 && (
+              {/* Reasoning State (id: 2) or file reading (id:5) */}
+              {(onAiState.id === 2 || onAiState.id === 5) && (
                 <div className="flex items-center gap-2 transition-all duration-300 ease-in-out animate-fadeIn">
                   <span className="text-lg animate-pulse text-gray-500 dark:text-gray-400">
                     { onAiState.aiState }
@@ -398,15 +398,6 @@ export default function ConversationPage() {
                     {onAiState.aiState === "search"
                       ? "Searching the internet..."
                       : `Using ${onAiState.aiState || "tool"}...`}
-                  </span>
-                </div>
-              )}
-
-              {/* File reading State (id: 5) */}
-              {onAiState.id === 5 && (
-                <div className="flex items-center gap-2 transition-all duration-300 ease-in-out animate-fadeIn">
-                  <span className="text-lg animate-pulse text-gray-500 dark:text-gray-400">
-                    { onAiState.aiState }
                   </span>
                 </div>
               )}
