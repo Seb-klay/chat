@@ -54,11 +54,7 @@ export default function ConversationPage() {
   const [messages, setMessages] = useState<IMessage[]>([]); // list of messages history
   const scrollRef = useRef<HTMLDivElement>(null); // used to go at the bottom of the page
   const [loadingConversation, setLoadingConversation] = useState(false); // when conv is loading, activate skeleton page
-  const [onAiWriting, setOnAiWriting] = useState(false); // when AI is writing
-  const [onAiThought, setOnAiThought] = useState(false); // when AI "thinks" or waiting for the AI stream, it triggers the 3 waiting dots
-  const [onAiReasoning, setOnAiReasoning] = useState(false); // when AI is reasoning, it triggers the reasoning state in the UI
-  const [onToolCall, setOnToolCall] = useState(false); // when AI calls a tool, it triggers the tool call state in the UI
-  const [toolName, setToolName] = useState<string>(""); // name of the tool being called, used to display in the UI
+  const [onAiState, setOnAiState] = useState({ id: 0, aiState: "" }); // when AI is writing, thinking, reasoning or using tools, update the UI
   const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -123,8 +119,8 @@ export default function ConversationPage() {
         // clean up storage after use
         await del("local_files");
 
-        // rename conversation
-        if (!onAiWriting)
+        // rename conversation once ai stops writing
+        if (onAiState.id !== 0)
           await summaryConversationAndUpdate(newConversation[0], {
             onError: (err) => {
               toast.warning(`Bad response while summarizing title : ` + err);
@@ -156,7 +152,7 @@ export default function ConversationPage() {
     if (abortControllerRef.current) {
       abortControllerRef.current.abort();
       abortControllerRef.current = null;
-      setOnAiWriting(false);
+      setOnAiState({ id: 0, aiState: "" });
     }
   };
 
@@ -223,7 +219,8 @@ export default function ConversationPage() {
         isStream: true,
         conversationID: conversationId,
       };
-      setOnAiThought(true);
+
+      setOnAiState({ id: 1, aiState: "Thinking" }); // ai is thinking (triggers 3 dots)
 
       await sendChatMessage(
         payloadFromUser,
@@ -232,10 +229,14 @@ export default function ConversationPage() {
         {
           // when receiving data from the stream, update the message in real time
           onData: (chunk: string, toolcalls?: tool[]) => {
-            // if (onAiThought) {
-            //   setOnAiThought(false);
-            //   setOnAiWriting(true);
-            // }
+            if (chunk && chunk.length > 0) {
+              setOnAiState((prev) => {
+                if (prev.id === 2 || prev.id === 4) return prev;
+                // Switch from thinking (id: 1) to writing (id: 3)
+                if (prev.id === 1) return { id: 3, aiState: "Writing" };
+                return prev;
+              });
+            }
 
             setMessages((prev) => {
               if (prev.length === 0) return prev;
@@ -248,7 +249,7 @@ export default function ConversationPage() {
                   ...prev,
                   {
                     role: "assistant",
-                    content: chunk, // start it off with this chunk
+                    content: chunk,
                     tool_calls: toolcalls,
                   },
                 ];
@@ -269,38 +270,40 @@ export default function ConversationPage() {
           },
 
           onToolCalls: (isCalling: boolean, toolName?: string) => {
-            // if (onAiThought) {
-            //   setOnAiThought(false);
-            //   setOnAiWriting(true);
-            // }
-
-            setOnToolCall(isCalling);
-            setToolName(toolName || "");
+            if (isCalling) {
+              setOnAiState({ id: 4, aiState: toolName || "Searching" });
+            } else {
+              // Keep showing thinking state while processing tool results
+              setOnAiState({ id: 1, aiState: "Thinking" });
+            }
           },
 
           onReasoning: (isReasoning: boolean) => {
-            // if (onAiThought) {
-            //   setOnAiThought(false);
-            //   setOnAiWriting(true);
-            // }
-            setOnAiReasoning(isReasoning);
+            if (isReasoning) {
+              setOnAiState({ id: 2, aiState: "Reasoning" });
+            } else {
+              // Switch back to thinking, not clearing completely
+              setOnAiState({ id: 1, aiState: "Thinking" });
+            }
           },
-
           onAiWriting: () => {
-            setOnAiThought(false);
-            setOnAiWriting(true);
+            setOnAiState((prev) => {
+              // Only switch if we're in thinking state
+              if (prev.id === 1) {
+                return { id: 3, aiState: "Writing" };
+              }
+              return prev;
+            });
           },
 
           // Finalize the message
           onCompleted: () => {
-            setOnAiWriting(false);
+            setOnAiState({ id: 0, aiState: "" });
           },
 
           // Handle errors
           onError: (err) => {
-            setOnAiThought(false);
-            setOnAiWriting(false);
-            setOnAiReasoning(false);
+            setOnAiState({ id: 0, aiState: "" });
             toast.warning(String(err));
           },
         },
@@ -334,41 +337,46 @@ export default function ConversationPage() {
             </>
           )}
 
-          {/* AI Thinking Indicator */}
-          {onAiThought && (
-            <div className="flex space-x-2 mb-6">
-              <div
-                style={{ backgroundColor: theme.colors.primary }}
-                className="dot w-2 h-2 rounded-full animate-bounce [animation-delay:-0.3s]"
-              ></div>
-              <div
-                style={{ backgroundColor: theme.colors.primary }}
-                className="dot w-2 h-2 rounded-full animate-bounce [animation-delay:-0.15s]"
-              ></div>
-              <div
-                style={{ backgroundColor: theme.colors.primary }}
-                className="dot w-2 h-2 rounded-full animate-bounce"
-              ></div>
-            </div>
-          )}
+          {/* 0=none, 1=thinking, 2=reasoning, 3=writing, 4=tool */}
+          {onAiState.id !== 0 && (
+            <div className="my-8 md:my-12">
+              {/* Thinking State (id: 1) */}
+              {onAiState.id === 1 && (
+                <div className="flex space-x-2 transition-all duration-300 ease-in-out animate-fadeIn">
+                  <div
+                    style={{ backgroundColor: theme.colors.primary }}
+                    className="dot w-2 h-2 rounded-full animate-bounce [animation-delay:-0.3s]"
+                  ></div>
+                  <div
+                    style={{ backgroundColor: theme.colors.primary }}
+                    className="dot w-2 h-2 rounded-full animate-bounce [animation-delay:-0.15s]"
+                  ></div>
+                  <div
+                    style={{ backgroundColor: theme.colors.primary }}
+                    className="dot w-2 h-2 rounded-full animate-bounce"
+                  ></div>
+                </div>
+              )}
 
-          {/* Tool Call Indicator */}
-          {onToolCall && (
-            <div className="flex items-center gap-2 mb-6">
-              <span className="text-lg animate-pulse text-gray-500 dark:text-gray-400">
-                {toolName === "search"
-                  ? "Searching the internet..."
-                  : `Using ${toolName}...`}
-              </span>
-            </div>
-          )}
+              {/* Reasoning State (id: 2) */}
+              {onAiState.id === 2 && (
+                <div className="flex items-center gap-2 transition-all duration-300 ease-in-out animate-fadeIn">
+                  <span className="text-lg animate-pulse text-gray-500 dark:text-gray-400">
+                    {onAiState.aiState}
+                  </span>
+                </div>
+              )}
 
-          {/* Reasoning Indicator */}
-          {onAiReasoning && (
-            <div className="flex items-center gap-2 mb-6">
-              <span className="text-lg animate-pulse text-gray-500 dark:text-gray-400">
-                Reasoning...
-              </span>
+              {/* Tool Use State (id: 4) */}
+              {onAiState.id === 4 && (
+                <div className="flex items-center gap-2 transition-all duration-300 ease-in-out animate-fadeIn">
+                  <span className="text-lg animate-pulse text-gray-500 dark:text-gray-400">
+                    {onAiState.aiState === "search"
+                      ? "Searching the internet..."
+                      : `Using ${onAiState.aiState || "tool"}...`}
+                  </span>
+                </div>
+              )}
             </div>
           )}
 
@@ -381,8 +389,8 @@ export default function ConversationPage() {
       <div className="w-full max-w-3xl mx-auto sticky bottom-0">
         <div className="rounded-lg">
           <ChatInput
-            onThought={onAiThought}
-            onChatbotWriting={onAiWriting}
+            onThought={onAiState.id === 1}
+            onChatbotWriting={onAiState.id === 3}
             onAbort={handleAbort}
             onSend={sendMessage}
             onError={handleError}

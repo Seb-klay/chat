@@ -1,6 +1,5 @@
 "use client";
 
-import { on } from "node:cluster";
 import { addUserAnalytics, storeMessage } from ".";
 import { availableFunctions, ToolName } from "../tools/tools";
 import { IAnswer, IMessage, IPayload, tool } from "../utils/chatUtils";
@@ -62,6 +61,10 @@ const handleStream = async (
   const toolCalls: tool[] = [];
   const toolResults: IMessage[] = [];
   let toolArgs: string = "";
+  // ai state variables
+  let hasReceivedContent = false;
+  let isReasoning = false;
+  let hasToolCalls = false;
 
   try {
     const reader = response.body?.getReader();
@@ -70,7 +73,8 @@ const handleStream = async (
     if (!reader) throw new Error("No reader available");
 
     // stop thought indicator (3 dots) and start writing indicator
-    callbacks.onAiWriting();
+    //callbacks.onAiWriting();
+    let hasCalledOnAiWriting = false;
 
     while (true) {
       const { done, value } = await reader.read();
@@ -106,13 +110,36 @@ const handleStream = async (
 
         // handles reasoning models
         if (delta?.reasoning) {
-          callbacks.onReasoning(true);
-        } else {
+          if (!isReasoning) {
+            isReasoning = true;
+            callbacks.onReasoning(true);
+          }
+
+          if (delta.reasoning && typeof delta.reasoning === "string") {
+            // collect reasoning here
+          }
+        } else if (isReasoning) {
+          // Only turn off reasoning if it was previously on
+          isReasoning = false;
           callbacks.onReasoning(false);
         }
 
         if (delta?.content) {
           const content = delta.content;
+
+          // First time receiving content
+          if (!hasReceivedContent) {
+            hasReceivedContent = true;
+
+            // If we're not in reasoning state, switch to writing
+            if (!isReasoning) {
+              // Only call onAiWriting if we haven't already
+              if (!hasCalledOnAiWriting) {
+                hasCalledOnAiWriting = true;
+                callbacks.onAiWriting();
+              }
+            }
+          }
 
           aiResponse += content;
           callbacks.onData(content);
@@ -120,6 +147,13 @@ const handleStream = async (
 
         // legacy from ollama : data.message?.tool_calls
         if (delta?.tool_calls && delta?.tool_calls?.length > 0) {
+          if (!hasToolCalls) {
+            hasToolCalls = true;
+            // Get the tool name from the first tool call
+            const toolName = delta.tool_calls[0]?.function?.name || "tool";
+            callbacks.onToolCalls(true, toolName);
+          }
+
           const toolCallsID = delta.tool_calls.map((call: tool) => call.id);
 
           if (toolCallsID[0]) {
@@ -140,11 +174,16 @@ const handleStream = async (
               toolArgs += call.function.arguments;
             });
 
+            // Parse arguments when complete
             if (toolArgs.includes("}")) {
-              toolCalls[toolCalls.length - 1].function.arguments = JSON.parse(toolArgs);
+              try {
+                const parsedArgs = JSON.parse(toolArgs);
+                toolCalls[toolCalls.length - 1].function.arguments = parsedArgs;
+              } catch (e) {
+                //console.warn("Failed to parse tool arguments:", toolArgs);
+              }
             }
           }
-          callbacks.onData("", delta?.tool_calls);
         }
       }
     }
@@ -167,7 +206,7 @@ const handleStream = async (
             tool_calls: [call],
           };
 
-          // store tool result for next prompt
+          // store tool result
           toolResults.push(toolMessage);
           // store tool message in client message list
           callbacks.onNewMessage(toolMessage);
@@ -205,7 +244,7 @@ const handleStream = async (
       },
     );
 
-    callbacks.onCompleted();
+    //callbacks.onCompleted();
     return;
   }
 
