@@ -1,4 +1,4 @@
-export const runtime = "nodejs"
+export const runtime = "nodejs";
 
 import { NextResponse } from "next/server";
 import {
@@ -7,6 +7,7 @@ import {
   SearxngServiceConfig,
 } from "searxng";
 import { logger, httpRequestDuration } from "@/app/utils/logger";
+import { Browser, BrowserContext } from "playwright";
 
 // Utility function to clean and normalize text content
 function cleanText(text: string): string {
@@ -37,7 +38,7 @@ function cleanText(text: string): string {
 
 export async function GET(request: Request): Promise<NextResponse> {
   const endTimer = httpRequestDuration.startTimer();
-  
+
   logger.info(
     {
       path: "/api/tools/get-search-results",
@@ -90,77 +91,108 @@ export async function GET(request: Request): Promise<NextResponse> {
     const results = await searxngService.search(input + "&format=json");
 
     const webArticles: SearxngSearchResult[] = [];
-    const browser = await firefox.launch();
+    let browser : Browser | null = null;
+    let context : BrowserContext | null = null;
+    
+    try {
+      browser = await firefox.launch();
+      context = await browser.newContext();
+      if (!browser || !context) throw new Error("An error occured while searching on the internet.")
 
-    for (const res of results.results.slice(0, 10)) {
-      if (webArticles.length >= 3) break;
+      for (const res of results.results.slice(0, 10)) {
+        if (webArticles.length >= 6) break;
 
-      if (
-        !res.url.startsWith("http") ||
-        res.url.includes("youtube.com") ||
-        res.url.includes("reddit.com")
-      ) {
-        continue;
-      }
-
-      try {
-        const response = await fetch(res.url, {
-          headers: {
-            "User-Agent":
-              "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
-            Accept:
-              "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-US,en;q=0.5",
-          },
-        });
-        const html = await response.text();
-
-        // if first time doesn't work, try with playwright to render potential dynamic content (like with react)
-        let pw_html = undefined;
-        if (!html || html.length === 0) {
-          try {
-            const context = await browser.newContext();
-            const page = await context.newPage();
-            await page.goto(res.url, {
-              waitUntil: "domcontentloaded",
-              timeout: 10000,
-            });
-            await page.waitForTimeout(2000);
-
-            pw_html = await page.content();
-
-            if (!pw_html) continue;
-          } catch (err) {
-            logger.warn(
-              {
-                err,
-                url: res.url,
-              },
-              "Failed to fetch or parse content for URL using Playwright.",
-            );
-          } finally {
-            await browser.close();
-          }
+        if (
+          !res.url.startsWith("http") ||
+          res.url.includes("youtube.com") ||
+          res.url.includes("reddit.com") ||
+          res.url.includes("facebook.com")
+        ) {
+          continue;
         }
 
-        const contentToParse = html && html.length > 0 ? html : pw_html;
-        const dom = new JSDOM(contentToParse, { url: res.url });
-        const reader = new Readability(dom.window.document);
-        const article = reader.parse();
+        try {
+          const response = await fetch(res.url, {
+            headers: {
+              "User-Agent":
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/124 Safari/537.36",
+              Accept:
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+              "Accept-Language": "en-US,en;q=0.5",
+            },
+          });
+          const html = await response.text();
 
-        if (!article?.textContent) continue;
+          // if first time doesn't work, try with playwright to render potential dynamic content (like with react)
+          let pw_html = undefined;
+          if (html.length < 201) {
+            const page = await context.newPage();
 
-        res.content = cleanText(article.textContent.substring(0, 1500));
-        webArticles.push(res);
-      } catch (err) {
-        logger.warn(
-          {
-            err,
-            url: res.url,
-          },
-          "Failed to fetch or parse content for URL.",
-        );
+            try {
+              await page.goto(res.url, {
+                waitUntil: "domcontentloaded",
+                timeout: 5000,
+              });
+              await page.waitForTimeout(2000);
+
+              pw_html = await page.content();
+
+              if (!pw_html) continue;
+            } catch (err) {
+              logger.warn(
+                {
+                  err,
+                  url: res.url,
+                },
+                "Failed to fetch or parse content for URL using Playwright.",
+              );
+            } finally {
+              await page.close();
+            }
+          }
+
+          const contentToParse = html && html.length > 0 ? html : pw_html;
+          const dom = new JSDOM(contentToParse, { url: res.url });
+          const reader = new Readability(dom.window.document);
+          const article = reader.parse();
+
+          if (!article?.textContent) continue;
+
+          res.content = cleanText(article.textContent.substring(0, 1500));
+          webArticles.push(res);
+        } catch (err) {
+          endTimer({
+            method: "GET",
+            route: "/api/tools/get-search-results",
+            status_code: 400,
+          });
+
+          logger.warn(
+            {
+              err,
+              url: res.url,
+            },
+            "Failed to fetch or parse content for URL.",
+          );
+        }
       }
+    } catch (error) {
+      endTimer({
+        method: "GET",
+        route: "/api/tools/get-search-results",
+        status_code: 400,
+      });
+
+      logger.warn(
+        {
+          error,
+          path: "/api/tools/get-search-results",
+        },
+        "Failed to fetch or parse content for URL.",
+      );
+    } finally {
+      if (browser !== null) await browser.close();
+      if (context !== null) await context.close();      
     }
 
     endTimer({
