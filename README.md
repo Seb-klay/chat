@@ -24,6 +24,7 @@ A modern web application that allows you to converse with multiple open-weight A
 - [Node.js](https://nodejs.org/) (version specified in `.nvmrc`)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop)
 - [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- [search engine] install firefox or chromium for search tool (npx playwright install firefox/chromium)
 
 ### Installation & Setup
 
