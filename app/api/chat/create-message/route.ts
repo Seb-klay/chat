@@ -13,7 +13,12 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
   try {
     const { message, conversationId } = await request.json();
-    const { role, model, content }: IMessage = message.at(-1);
+    const lastMsg: IMessage = message.at(-1);
+
+    const { role, model, content, tool_calls } = lastMsg;
+
+    const validToolCalls =
+      tool_calls ? JSON.stringify(tool_calls) : null;
 
     const pool = getPool();
     const sessionUser = await verifySession();
@@ -33,10 +38,10 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     // create new message in conversation
     const messagesResponse = await pool.query(
-      `INSERT INTO messages (rolesender, model, content, convid, createdat) 
-      values ($1, $2, $3, $4, $5)
+      `INSERT INTO messages (rolesender, model, content, convid, createdat, tool_calls) 
+      values ($1, $2, $3, $4, $5, $6)
       RETURNING messid`,
-      [role, model, content, conversationId, new Date(Date.now())],
+      [role, model, content, conversationId, new Date(Date.now()), validToolCalls],
     );
     if (messagesResponse.rowCount === 0){
       endTimer({

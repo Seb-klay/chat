@@ -10,7 +10,9 @@ export type tool = {
   function: {
     name: ToolName;
     description: string;
-    arguments: {};
+    arguments: {
+      input: string;
+    };
   };
 };
 

@@ -30,6 +30,7 @@ CREATE TABLE Messages
   reasoning TEXT,
   convID UUID,
   createdAt TIMESTAMP NOT NULL,
+  tool_calls JSONB,
   CONSTRAINT FK_convMess FOREIGN KEY (convID)
     REFERENCES Conversations(convID)
 );

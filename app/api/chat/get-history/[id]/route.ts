@@ -40,6 +40,7 @@ export async function GET(
         m.model as model, 
         m.content as content,
         m.createdat as createdat,
+        m.tool_calls as tool_calls,
         COALESCE(
           json_agg(
             json_build_object(

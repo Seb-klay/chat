@@ -169,6 +169,9 @@ const handleStream = async (
                 },
               });
             });
+            // add toolcalls to last message in UI
+            callbacks.onData("", toolCalls);
+
           } else {
             delta.tool_calls.map((call: tool) => {
               toolArgs += call.function.arguments;
@@ -180,7 +183,7 @@ const handleStream = async (
                 const parsedArgs = JSON.parse(toolArgs);
                 toolCalls[toolCalls.length - 1].function.arguments = parsedArgs;
               } catch (e) {
-                //console.warn("Failed to parse tool arguments:", toolArgs);
+                callbacks.onError(String(e));
               }
             }
           }
@@ -191,23 +194,39 @@ const handleStream = async (
     // call all tools required from the model and store it in message list
     // const ai_tool_calls = data.choices?.[0]?.delta?.tool_calls
     if (toolCalls && toolCalls.length > 0)
+      // call all tools
       await Promise.all(
-        toolCalls.map(async (call) => {
+        toolCalls.map(async (call: tool) => {
           callbacks.onToolCalls(true, call.function.name);
           const args = call.function.arguments as { input: string };
           const result = await availableFunctions[
             call.function.name as ToolName
           ](args.input);
 
+          const assistantMessage: IMessage = {
+            role: "assistant",
+            content: "",
+            model: payload.messages.at(-1)?.model || MODELS[1],
+            tool_calls: [{
+              id: call.id,
+              function: {
+                name: call.function.name,
+                description: call.function.description,
+                arguments: {
+                  input: call.function.arguments.input
+                },
+              }
+            }],
+          };
+
           const toolMessage: IMessage = {
             role: "tool",
             content: result?.error ?? JSON.stringify(result?.results),
             model: payload.messages.at(-1)?.model || MODELS[1],
-            tool_calls: [call],
           };
 
           // store tool result
-          toolResults.push(toolMessage);
+          toolResults.push(assistantMessage, toolMessage);
           // store tool message in client message list
           callbacks.onNewMessage(toolMessage);
         }),
@@ -229,7 +248,7 @@ const handleStream = async (
     }
   }
 
-  callbacks.onToolCalls(false);
+  //callbacks.onToolCalls(false);
 
   // if toolCalls, resend message
   if (toolCalls.length > 0) {
@@ -244,7 +263,6 @@ const handleStream = async (
       },
     );
 
-    //callbacks.onCompleted();
     return;
   }
 
