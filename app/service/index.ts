@@ -1,7 +1,6 @@
 import { IAnalytics } from "../(main)/account/analytics";
-import { preparedFiles } from "../(main)/conversation/[id]/page";
 import { IAnswer, IPayload } from "../utils/chatUtils";
-import { PathItem } from "../utils/fileUtils";
+import { PathItem, preparedFile } from "../utils/fileUtils";
 import { IModelList } from "../utils/listModels";
 import { IUser } from "../utils/userUtils";
 const URL: string = process.env.FULL_URL || "";
@@ -108,7 +107,6 @@ export const storeMessage = async (
   });
   // store files Meta data (if any)
     const files = payload?.messages.at(-1)?.files;
-    let filesWithIds: preparedFiles[] = [];
     if (files && files.length > 0){
       const { messID } = await responseMessage.json();
 
@@ -205,7 +203,7 @@ export const updateUserSettings = async (
 };
 
 export const uploadFiles = async (
-  files: preparedFiles[] | undefined,
+  files: preparedFile[] | undefined,
 ): Promise<Response | null> => {
   return await fetch(`${URL}/api/files/upload-files`, {
     method: "PUT",
@@ -262,7 +260,7 @@ export const deleteFiles = async (
 
 // Create files and folders
 export const createFiles = async (
-  files: preparedFiles[],
+  files: preparedFile[],
   messID?: string,
 ): Promise<Response | null> => {
   try {

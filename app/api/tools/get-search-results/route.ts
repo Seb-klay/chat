@@ -87,8 +87,17 @@ export async function GET(request: Request): Promise<NextResponse> {
       },
     };
 
+    const t0 = Date.now();
+
     const searxngService = new SearxngService(searxConfig);
-    const results = await searxngService.search(input + "&format=json");
+    const results = await searxngService.search(input);
+
+    logger.info(
+      {
+        path: "/api/tools/get-search-results",
+      },
+      `Search done in ${Date.now() - t0} seconds.`,
+    );
 
     const webArticles: SearxngSearchResult[] = [];
     let browser : Browser | null = null;
@@ -191,8 +200,8 @@ export async function GET(request: Request): Promise<NextResponse> {
         "Failed to fetch or parse content for URL.",
       );
     } finally {
-      if (browser !== null) await browser.close();
-      if (context !== null) await context.close();      
+      if (context !== null) await context.close(); 
+      if (browser !== null) await browser.close();  
     }
 
     endTimer({
@@ -205,7 +214,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       {
         path: "/api/tools/get-search-results",
       },
-      "Search attempt finished successfully.",
+      `Search attempt finished successfully with ${webArticles.length} articles.`,
     );
 
     return NextResponse.json({ results: webArticles }, { status: 200 });

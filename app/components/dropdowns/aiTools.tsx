@@ -1,8 +1,5 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
-import {
-  DocumentIcon,
-  PlusIcon,
-} from "@heroicons/react/16/solid";
+import { DocumentIcon, PlusIcon } from "@heroicons/react/16/solid";
 import { useTheme } from "../contexts/theme-provider";
 import { useRef, useState } from "react";
 import FileUploadCard from "../cards/fileUploadCard";
@@ -23,14 +20,14 @@ export default function AiTools({ onFile, onError }: AiToolsProps) {
       // Convert FileList to array
       const fileArray = Array.from(files);
       if (folderName) {
-        onFile(fileArray, folderName)
+        onFile(fileArray, folderName);
       } else {
         onFile(fileArray);
       }
-    
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
     } else {
       onFile([]); // Handle no files selected
     }
@@ -68,31 +65,31 @@ export default function AiTools({ onFile, onError }: AiToolsProps) {
           {/* File Upload Option */}
           <MenuItem>
             <div
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-all duration-200 cursor-pointer"
-            style={{ color: theme.colors.primary }}
-            onClick={handleBrowseClick}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 transition-all duration-200 cursor-pointer"
+              style={{ color: theme.colors.primary }}
+              onClick={handleBrowseClick}
             >
-            <div className="p-1.5 rounded-md bg-white/5">
+              <div className="p-1.5 rounded-md bg-white/5">
                 <DocumentIcon className="w-5 h-5 text-blue-400" />
-            </div>
-            <span className="flex-1 text-sm font-medium">Upload Files</span>
+              </div>
+              <span className="flex-1 text-sm font-medium">Upload Files</span>
             </div>
           </MenuItem>
 
           {/* Add more menu items here */}
           <MenuItem>
             <button
-            onClick={() => setOnFolderCreation(true)}
-            className={`
+              onClick={() => setOnFolderCreation(true)}
+              className={`
                 w-full flex items-center gap-3 px-3 py-2.5
                 text-sm font-medium rounded-lg hover:bg-white/10 transition-all duration-200 cursor-pointer
             `}
-            style={{ color: theme.colors.primary }}
+              style={{ color: theme.colors.primary }}
             >
-            <div className="p-1.5 rounded-md bg-white/5">
+              <div className="p-1.5 rounded-md bg-white/5">
                 <PlusIcon className="w-5 h-5 text-green-400" />
-            </div>
-            <span>Create New Folder</span>
+              </div>
+              <span>Create New Folder</span>
             </button>
           </MenuItem>
         </div>
@@ -114,14 +111,13 @@ export default function AiTools({ onFile, onError }: AiToolsProps) {
         }}
       />
 
-
       {onFolderCreation && (
-      <FileUploadCard
-        isOpen={onFolderCreation}
-        onClose={() => setOnFolderCreation(false)}
-        onSubmit={handleFileSelect}
-        onError={handleError}
-      />
+        <FileUploadCard
+          isOpen={onFolderCreation}
+          onClose={() => setOnFolderCreation(false)}
+          onSubmit={handleFileSelect}
+          onError={handleError}
+        />
       )}
     </Menu>
   );

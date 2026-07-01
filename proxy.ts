@@ -25,7 +25,11 @@ export default async function proxy(req: NextRequest) {
   const isAction = req.method === 'POST' && req.headers.has('Next-Action');
   // since middleware cannot redirect server actions directly, the corresponding header gets set
   if (!sessionUser?.userId && isAction) {
-    return ;
+    return;
+  }
+
+  if (isAction) {
+    return NextResponse.next();
   }
 
   if (isProtectedRoute && !sessionUser?.userId) {

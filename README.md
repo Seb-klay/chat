@@ -24,7 +24,6 @@ A modern web application that allows you to converse with multiple open-weight A
 - [Node.js](https://nodejs.org/) (version specified in `.nvmrc`)
 - [Docker Desktop](https://www.docker.com/products/docker-desktop)
 - [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
-- [search engine] install firefox or chromium for search tool (npx playwright install firefox/chromium)
 
 ### Installation & Setup
 
@@ -99,8 +98,22 @@ docker-compose --env-file ../../../../.env -f compose.prod.yml up
 4. **Init the object storage database (Optional)**
 You can connect it to an object storage DB and store your files there.
 
+5. **Update for internet search tool**
+Make sure to have installed firefox on your machine : 
 
-5. **Start up the interface**
+- [search engine] install firefox or chromium for search tool (npx playwright install firefox/chromium)
+
+> [!NOTE]
+> Update searxng library (in /dist/index.cjs) to have more flexible timeout :
+
+```ts
+      const response = await axios__default.get(url, {
+        headers: this.defaultRequestHeaders,
+        signal: AbortSignal.timeout(5e3) // update to 1e4 instead of 5 seconds
+      });
+```
+
+6. **Start up the interface**
 Finally, run the development server in terminal:
 
 ```bash
@@ -109,7 +122,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
-6. **Build project for production**
+7. **Build project for production**
 To build the project for production :
 
 ```bash

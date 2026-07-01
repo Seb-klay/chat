@@ -132,12 +132,14 @@ describe("Loading history", () => {
 
     render(<ConversationPage />);
 
-    await waitFor(() => {
-      // Verify metadata was fetched
-      expect(getSingleConversations).toHaveBeenCalledWith("test-id-123");
-      // Verify summary was triggered
-      expect(summaryConversationAndUpdate).toHaveBeenCalled();
-    });
+    await waitFor(
+      () => {
+        // Verify metadata was fetched
+        expect(getSingleConversations).toHaveBeenCalledWith("test-id-123");
+        // Verify summary was triggered
+        expect(summaryConversationAndUpdate).toHaveBeenCalled();
+      },
+    );
   });
 
   it("shows a toast warning if the history fetch fails", async () => {
@@ -206,7 +208,7 @@ describe("Sending message", () => {
               model: expect.objectContaining({
                 id: 1,
               }),
-              files: [],
+              files: undefined,
             }),
           ]),
         }),
@@ -227,26 +229,51 @@ describe("Sending message", () => {
   });
 
   it("shows a toast warning when onError is triggered during streaming", async () => {
+    // Fix the initial page mount loading state
+vi.mocked(getSingleConversations).mockResolvedValue({
+    ok: true,
+    status: 200,
+    json: async () => [
+      { 
+        id: "test-id-123", 
+        title: "Test Title",
+        defaultmodel: { id: 1, model_name: "llama3.2:3b" } 
+      }
+    ],
+  } as Response);
+
+    (getConversationHistory as any).mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => [],
+    });
+
+    // Mock stream failure
     (sendChatMessage as any).mockImplementation(
       async (
-        payload: IPayload,
+        payload: any,
         controller: AbortController,
         callbacks: {
-          onData: (chunk: string) => void;
           onError: (err: any) => void;
-          onWrite: () => void;
-          onCompleted: () => void;
         },
       ) => {
         callbacks.onError(new Error("Stream Interrupted"));
       },
     );
 
-    render(<ConversationPage />);
+    const { container } = render(<ConversationPage />);
+
+    // Wait for the loading pulse to disappear and the conversation view to actually be ready
+    await waitFor(() => {
+      expect(container.querySelector("animate-pulse")).toBeNull();
+    });
+
+    // Fire the event now that the page isn't frozen in a loading state
     fireEvent.click(screen.getByTestId("send-button"));
 
+    // Assert the toast was triggered
     await waitFor(() => {
-      expect(toast.warning).toHaveBeenCalledWith("Error: Stream Interrupted");
+      expect(toast.error).toHaveBeenCalledWith("Error: Stream Interrupted");
     });
   });
 
@@ -254,6 +281,7 @@ describe("Sending message", () => {
     (sendChatMessage as any).mockRejectedValue(new Error("Network Crash"));
 
     render(<ConversationPage />);
+    
     fireEvent.click(screen.getByTestId("send-button"));
 
     await waitFor(() => {

@@ -3,11 +3,25 @@ import {
   PhotoIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
-import {
-  deleteFiles,
-  downloadFile,
-  downloadFileWithPath,
-} from "../service";
+import { deleteFiles, downloadFile, downloadFileWithPath } from "../service";
+import { extractTextFromFiles } from "./pdf-parser";
+
+export type FilesStatus = "loading" | "done" | "error";
+
+export type preparedFile = {
+  id?: string;
+  messid?: string;
+  name: string;
+  type: string | null;
+  size: number;
+  path?: string;
+  isdirectory?: boolean;
+  createdat?: string;
+  updatedat?: string;
+  isdeleted?: boolean;
+  data?: string;
+  status: FilesStatus;
+};
 
 const getIcon = ({ fileType }: any) => {
   if (fileType.includes("image")) {
@@ -46,6 +60,25 @@ export const FileIcon = ({ fileType }: any) => {
 
   return <div className={`${getIconColor()}`}>{getIcon({ fileType })}</div>;
 };
+
+export async function prepareFilesForServer(
+  files: File[],
+): Promise<preparedFile[]> {
+  return await Promise.all(
+    Array.from(files).map(async (file) => {
+      const buffer = await file.arrayBuffer();
+      return {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        path: "/",
+        data: Buffer.from(buffer).toString("base64"),
+        isdirectory: false,
+        status: "loading"
+      };
+    }),
+  );
+}
 
 // Handle file download
 export const handleFileDownload = async ({
@@ -166,3 +199,23 @@ export const handleFileDelete = async ({
 //     throw new Error(String(error));
 //   }
 // };
+
+export const handleLoadFile = async (file: preparedFile, folderName?: String) => {
+  // add path to file
+  file.path = folderName ? `/${folderName}/${file.name}` : `/${file.name}`;
+
+  // extract text from files
+  try {
+    // extract text from files using pdf parser
+    const extractedFile = await extractTextFromFiles(file);
+
+    if (!extractedFile || extractedFile.error.length > 0) {
+      throw new Error(
+        extractedFile.error ?? "Error while parsing files.",
+      );
+    }
+    return extractedFile;
+  } catch (error: any) {
+    throw new Error(error);
+  }
+};

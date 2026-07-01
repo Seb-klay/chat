@@ -6,9 +6,8 @@ import "@svar-ui/react-filemanager/all.css";
 import {
   getFilesMetadata,
 } from "../../service";
-import { preparedFiles } from "../conversation/[id]/page";
 import { useTheme } from "../../components/contexts/theme-provider";
-import { handleFileDelete, handleFileDownload } from "@/app/utils/fileUtils";
+import { handleFileDelete, handleFileDownload, preparedFile } from "@/app/utils/fileUtils";
 import { Toaster, toast } from "sonner";
 
 export default function Documents() {
@@ -24,8 +23,8 @@ export default function Documents() {
       const response = await getFilesMetadata(); // we don't want the deleted files (metadata)
       const data = await response?.json();
 
-      const formattedFiles = data.files.map((file: preparedFiles) => {
-        const buildId = (file: preparedFiles) => {
+      const formattedFiles = data.files.map((file: preparedFile) => {
+        const buildId = (file: preparedFile) => {
           return file.path && file.path === "/" ? `/${file.name}` : file.path;
         }
 

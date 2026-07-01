@@ -7,8 +7,8 @@ import {
   CloudArrowUpIcon,
   DocumentIcon,
 } from "@heroicons/react/24/outline";
-import { preparedFiles } from "@/app/(main)/conversation/[id]/page";
 import { createFiles } from "@/app/service";
+import { preparedFile } from "@/app/utils/fileUtils";
 
 interface FileUploadCardProps {
   isOpen: boolean;
@@ -124,7 +124,7 @@ export default function FileUploadCard({
   const createProject = async () => {
     try {
         // first create folder
-        const newFolder: preparedFiles = {
+        const newFolder: preparedFile = {
             name: folderName,
             type: null,
             size: 0,
@@ -132,6 +132,7 @@ export default function FileUploadCard({
             isdirectory: true,
             isdeleted: false,
             data: undefined,
+            status: "done"
         }
         const response = await createFiles([newFolder]);
         if (!response?.ok) throw new Error("Could not store files in database. ");

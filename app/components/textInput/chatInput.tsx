@@ -6,7 +6,14 @@ import { AbortButton } from "../buttons/abortButton";
 import { useTheme } from "../contexts/theme-provider";
 import { useModel } from "../contexts/model-provider";
 import AiTools from "../dropdowns/aiTools";
-import { formatFileSize, FileIcon } from "@/app/utils/fileUtils";
+import {
+  formatFileSize,
+  FileIcon,
+  preparedFile,
+  handleLoadFile,
+  prepareFilesForServer,
+  FilesStatus,
+} from "@/app/utils/fileUtils";
 
 type ChatInputProps = {
   onThought: boolean;
@@ -15,13 +22,13 @@ type ChatInputProps = {
   onSend: (
     message: string,
     model: IModelList,
-    files: File[],
+    files: preparedFile[],
     folderName?: string,
   ) => void;
   onError: (error: string) => void;
   aiError?: boolean;
-  rollbackInput?: string,
-  rollbackFiles?: File[],
+  rollbackInput?: string;
+  rollbackFiles?: preparedFile[];
 };
 
 export default function ChatInput({
@@ -36,8 +43,8 @@ export default function ChatInput({
 }: ChatInputProps) {
   const [input, setInput] = useState("");
   const [nameFolder, setNameFolder] = useState("");
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-
+  const [selectedFiles, setSelectedFiles] = useState<preparedFile[]>([]);
+  const [loadingFiles, setLoadingFiles] = useState<boolean>(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const { defaultModel } = useModel();
   const [model, setModel] = useState<IModelList>(defaultModel);
@@ -87,9 +94,82 @@ export default function ChatInput({
     setInput("");
   };
 
-  const handleFileSelect = (files: File[], folderName?: string) => {
-    setSelectedFiles((prevFiles) => [...prevFiles, ...files]);
+  const fileExists = (file: preparedFile, list: preparedFile[]) =>
+    list.some(
+      (f) =>
+        f.name === file.name && f.size === file.size && f.type === file.type,
+    );
+
+  const handleFileSelect = async (files: File[], folderName?: string) => {
+    // set loading document
+    setLoadingFiles(true);
+
     if (folderName) setNameFolder(folderName);
+
+    const serverFiles = (await prepareFilesForServer(files)).map((file) => ({
+      ...file,
+    }));
+
+    // Add only non-duplicate files
+    setSelectedFiles((prev) => {
+      const newFiles = serverFiles.filter((f) => !fileExists(f, prev));
+      return [...prev, ...newFiles];
+    });
+
+    // Process files one by one
+    for (const file of serverFiles) {
+      try {
+        // skip duplicates again (safety)
+        setSelectedFiles((prev) => {
+          if (fileExists(file, prev)) return prev;
+          return prev;
+        });
+
+        // unsupported file check
+        if (file.type !== "application/pdf") {
+          // set loading document
+          setLoadingFiles(false);
+
+          setSelectedFiles((prev) =>
+            prev.map((f) =>
+              f.name === file.name &&
+              f.size === file.size &&
+              f.type === file.type
+                ? { ...f, status: "error" }
+                : f,
+            ),
+          );
+          continue;
+        }
+
+        const result = await handleLoadFile(file, folderName);
+
+        setSelectedFiles((prev) =>
+          prev.map((f) =>
+            f.name === file.name && f.size === file.size && f.type === file.type
+              ? {
+                  ...f,
+                  ...result.result,
+                  status: "done",
+                }
+              : f,
+          ),
+        );
+        // set loading document
+        setLoadingFiles(false);
+      } catch (error) {
+        // set loading document
+        setLoadingFiles(false);
+
+        setSelectedFiles((prev) =>
+          prev.map((f) =>
+            f.name === file.name && f.size === file.size && f.type === file.type
+              ? { ...f, status: "error" }
+              : f,
+          ),
+        );
+      }
+    }
   };
 
   const handleError = (error: string) => {
@@ -114,9 +194,10 @@ export default function ChatInput({
           {/* Files list */}
           <div className="flex items-center gap-2 px-2 py-2">
             {selectedFiles.map((file, index) => {
+              // not pdf -> not supported
               const isUnsupported =
-                file.type?.startsWith("video/") ||
-                file.type?.startsWith("audio/");
+                file.type !== "application/pdf" &&
+                !file.name.toLowerCase().endsWith(".pdf");
 
               return (
                 <div
@@ -125,7 +206,9 @@ export default function ChatInput({
                     backgroundColor: theme.colors.tertiary_background,
                     color: theme.colors.secondary,
                   }}
-                  className="flex items-center gap-1 rounded px-2 py-0.5 text-sm whitespace-nowrap"
+                  className={`flex items-center gap-1 rounded px-2 py-0.5 text-sm whitespace-nowrap transition-opacity ${
+                    file.status === "loading" ? "opacity-50" : "opacity-100"
+                  }`}
                 >
                   {/* File icon/logo */}
                   <div className="text-2xl mb-1">
@@ -208,7 +291,7 @@ export default function ChatInput({
             ) : (
               <SendButton
                 onClick={handleSend}
-                disabled={!input.trim() || onThought}
+                disabled={!input.trim() || onThought || loadingFiles}
               />
             )}
           </div>

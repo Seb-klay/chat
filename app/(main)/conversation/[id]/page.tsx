@@ -6,7 +6,6 @@ import {
   IMessage,
   IPayload,
   summaryConversationAndUpdate,
-  prepareFilesForServer,
   tool,
 } from "../../../utils/chatUtils";
 import {
@@ -22,6 +21,7 @@ import { useTheme } from "@/app/components/contexts/theme-provider";
 import { Toaster, toast } from "sonner";
 import { get, del } from "idb-keyval";
 import { useModel } from "@/app/components/contexts/model-provider";
+import { preparedFile } from "@/app/utils/fileUtils";
 
 export interface IConversation {
   convid: string;
@@ -31,20 +31,6 @@ export interface IConversation {
   updatedat: string;
   defaultmodel: IModelList;
 }
-
-export type preparedFiles = {
-  id?: string;
-  messid?: string;
-  name: string;
-  type: string | null;
-  size: number;
-  path?: string;
-  isdirectory?: boolean;
-  createdat?: string;
-  updatedat?: string;
-  isdeleted?: boolean;
-  data?: string;
-};
 
 export default function ConversationPage() {
   const params = useParams();
@@ -59,7 +45,7 @@ export default function ConversationPage() {
   const onAiErrorRef = useRef<boolean>(false);
   const rollbackRef = useRef<{
     userInput: string;
-    files?: File[];
+    files?: preparedFile[];
   }>({
     userInput: "",
     files: [],
@@ -107,7 +93,7 @@ export default function ConversationPage() {
           );
 
         // checks if there are files in IndexedDB
-        const files: File[] | undefined = await get("local_files");
+        const files: preparedFile[] | undefined = await get("local_files");
         const newConversation: IConversation[] = await response?.json();
         // show conversation to user
         setLoadingConversation(false);
@@ -128,12 +114,11 @@ export default function ConversationPage() {
         await del("local_files");
 
         // rename conversation once ai stops writing
-        if (onAiState.id !== 0)
-          await summaryConversationAndUpdate(newConversation[0], {
-            onError: (err) => {
-              toast.warning(`Bad response while summarizing title : ` + err);
-            },
-          });
+        await summaryConversationAndUpdate(newConversation[0], {
+          onError: (err) => {
+            toast.warning(`Bad response while summarizing title : ` + err);
+          },
+        });
 
         // otherwise just load the history
       } else {
@@ -182,12 +167,11 @@ export default function ConversationPage() {
   const sendMessage = async (
     userInput: string,
     selectedModel: IModelList,
-    files?: File[],
-    folderName?: string,
+    files?: preparedFile[],
   ) => {
     // start by making sure error is false
     onAiErrorRef.current = false;
-        // save current state
+    // save current state
     rollbackRef.current = {
       userInput,
       files,
@@ -197,32 +181,11 @@ export default function ConversationPage() {
     // TODO: handle images in files
     let filesImages: string[] | undefined = undefined;
     try {
-      setOnAiState({ id: 5, aiState: "Reading files" });
-
-      let preparedFiles: preparedFiles[] = [];
-      if (files) {
-        preparedFiles.push({
-          name: "",
-          type: "",
-          size: 0,
-          path: "/",
-          data: "",
-          isdirectory: false,
-        });
-        const serverFiles = await prepareFilesForServer(files!);
-
-        // add path to each file
-        preparedFiles = serverFiles.map((file) => ({
-          ...file,
-          path: folderName ? `/${folderName}/${file.name}` : `/${file.name}`,
-        }));
-      }
-
       const messageFromUser: IMessage = {
         role: "user",
         model: selectedModel ?? allModels[0],
         content: messageText,
-        files: preparedFiles,
+        files: files,
         //images: filesImages,
       };
       const assistantPlaceholder: IMessage = {
@@ -382,8 +345,8 @@ export default function ConversationPage() {
                 </div>
               )}
 
-              {/* Reasoning State (id: 2) or file reading (id:5) */}
-              {(onAiState.id === 2 || onAiState.id === 5) && (
+              {/* Reasoning State (id: 2) */}
+              {(onAiState.id === 2) && (
                 <div className="flex items-center gap-2 transition-all duration-300 ease-in-out animate-fadeIn">
                   <span className="text-lg animate-pulse text-gray-500 dark:text-gray-400">
                     { onAiState.aiState }

@@ -1,6 +1,7 @@
-import { IConversation, preparedFiles } from "../(main)/conversation/[id]/page";
+import { IConversation } from "../(main)/conversation/[id]/page";
 import { summaryConversation, updateTitleConversation } from "../service/index";
 import { ToolName } from "../tools/tools";
+import { preparedFile } from "./fileUtils";
 import { IModelList } from "./listModels";
 
 type role = "user" | "assistant" | "system" | "tool";
@@ -24,7 +25,7 @@ export interface IMessage {
   //thinking?: string; legacy from ollama
   reasoning?: string;
   tool_calls?: tool[];
-  files?: preparedFiles[];
+  files?: preparedFile[];
   //images?: string[]; legagy from ollama
 }
 
@@ -116,19 +117,3 @@ export const summaryConversationAndUpdate = async (
     throw new Error("Could not summarize conversation title : " + err);
   }
 };
-
-export async function prepareFilesForServer(
-  files: File[],
-): Promise<preparedFiles[]> {
-  return await Promise.all(
-    Array.from(files).map(async (file) => {
-      const buffer = await file.arrayBuffer();
-      return {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        data: Buffer.from(buffer).toString("base64"),
-      };
-    }),
-  );
-}

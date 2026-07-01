@@ -1,7 +1,7 @@
-import { preparedFiles } from "@/app/(main)/conversation/[id]/page";
 import { getStorageToken } from "@/app/backend/file-database/storageUtils";
 import { NextRequest, NextResponse } from "next/server";
 import { logger, httpRequestDuration } from "@/app/utils/logger";
+import { preparedFile } from "@/app/utils/fileUtils";
 const PUBLIC_URL = process.env.OBJECT_STORAGE_URL!;
 const container = process.env.OBJECT_STORAGE_CONTAINER;
 
@@ -12,7 +12,7 @@ export async function PUT(request: NextRequest): Promise<NextResponse> {
     const { files } = await request.json();
     const token = await getStorageToken();
 
-    const uploadPromises = files.map(async (file: preparedFiles) => {
+    const uploadPromises = files.map(async (file: preparedFile) => {
       if (file.isdirectory) return;
       if (!file.id) return NextResponse.json({ error: "No file could be found. " }, { status: 404 });
       if (!file.data) return NextResponse.json({ error: "The file has no data to store. " }, { status: 400 });

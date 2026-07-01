@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useTheme } from "../../components/contexts/theme-provider";
 import { Toaster, toast } from "sonner";
 import { set } from "idb-keyval";
+import { preparedFile } from "@/app/utils/fileUtils";
 
 export default function HomePage() {
   const router = useRouter();
@@ -21,7 +22,7 @@ export default function HomePage() {
   const createAndRedirect = async (
     userInput: string,
     selectedModel: IModelList,
-    files?: File[],
+    files?: preparedFile[],
   ) => {
     if (!userInput.trim()) return;
     setOnAiThought(true);
